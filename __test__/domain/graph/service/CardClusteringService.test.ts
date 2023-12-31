@@ -1,9 +1,4 @@
-import {NestedGroupNode} from "../../../../src/domain/graph/entity/NestedGroupNode";
-import {MatrixNode} from "../../../../src/domain/graph/entity/MatrixNode";
-import {Geometry} from "../../../../src/domain/graph/entity/Geometry";
-import {Coordinate} from "../../../../src/domain/graph/entity/Coordinate";
-import {MatrixIndex} from "../../../../src/domain/graph/entity/MatrixIndex";
-import {groupCards} from "../../../../src/domain/graph";
+import {Coordinate, Geometry, groupCards, MatrixIndex, MatrixNode, NestedGroupNode} from "../../../../src/domain/graph";
 
 
 test('嵌入式分组, grouped = [], cardGroupList = []，返回 []', () => {
