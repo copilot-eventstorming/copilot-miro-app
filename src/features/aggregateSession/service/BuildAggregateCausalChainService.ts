@@ -1,5 +1,5 @@
 import {WorkshopBoardSPI} from "../../../application/spi/WorkshopBoardSPI";
-import {BuildCausalChainService, CauseChainResult} from "../../../application/service/graph/BuildCausalChainService";
+import {BuildCausalChainService, CauseChainResult} from "../../../application/service";
 import {convertToNodeObject} from "../../../application/service/utils/utils";
 
 export class BuildAggregateCausalChainService {
