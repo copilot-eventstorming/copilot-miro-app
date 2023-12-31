@@ -1,8 +1,8 @@
-import {findLocally, saveLocally} from "../../infrastructure/storage/utils";
+import {findLocally, saveLocally} from "../../utils/localStorage";
 import _ from 'lodash';
 import {SaveResult} from "./SaveResult";
 import {StateSaveResult} from "./StateSaveResult";
-import {sizeof} from "../service/utils";
+import {sizeof} from "../service/utils/utils";
 
 export class SaveActionState {
     boardId: string;

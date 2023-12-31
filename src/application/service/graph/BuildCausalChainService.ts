@@ -1,9 +1,9 @@
-import {WorkshopBoardSPI} from "../../gateway/WorkshopBoardSPI";
+import {WorkshopBoardSPI} from "../../spi/WorkshopBoardSPI";
 import {EdgeKey, GraphFactory} from "../../../domain/graph/entity/Graph";
 import {groupGraph} from "../../../domain/graph/service/CardClusteringService";
 import {NestedGroupNode} from "../../../domain/graph/entity/NestedGroupNode";
 import {GroupedGraph} from "../../../domain/graph/entity/GroupedGraph";
-import {cleanHtmlTag} from "../utils";
+import {cleanHtmlTag} from "../utils/utils";
 import {Connector} from "@mirohq/websdk-types";
 
 export class CauseChainResult {

@@ -1,4 +1,4 @@
-import {OptimizeResult, WorkshopBoardSPI} from "../../gateway/WorkshopBoardSPI";
+import {OptimizeResult, WorkshopBoardSPI} from "../../spi/WorkshopBoardSPI";
 import {EdgeKey, GraphFactory} from "../../../domain/graph/entity/Graph";
 import {groupingLayout} from "../../../domain/graph/service/CardClusteringService";
 import {Connector} from "@mirohq/websdk-types";

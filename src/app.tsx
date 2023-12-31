@@ -1,23 +1,23 @@
 import * as React from 'react';
 import ReactDOM from 'react-dom/client';
-import {checkBoardManagedOnServer} from "./infrastructure/gateway/backend";
-import {OnboardingPage} from "./infrastructure/view/onboarding/OnboardingPage";
-import {SessionLifecycleChannel, SessionTypeChannel} from "./infrastructure/channel/channelNames";
-import {SessionInitializingFinished, SessionInitializingStarted} from "./infrastructure/common/SessionLifecycleNames";
+import {checkBoardManagedOnServer} from "./api/Backend";
+import {OnboardingPage} from "./features/onboarding/panels/OnboardingPage";
 import {
     AggregateExplorationSession,
     CommandStormingSession,
     ContextMappingSession,
     EventStormingSession,
     SubdomainExplorationSession
-} from "./infrastructure/common/SessionTypes";
-import {EventStormingBoardPanel} from "./infrastructure/view/eventSession/EventStormingBoardPanel";
-import {CommandStormingBoardPanel} from "./infrastructure/view/commandSession/CommandStormingBoardPanel";
-import {AggregateExplorationBoardPanel} from "./infrastructure/view/aggregateSession/AggregateExplorationBoardPanel";
-import {SubdomainExplorationBoardPanel} from "./infrastructure/view/subdomainSession/SubdomainExplorationBoardPanel";
-import {ContextMappingBoardPanel} from "./infrastructure/view/contextSession/ContextMappingBoardPanel";
-import {WorkshopBoardService} from "./infrastructure/gateway/WorkshopBoardService";
-import {miroProxy} from "./infrastructure/gateway/MiroProxy";
+} from "./features/onboarding/types/SessionTypes";
+import {EventStormingBoardPanel} from "./features/eventSession/panels/EventStormingBoardPanel";
+import {SubdomainExplorationBoardPanel} from "./features/subdomainSession/SubdomainExplorationBoardPanel";
+import {WorkshopBoardService} from "./api/WorkshopBoardService";
+import {miroProxy} from "./api/MiroProxy";
+import {SessionLifecycleChannel, SessionTypeChannel} from "./features/onboarding/types/SessionChannels";
+import {SessionInitializingFinished, SessionInitializingStarted} from "./features/onboarding/types/SessionEvents";
+import {CommandStormingBoardPanel} from "./features/commandSession/CommandStormingBoardPanel";
+import {AggregateExplorationBoardPanel} from "./features/aggregateSession/AggregateExplorationBoardPanel";
+import {ContextMappingBoardPanel} from "./features/contextSession/ContextMappingBoardPanel";
 
 interface SessionType {
     key: string;

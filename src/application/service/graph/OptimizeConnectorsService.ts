@@ -1,4 +1,4 @@
-import {WorkshopBoardSPI} from "../../gateway/WorkshopBoardSPI";
+import {WorkshopBoardSPI} from "../../spi/WorkshopBoardSPI";
 import {Connector} from "@mirohq/websdk-types";
 
 export class OptimizeConnectorsService {

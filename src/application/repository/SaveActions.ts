@@ -1,8 +1,8 @@
 import {SaveActionState} from "./SaveActionState";
-import {WorkshopBoardSPI} from "../gateway/WorkshopBoardSPI";
+import {WorkshopBoardSPI} from "../spi/WorkshopBoardSPI";
 import {SaveResult} from "./SaveResult";
 import {StateSaveResult} from "./StateSaveResult";
-import {sizeof} from "../service/utils";
+import {sizeof} from "../service/utils/utils";
 
 export class SaveActions {
     boardId: string;

@@ -3,7 +3,7 @@ import {
     calculateFuzzyCards,
     calculateNearestDomainCards
 } from "../../../domain/graph/service/CardDistanceStatisticsService";
-import {calculateAverage, cleanHtmlTag} from "../utils";
+import {calculateAverage, cleanHtmlTag} from "../utils/utils";
 
 export class ProblematicCard {
     category: string;
@@ -16,13 +16,13 @@ export class ProblematicCard {
     candidateCentralOther: {
         id: string;
         name: string;
-    } | string;
+    } | null;
     diff: string;
 
     constructor(category: string, satelliteCardId: string, satelliteCardName: string, candidateCentralOne: {
         id: string,
         name: string
-    }, candidateCentralOther: { id: string, name: string } | string, diff: string) {
+    }, candidateCentralOther: { id: string, name: string } | null, diff: string) {
         this.category = category;
         this.satelliteCardId = satelliteCardId;
         this.satelliteCardName = satelliteCardName;
@@ -71,7 +71,7 @@ export class AffiliationDistinctionProblemDiagnoseService {
                     id: x.centralCardId,
                     name: cleanHtmlTag(x.domainName)
                 },
-                candidateCentralOther: 'None',
+                candidateCentralOther: null,
                 diff: x.distance.toFixed(3)
             } as ProblematicCard;
         });
