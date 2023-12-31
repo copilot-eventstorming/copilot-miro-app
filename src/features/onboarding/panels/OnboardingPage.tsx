@@ -2,7 +2,7 @@ import * as React from "react";
 import {ImportBoardLandingPanel} from "./component/ImportBoardLandingPanel";
 import {AnalyzingStateLandingPanel} from "./component/AnalyzingStateLandingPanel";
 import {EmptyBoardLandingPanel} from "./component/EmptyBoardLandingPanel";
-import { WorkshopBoardSPI } from "../../../application/spi/WorkshopBoardSPI";
+import {WorkshopBoardSPI} from "../../../application/spi/WorkshopBoardSPI";
 import {NonEventStormingBoardLandingPanel} from "./component/NonEventStormingBoard";
 
 interface AnalyzeBoard {

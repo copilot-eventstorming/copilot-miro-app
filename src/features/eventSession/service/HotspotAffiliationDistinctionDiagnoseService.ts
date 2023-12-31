@@ -1,5 +1,6 @@
 import {
-    AffiliationDistinctionProblemDiagnoseService, ProblematicCard
+    AffiliationDistinctionProblemDiagnoseService,
+    ProblematicCard
 } from "../../../application/service/graph/AffiliationDistinctionProblemDiagnoseService";
 import {convertToNodeObject} from "../../../application/service/utils/utils";
 import {WorkshopBoardSPI} from "../../../application/spi/WorkshopBoardSPI";

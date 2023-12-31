@@ -1,4 +1,5 @@
 import * as React from "react";
+import {useState} from "react";
 import {OptimizeReadModel} from "./OptimizeReadModel";
 import {OperationLogDeleted, OperationLogRestore} from "../../../operationLogs/types/OperationLogEvent";
 import {SaveActions} from "../../../../application/repository/SaveActions";
@@ -8,7 +9,6 @@ import {SaveOperation} from "./SaveOperation";
 import {OperationLogChannel} from "../../../operationLogs/types/OperationLogChannels";
 import {GraphOptimizerButtonGroupProps} from "../../types/GraphOptimizerTypes";
 import {GraphOptimizerContext} from "../context/GraphOptimizerContext";
-import {useState} from "react";
 import {ClusterAnalysisResult} from "./ExploreAnalysisResultTable";
 import {ProblematicCard} from "../../../../application/service/graph/AffiliationDistinctionProblemDiagnoseService";
 
