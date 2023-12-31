@@ -1,10 +1,6 @@
 import {ClusterAnalysisResult} from "../../../features/eventSession/panels/component/ExploreAnalysisResultTable";
-import {
-    calculateDistancesStatistics,
-    CardDistanceStatistics
-} from "../../../domain/graph/service/CardDistanceStatisticsService";
+import {calculateDistancesStatistics, CardDistanceStatistics, NestedGroupNode} from "../../../domain/graph";
 import {cleanHtmlTag} from "../utils/utils";
-import {NestedGroupNode} from "../../../domain/graph/entity/NestedGroupNode";
 
 export class AffiliationDistinctionExplorationService {
 

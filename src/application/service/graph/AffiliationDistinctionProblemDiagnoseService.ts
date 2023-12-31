@@ -1,5 +1,4 @@
-import {MatrixNode} from "../../../domain/graph/entity/MatrixNode";
-import {calculateFuzzyCards, calculateNearestDomainCards} from "../../../domain/graph";
+import {calculateFuzzyCards, calculateNearestDomainCards, MatrixNode} from "../../../domain/graph";
 import {calculateAverage, cleanHtmlTag} from "../utils/utils";
 
 export class ProblematicCard {

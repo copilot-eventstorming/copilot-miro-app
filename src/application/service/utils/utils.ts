@@ -1,9 +1,6 @@
-import {NestedGroupNode} from "../../../domain/graph/entity/NestedGroupNode";
-import {MatrixNode} from "../../../domain/graph/entity/MatrixNode";
-import {Geometry} from "../../../domain/graph/entity/Geometry";
-import {Coordinate} from "../../../domain/graph/entity/Coordinate";
-import {MatrixIndex} from "../../../domain/graph/entity/MatrixIndex";
+import {Coordinate, EdgeKey, Geometry, MatrixIndex, MatrixNode, NestedGroupNode} from "../../../domain/graph";
 import {WorkshopCard} from "../../spi/WorkshopBoardSPI";
+import {Connector} from "@mirohq/websdk-types";
 
 export function calculateAverage(numbers: number[]): number {
     const max = Math.max(...numbers);
@@ -11,7 +8,25 @@ export function calculateAverage(numbers: number[]): number {
     const sum = filteredNumbers.reduce((acc, cur) => acc + cur, 0);
     return sum / filteredNumbers.length;
 }
-
+export function convertConnectorToEdgeKey(edge: Connector): EdgeKey {
+    let start = edge!.start;
+    let end = edge!.end;
+    if (edge.style.startStrokeCap === 'none' && edge.style.endStrokeCap === 'none') {
+    } else if (edge.style.startStrokeCap !== 'none' && edge.style.endStrokeCap !== 'none') {
+    } else if (edge.style.startStrokeCap !== 'none') {
+        start = edge.end;
+        end = edge.start;
+    }
+    let weight;
+    if (edge.style.strokeStyle === 'normal') {
+        weight = 1;
+    } else if (edge.style.strokeStyle === 'dotted') {
+        weight = 0.1;
+    } else {// if (edge.style.strokeStyle == 'dashed') {
+        weight = 0.5;
+    }
+    return new EdgeKey(start!.item, end!.item, weight);
+}
 export function convertToNodeObject(category: string, level: number, ignoredWhenSizing: boolean = false): (miroObject: WorkshopCard) => NestedGroupNode {
     return (miroObject) => {
         let x = miroObject.x;
