@@ -3,7 +3,7 @@ import * as React from "react";
 import {Dispatch, SetStateAction} from "react";
 import {ClusterAnalysisResult} from "../panels/component/ExploreAnalysisResultTable";
 import {ProblematicCard} from "../../../application/service/graph/AffiliationDistinctionProblemDiagnoseService";
-import {SaveActions} from "../../../application/repository/SaveActions";
+import {SaveActions} from "../../../application/repository";
 
 export interface GraphOptimizerContextProps {
     boardSPI: WorkshopBoardSPI;

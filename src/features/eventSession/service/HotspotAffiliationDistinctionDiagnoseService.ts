@@ -4,7 +4,7 @@ import {
 } from "../../../application/service/graph/AffiliationDistinctionProblemDiagnoseService";
 import {convertToNodeObject} from "../../../application/service/utils/utils";
 import {WorkshopBoardSPI} from "../../../application/spi/WorkshopBoardSPI";
-import {NestedGroupNode} from "../../../domain/graph/entity/NestedGroupNode";
+import {NestedGroupNode} from "../../../domain/graph";
 
 export class HotspotAffiliationDistinctionDiagnoseService {
     private actualService: AffiliationDistinctionProblemDiagnoseService;

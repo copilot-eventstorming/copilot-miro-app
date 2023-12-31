@@ -2,7 +2,7 @@ import * as React from "react";
 import {useState} from "react";
 import {OptimizeReadModel} from "./OptimizeReadModel";
 import {OperationLogDeleted, OperationLogRestore} from "../../../operationLogs/types/OperationLogEvent";
-import {SaveActions} from "../../../../application/repository/SaveActions";
+import {SaveActions} from "../../../../application/repository";
 import {OptimizerButtons} from "./OptimizerButtons";
 import {OptimizerOptions} from "./OptimizerOptions";
 import {SaveOperation} from "./SaveOperation";

@@ -1,5 +1,5 @@
 import {WorkshopBoardSPI} from "../../../application/spi/WorkshopBoardSPI";
-import {PrettifyLayoutService} from "../../../application/service/graph/PrettifyLayoutService";
+import {PrettifyLayoutService} from "../../../application/service";
 import {convertToNodeObject} from "../../../application/service/utils/utils";
 
 export class EventSessionPrettifyLayoutService {

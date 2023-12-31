@@ -2,8 +2,8 @@ import * as React from "react";
 import {Dispatch, SetStateAction, useContext} from "react";
 import {mkLayoutChangeResult} from "../../utils/ConsoleMessageMaker";
 import {miroProxy} from "../../../../api/MiroProxy";
-import {StateSaveResult} from "../../../../application/repository/StateSaveResult";
-import {UndoRedoResult} from "../../../../application/repository/SaveActions";
+import {StateSaveResult} from "../../../../application/repository";
+import {UndoRedoResult} from "../../../../application/repository";
 import {GraphOptimizerContext} from "../context/GraphOptimizerContext";
 
 

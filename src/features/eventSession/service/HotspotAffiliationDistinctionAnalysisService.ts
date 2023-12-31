@@ -2,7 +2,7 @@ import {WorkshopBoardSPI} from "../../../application/spi/WorkshopBoardSPI";
 import {convertToNodeObject} from "../../../application/service/utils/utils";
 import {
     AffiliationDistinctionExplorationService
-} from "../../../application/service/graph/AffiliationDistinctionExplorationService";
+} from "../../../application/service";
 import {ClusterAnalysisResult} from "../panels/component/ExploreAnalysisResultTable";
 
 export class HotspotAffiliationDistinctionAnalysisService {
