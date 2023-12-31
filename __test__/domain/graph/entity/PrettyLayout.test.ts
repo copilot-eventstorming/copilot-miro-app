@@ -1,7 +1,4 @@
-import {NestedGroupNode} from "../../../../src/domain/graph/entity/NestedGroupNode";
-import {MatrixNode} from "../../../../src/domain/graph/entity/MatrixNode";
-import {Geometry} from "../../../../src/domain/graph/entity/Geometry";
-import {MatrixIndex} from "../../../../src/domain/graph/entity/MatrixIndex";
+import {Geometry, MatrixIndex, MatrixNode, NestedGroupNode} from "../../../../src/domain/graph";
 
 
 test('square center: 1 node only on top left corner', () => {

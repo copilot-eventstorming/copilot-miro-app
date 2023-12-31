@@ -1,5 +1,4 @@
-import {EdgeKey, GraphFactory} from '../../../../src/domain/graph/entity/Graph';
-import {Node} from '../../../../src/domain/graph/entity/Node'
+import {EdgeKey, GraphFactory, Node} from '../../../../src/domain/graph';
 
 test('return true when 2 nodes have direct connection', () => {
 

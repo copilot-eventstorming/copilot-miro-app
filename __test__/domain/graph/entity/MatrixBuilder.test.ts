@@ -1,11 +1,11 @@
 import {describe, expect, it} from '@jest/globals';
-import {MatrixBuilder} from "../../../../src/domain/graph/entity/MatrixBuilder";
-import {MatrixNode} from "../../../../src/domain/graph/entity/MatrixNode";
-import {EdgeKey, GraphFactory} from "../../../../src/domain/graph/entity/Graph";
-import {NestedGroupNode} from "../../../../src/domain/graph/entity/NestedGroupNode";
-import {Geometry} from "../../../../src/domain/graph/entity/Geometry";
-import {Coordinate} from "../../../../src/domain/graph/entity/Coordinate";
-import {MatrixIndex} from "../../../../src/domain/graph/entity/MatrixIndex";
+import {MatrixBuilder} from "../../../../src/domain/graph";
+import {MatrixNode} from "../../../../src/domain/graph";
+import {EdgeKey, GraphFactory} from "../../../../src/domain/graph";
+import {NestedGroupNode} from "../../../../src/domain/graph";
+import {Geometry} from "../../../../src/domain/graph";
+import {Coordinate} from "../../../../src/domain/graph";
+import {MatrixIndex} from "../../../../src/domain/graph";
 
 describe('MatrixBuilder', () => {
     const builder = new MatrixBuilder();
