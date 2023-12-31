@@ -1,6 +1,6 @@
 import {OptimizeResult, WorkshopBoardSPI} from "../../spi/WorkshopBoardSPI";
 import {EdgeKey, GraphFactory} from "../../../domain/graph/entity/Graph";
-import {groupingLayout} from "../../../domain/graph/service/CardClusteringService";
+import {groupingLayout} from "../../../domain/graph";
 import {Connector} from "@mirohq/websdk-types";
 import {NestedGroupNode} from "../../../domain/graph/entity/NestedGroupNode";
 import {Coordinate} from "../../../domain/graph/entity/Coordinate";

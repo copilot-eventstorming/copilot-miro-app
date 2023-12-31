@@ -3,7 +3,7 @@ import {MatrixNode} from "../../../../src/domain/graph/entity/MatrixNode";
 import {Geometry} from "../../../../src/domain/graph/entity/Geometry";
 import {Coordinate} from "../../../../src/domain/graph/entity/Coordinate";
 import {MatrixIndex} from "../../../../src/domain/graph/entity/MatrixIndex";
-import {groupCards} from "../../../../src/domain/graph/service/CardClusteringService";
+import {groupCards} from "../../../../src/domain/graph";
 
 
 test('嵌入式分组, grouped = [], cardGroupList = []，返回 []', () => {
