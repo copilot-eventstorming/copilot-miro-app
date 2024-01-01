@@ -29,20 +29,20 @@ async function isBoardManaged(boardSPI: WorkshopBoardService) {
     })
 }
 
+const boardSPI = new WorkshopBoardService(miroProxy)
 const App: React.FC = () => {
     console.log("init app")
-    const boardSPI = new WorkshopBoardService(miroProxy)
-
     const [managed, setManaged] = React.useState(false)
     const [page, setPage] = React.useState<JSX.Element | null>(null)
 
     React.useEffect(() => {
-        (async () => await isBoardManaged(boardSPI))().then(setManaged)
+        isBoardManaged(boardSPI).then(setManaged)
     }, []);
 
-    const sessionTypeChannel = new BroadcastChannel(SessionTypeChannel);
-    const sessionLifecycleChannel = new BroadcastChannel(SessionLifecycleChannel);
     React.useEffect(() => {
+        const sessionTypeChannel = new BroadcastChannel(SessionTypeChannel);
+        const sessionLifecycleChannel = new BroadcastChannel(SessionLifecycleChannel);
+
         const handleEvent = async (event: MessageEvent) => {
             console.log("sessionTypeChannel event received")
             sessionLifecycleChannel.postMessage(SessionInitializingStarted)
@@ -54,8 +54,10 @@ const App: React.FC = () => {
         sessionTypeChannel.addEventListener("message", handleEvent)
         return () => {
             sessionTypeChannel.removeEventListener("message", handleEvent)
+            sessionTypeChannel.close()
+            sessionLifecycleChannel.close()
         }
-    }, [sessionTypeChannel, sessionLifecycleChannel]);
+    }, []);
 
     if (!managed || page == null) {
         return <OnboardingPage boardSPI={boardSPI}/>
