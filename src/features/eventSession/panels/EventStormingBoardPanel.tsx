@@ -5,11 +5,11 @@ import {reloadEventSummary} from "../utils/EventSummaryUtils";
 import {WorkshopBoardSPI} from "../../../application/spi/WorkshopBoardSPI";
 import {emptyEventSummary} from "../types/EventSummaryTypes";
 
-interface ConsoleProps {
+type TConsoleProps = {
     output: string;
 }
 
-const Console: React.FC<ConsoleProps> = ({output}) => {
+const Console: React.FC<TConsoleProps> = ({output}) => {
     return (
         <div className="m-0 rounded">
             <div className="sub-title text-lg w-full text-center">Copilot Output</div>
