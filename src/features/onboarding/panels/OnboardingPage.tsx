@@ -5,7 +5,7 @@ import {EmptyBoardLandingPanel} from "./component/EmptyBoardLandingPanel";
 import {WorkshopBoardSPI} from "../../../application/spi/WorkshopBoardSPI";
 import {NonEventStormingBoardLandingPanel} from "./component/NonEventStormingBoard";
 
-interface AnalyzeBoard {
+type TAnalyzeBoard = {
     analyzed: boolean;
     setAnalyzing: React.Dispatch<React.SetStateAction<boolean>>;
     setMaybeWorkshop: React.Dispatch<React.SetStateAction<boolean>>;
@@ -14,29 +14,11 @@ interface AnalyzeBoard {
     boardSPI: WorkshopBoardSPI;
 }
 
-function analyzeBoard({analyzed, setAnalyzing, setMaybeWorkshop, setEmptyBoard, setAnalyzed, boardSPI}: AnalyzeBoard) {
-    return async () => {
-        if (!analyzed) {
-            console.log('Analyzing board...')
-            try {
-                const maybe = await boardSPI.maybeEventStormingSession()
-                const empty = await boardSPI.isBoardEmpty()
-                setAnalyzing(false)
-                setMaybeWorkshop(maybe)
-                setEmptyBoard(empty)
-                setAnalyzed(true)
-            } catch (e) {
-                console.log(e)
-            }
-        }
-    };
-}
-
-interface OnboardingPageProps {
+type TOnboardingPageProps = {
     boardSPI: WorkshopBoardSPI;
 }
 
-const OnboardingPage: React.FC<OnboardingPageProps> = ({boardSPI}) => {
+const OnboardingPage: React.FC<TOnboardingPageProps> = ({boardSPI}) => {
 
     const [analyzing, setAnalyzing] = React.useState(true);
     const [maybeWorkshop, setMaybeWorkshop] = React.useState(false);
@@ -55,6 +37,22 @@ const OnboardingPage: React.FC<OnboardingPageProps> = ({boardSPI}) => {
                     <NonEventStormingBoardLandingPanel/>}
     </div>)
 }
-
+function analyzeBoard({analyzed, setAnalyzing, setMaybeWorkshop, setEmptyBoard, setAnalyzed, boardSPI}: TAnalyzeBoard) {
+    return async () => {
+        if (!analyzed) {
+            console.log('Analyzing board...')
+            try {
+                const maybe = await boardSPI.maybeEventStormingSession()
+                const empty = await boardSPI.isBoardEmpty()
+                setAnalyzing(false)
+                setMaybeWorkshop(maybe)
+                setEmptyBoard(empty)
+                setAnalyzed(true)
+            } catch (e) {
+                console.log(e)
+            }
+        }
+    };
+}
 
 export {OnboardingPage};

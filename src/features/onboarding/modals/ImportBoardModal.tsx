@@ -17,22 +17,16 @@ import {emptyBoardCoreCards, WorkshopBoardCoreCards} from "../../../application/
 import {SessionLifecycleChannel, SessionTypeChannel} from "../types/SessionChannels";
 import {NotInitialized, SessionInitializingFinished, SessionInitializingStarted} from "../types/SessionEvents";
 
-interface SessionType {
+type TSessionType = {
     key: string;
 }
 
-function isValidSessionType(sessionType: SessionType) {
-    return strategicSessions
-        .map(session => session.key)
-        .includes(sessionType.key);
-}
-
-interface StateAnimationProps {
+type TStateAnimationProps = {
     stateName: { key: string, text: string };
     setClosed: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const StateAnimation: React.FC<StateAnimationProps> = ({stateName, setClosed}) => {
+const StateAnimation: React.FC<TStateAnimationProps> = ({stateName, setClosed}) => {
     if (stateName.key === NotInitialized.key) {
         return (
             <div className="relative w-full" style={{"height": 116}}>
@@ -57,19 +51,33 @@ const StateAnimation: React.FC<StateAnimationProps> = ({stateName, setClosed}) =
     }
 }
 
-const fireSessionTypeEvent = (sessionTypeChannel: BroadcastChannel, sessionType: SessionType) => {
+const fireSessionTypeEvent = (sessionTypeChannel: BroadcastChannel, sessionType: TSessionType) => {
     if (isValidSessionType(sessionType)) {
         sessionTypeChannel.postMessage(sessionType)
     }
 }
 
-const ImportBoardModal: React.FC = () => {
-    const boardSPI = new WorkshopBoardService(miroProxy)
-    const [initializingSession, setInitializingSession] = useState<{ key: string, text: string }>(NotInitialized)
-    const sessionTypeChannel = new BroadcastChannel(SessionTypeChannel);
-    const sessionLifecycleChannel = new BroadcastChannel(SessionLifecycleChannel);
-    React.useEffect(() => {
+const boardSPI = new WorkshopBoardService(miroProxy)
+const sessionTypeChannel = new BroadcastChannel(SessionTypeChannel);
+const sessionTypes = [
+    {session: EventStormingSession, name: 'Event Storming'},
+    {session: CommandStormingSession, name: 'Command Storming'},
+    {session: AggregateExplorationSession, name: 'Aggregate Exploration'},
+    {session: SubdomainExplorationSession, name: 'Subdomain Exploration'},
+    {session: ContextMappingSession, name: 'Context Mapping'},
+];
 
+const ImportBoardModal: React.FC = () => {
+
+    const [initializingSession, setInitializingSession] = useState<{ key: string, text: string }>(NotInitialized)
+    const [managed, setManaged] = useState(false)
+    const [closed, setClosed] = useState(false)
+    const [boardSummary, setBoardSummary] = useState<WorkshopBoardCoreCards>(emptyBoardCoreCards)
+    const [name, setName] = useState("")
+    const [id, setId] = useState("")
+
+    useEffect(() => {
+        const sessionLifecycleChannel = new BroadcastChannel(SessionLifecycleChannel);
         const eventHandler = (event: MessageEvent) => {
             console.log('Receive message from SessionLifecycleChannel: ' + event.data.key)
             if (event.data.key === SessionInitializingStarted.key || event.data.key === SessionInitializingFinished.key) {
@@ -81,47 +89,29 @@ const ImportBoardModal: React.FC = () => {
         sessionLifecycleChannel.addEventListener("message", eventHandler)
         return () => {
             sessionLifecycleChannel.removeEventListener("message", eventHandler)
+            sessionLifecycleChannel.close()
         }
-    }, [sessionLifecycleChannel])
-
-
-    const [managed, setManaged] = useState(false)
-    const [closed, setClosed] = useState(false)
+    }, [])
 
     useEffect(() => {
         if (closed) {
-            (async () => {
-                await miro.board.ui.closeModal();
+            miro.board.ui.closeModal().then(() => {
                 setManaged(false)
-            })();
+            });
         }
     }, [closed]);
 
-    const [boardSummary, setBoardSummary] = useState<WorkshopBoardCoreCards>(emptyBoardCoreCards)
     useEffect(() => {
-        (async () => {
-            const boardSummary = await boardSPI.summaryBySessionMainTypes();
-            setBoardSummary(boardSummary)
-        })();
+        boardSPI.summaryBySessionMainTypes().then(setBoardSummary);
     }, []);
 
-    const [name, setName] = useState("")
-    const [id, setId] = useState("")
+
     useEffect(() => {
-        (async () => {
-            const board = await boardSPI.fetchBoardInfo();
-            //setName(board.title)
-            setId(board.id)
-        })();
+        boardSPI.fetchBoardInfo().then(board => {
+            setId(board.id);
+        })
     }, [closed]);
 
-    const sessionTypes = [
-        {session: EventStormingSession, name: 'Event Storming'},
-        {session: CommandStormingSession, name: 'Command Storming'},
-        {session: AggregateExplorationSession, name: 'Aggregate Exploration'},
-        {session: SubdomainExplorationSession, name: 'Subdomain Exploration'},
-        {session: ContextMappingSession, name: 'Context Mapping'},
-    ];
 
     if (!managed) {
         return (
@@ -167,6 +157,11 @@ const ImportBoardModal: React.FC = () => {
     }
 }
 
+function isValidSessionType(sessionType: TSessionType) {
+    return strategicSessions
+        .map(session => session.key)
+        .includes(sessionType.key);
+}
 
 const root = ReactDOM.createRoot(document.getElementById('prompt-root') as HTMLElement);
 root.render(<ImportBoardModal/>);

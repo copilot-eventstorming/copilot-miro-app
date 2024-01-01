@@ -1,56 +1,17 @@
 import React, {useEffect, useState} from "react";
 import ReactDOM from 'react-dom/client';
-import {OperationLogDeleted, OperationLogRestore} from "../types/OperationLogEvent";
 import {miroProxy} from "../../../api/MiroProxy";
 import {WorkshopBoardService} from "../../../api/WorkshopBoardService";
 
 import {OperationLogChannel} from "../types/OperationLogChannels";
+import {concatLogs, deleteOperationLog, restoreLayout, sizeof, stateHistoryKey} from "../utils/OpLogUtils";
+import {TLog} from "../types/TLog";
 
-interface Log {
-    id: string;
-    workshopTitle: string;
-    sessionType: string;
-    state: any[];
-    createdOn: string;
-}
-
-function stateHistoryKey(boardId: string): string {
-    return `stateHistory-${boardId}`;
-}
-
-function deleteOperationLog(operationLogEventChannel: BroadcastChannel, boardId: string, logId: string, undoLogs: Log[], redoLogs: Log[], setUndoLogs: React.Dispatch<React.SetStateAction<Log[]>>, setRedoLogs: React.Dispatch<React.SetStateAction<Log[]>>): void {
-    const undoStack = undoLogs.filter(log => log.id !== logId);
-    const redoStack = redoLogs.filter(log => log.id !== logId);
-    localStorage.setItem(stateHistoryKey(boardId), JSON.stringify({
-        undoStack: undoStack,
-        redoStack: redoStack
-    }));
-    setUndoLogs(undoStack)
-    setRedoLogs(redoStack)
-    operationLogEventChannel.postMessage({type: OperationLogDeleted, id: logId})
-}
-
-function sizeof(object: any): string {
-    const str = JSON.stringify(object);
-    const size = new Blob([str]).size;
-    return (size / 1024).toFixed(2) + " KB";
-}
-
-function concatLogs(undoLogs: Log[], redoLogs: Log[]): Log[] {
-    let logs = undoLogs.concat(redoLogs);
-    logs.sort((a, b) => new Date(a.createdOn).getTime() - new Date(b.createdOn).getTime());
-    return logs
-}
-
-function restoreLayout(operationLogEventChannel: BroadcastChannel, id: string): void {
-    console.log('OperationLogsModal: restoreLayout postMessage')
-    operationLogEventChannel.postMessage({type: OperationLogRestore, id: id})
-}
 
 const OperationLogsModal: React.FC = () => {
     const boardSPI = new WorkshopBoardService(miroProxy)
-    const [undoLogs, setUndoLogs] = useState<Log[]>([])
-    const [redoLogs, setRedoLogs] = useState<Log[]>([])
+    const [undoLogs, setUndoLogs] = useState<TLog[]>([])
+    const [redoLogs, setRedoLogs] = useState<TLog[]>([])
     const [boardId, setBoardId] = useState<string>("")
     useEffect(() => {
         boardSPI.fetchBoardInfo().then(board => {

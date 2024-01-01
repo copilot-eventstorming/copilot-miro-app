@@ -2,12 +2,8 @@ import React, {useEffect, useState} from "react";
 import {EventSummary} from "./component/EventSummary";
 import {GraphOptimizerButtonGroup} from "./component/GraphOptimizerButtonGroup";
 import {reloadEventSummary} from "../utils/EventSummaryUtils";
-import {WorkshopBoardSPI} from "../../../application/spi/WorkshopBoardSPI";
 import {emptyEventSummary} from "../types/EventSummaryTypes";
-
-type TConsoleProps = {
-    output: string;
-}
+import {TConsoleProps, TEventStormingBoardPanelProps} from "../types/EventStormingBoardPanelTypes";
 
 const Console: React.FC<TConsoleProps> = ({output}) => {
     return (
@@ -18,11 +14,8 @@ const Console: React.FC<TConsoleProps> = ({output}) => {
     );
 };
 
-interface EventStormingBoardPanelProps {
-    boardSPI: WorkshopBoardSPI;
-}
 
-export const EventStormingBoardPanel: React.FC<EventStormingBoardPanelProps> = ({boardSPI}) => {
+export const EventStormingBoardPanel: React.FC<TEventStormingBoardPanelProps> = ({boardSPI}) => {
     const [eventSummary, setEventSummary] = useState(emptyEventSummary);
     const [consoleOutput, setConsoleOutput] = useState("");
 

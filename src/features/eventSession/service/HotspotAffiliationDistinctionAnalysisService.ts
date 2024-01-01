@@ -3,7 +3,7 @@ import {convertToNodeObject} from "../../../application/service/utils/utils";
 import {
     AffiliationDistinctionExplorationService
 } from "../../../application/service";
-import {ClusterAnalysisResult} from "../panels/component/ExploreAnalysisResultTable";
+import {TClusterAnalysisResult} from "../panels/component/ExploreAnalysisResultTable";
 
 export class HotspotAffiliationDistinctionAnalysisService {
     private actualService: AffiliationDistinctionExplorationService;
@@ -14,7 +14,7 @@ export class HotspotAffiliationDistinctionAnalysisService {
         this.actualService = new AffiliationDistinctionExplorationService();
     }
 
-    async perform(): Promise<ClusterAnalysisResult[]> {
+    async perform(): Promise<TClusterAnalysisResult[]> {
         const events = (await this.boardSPI.fetchEventCards()).map(convertToNodeObject('event', 1));
         const hotspots = (await this.boardSPI.fetchHotSpotCards()).map(convertToNodeObject('hotspot', 1));
         return this.actualService.perform(hotspots, events)

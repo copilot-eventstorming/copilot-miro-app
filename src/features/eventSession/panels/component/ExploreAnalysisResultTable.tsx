@@ -1,19 +1,8 @@
 import * as React from "react";
-import {WorkshopBoardSPI} from "../../../../application/spi/WorkshopBoardSPI";
+import {TExploreAnalysisResultTableProps} from "../../types/ExploreAnalysisResultTableTypes";
 
-export interface ClusterAnalysisResult {
-    itemId: string;
-    percentileName: string;
-    distance: string;
-    itemName: string;
-}
 
-interface ExploreAnalysisResultTableProps {
-    boardSPI: WorkshopBoardSPI;
-    clusterAnalysisResult: ClusterAnalysisResult[];
-}
-
-export const ExploreAnalysisResultTable: React.FC<ExploreAnalysisResultTableProps> = ({
+export const ExploreAnalysisResultTable: React.FC<TExploreAnalysisResultTableProps> = ({
                                                                                           boardSPI,
                                                                                           clusterAnalysisResult
                                                                                       }) => {

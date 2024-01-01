@@ -1,5 +1,4 @@
-import * as React from "react";
-import {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {OptimizeReadModel} from "./OptimizeReadModel";
 import {OperationLogDeleted, OperationLogRestore} from "../../../operationLogs/types/OperationLogEvent";
 import {SaveActions} from "../../../../application/repository";
@@ -9,7 +8,7 @@ import {SaveOperation} from "./SaveOperation";
 import {OperationLogChannel} from "../../../operationLogs/types/OperationLogChannels";
 import {GraphOptimizerButtonGroupProps} from "../../types/GraphOptimizerTypes";
 import {GraphOptimizerContext} from "../context/GraphOptimizerContext";
-import {ClusterAnalysisResult} from "./ExploreAnalysisResultTable";
+import {TClusterAnalysisResult} from "./ExploreAnalysisResultTable";
 import {ProblematicCard} from "../../../../application/service/graph/AffiliationDistinctionProblemDiagnoseService";
 
 export const GraphOptimizerButtonGroup: React.FC<GraphOptimizerButtonGroupProps> = ({
@@ -24,11 +23,11 @@ export const GraphOptimizerButtonGroup: React.FC<GraphOptimizerButtonGroupProps>
     const [verticalOverlapThreshold, setVerticalOverlapThreshold] = useState(0.5); // 添加这一行
     const [showClusterAnalysisResult, setShowClusterAnalysisResult] = useState(false); // 添加这一行
     const [clusterAnalysisResult, setClusterAnalysisResult] = useState([
-        {percentileName: 'min', distance: '0', itemName: "-", itemId: "-"} as ClusterAnalysisResult,
-        {percentileName: '25', distance: '0', itemName: "-", itemId: "-"} as ClusterAnalysisResult,
-        {percentileName: '50', distance: '0', itemName: "-", itemId: "-"} as ClusterAnalysisResult,
-        {percentileName: '75', distance: '0', itemName: "-", itemId: "-"} as ClusterAnalysisResult,
-        {percentileName: 'max', distance: '0', itemName: "-", itemId: "-"} as ClusterAnalysisResult,
+        {percentileName: 'min', distance: '0', itemName: "-", itemId: "-"} as TClusterAnalysisResult,
+        {percentileName: '25', distance: '0', itemName: "-", itemId: "-"} as TClusterAnalysisResult,
+        {percentileName: '50', distance: '0', itemName: "-", itemId: "-"} as TClusterAnalysisResult,
+        {percentileName: '75', distance: '0', itemName: "-", itemId: "-"} as TClusterAnalysisResult,
+        {percentileName: 'max', distance: '0', itemName: "-", itemId: "-"} as TClusterAnalysisResult,
     ]); // 添加这一行
     const [ambiguousDistanceThreshold, setAmbiguousDistanceThreshold] = useState(0.5); // 添加这一行
     const [minDistanceDiff, setMinDistanceDiff] = useState(0); // 添加这一行
@@ -44,8 +43,10 @@ export const GraphOptimizerButtonGroup: React.FC<GraphOptimizerButtonGroupProps>
     const [undoQty, setUndoQty] = React.useState(0);
     const [redoQty, setRedoQty] = React.useState(0);
     const context = React.useContext(GraphOptimizerContext)
-    const operationLogEventChannel = new BroadcastChannel(OperationLogChannel);
-    React.useEffect(() => {
+
+    useEffect(() => {
+        const operationLogEventChannel = new BroadcastChannel(OperationLogChannel);
+
         const handleEvent = async (event: MessageEvent) => {
             console.log('GraphOptimizerButtonGroup: receiveMessage', event)
             switch (event.data.type) {
@@ -68,12 +69,13 @@ export const GraphOptimizerButtonGroup: React.FC<GraphOptimizerButtonGroupProps>
         // 在 useEffect 的清理函数中移除事件监听器
         return () => {
             operationLogEventChannel.removeEventListener("message", handleEvent);
+            operationLogEventChannel.close();
         };
     }, [saveActions]);
-    React.useEffect(() => {
+
+    useEffect(() => {
             if (saveActions == null) {
-                const f = async () => {
-                    const board = await boardSPI.fetchBoardInfo()
+                boardSPI.fetchBoardInfo().then(board => {
                     const actions = new SaveActions(board.id,
                         setUndoDisabled,
                         setRedoDisabled,
@@ -82,8 +84,7 @@ export const GraphOptimizerButtonGroup: React.FC<GraphOptimizerButtonGroupProps>
                         setConsoleOutput,
                         boardSPI);
                     setSaveActions(actions);
-                }
-                f()
+                })
             }
         }
     )

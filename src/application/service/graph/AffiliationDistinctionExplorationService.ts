@@ -1,10 +1,10 @@
-import {ClusterAnalysisResult} from "../../../features/eventSession/panels/component/ExploreAnalysisResultTable";
+import {TClusterAnalysisResult} from "../../../features/eventSession/panels/component/ExploreAnalysisResultTable";
 import {calculateDistancesStatistics, CardDistanceStatistics, NestedGroupNode} from "../../../domain/graph";
 import {cleanHtmlTag} from "../utils/utils";
 
 export class AffiliationDistinctionExplorationService {
 
-    perform(satelliteCards: NestedGroupNode[], centralCards: NestedGroupNode[]): ClusterAnalysisResult[] {
+    perform(satelliteCards: NestedGroupNode[], centralCards: NestedGroupNode[]): TClusterAnalysisResult[] {
         if (satelliteCards.length <= 0 || centralCards.length <= 0) {
             return this.emptyResult();
         }
@@ -12,7 +12,7 @@ export class AffiliationDistinctionExplorationService {
         return this.mkClusterAnalysisResults(stats);
     }
 
-    private emptyResult(): ClusterAnalysisResult[] {
+    private emptyResult(): TClusterAnalysisResult[] {
         return [
             {
                 percentileName: 'min',

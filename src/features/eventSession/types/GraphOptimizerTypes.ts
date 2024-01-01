@@ -1,7 +1,7 @@
 import {WorkshopBoardSPI} from "../../../application/spi/WorkshopBoardSPI";
 import * as React from "react";
 import {Dispatch, SetStateAction} from "react";
-import {ClusterAnalysisResult} from "../panels/component/ExploreAnalysisResultTable";
+import {TClusterAnalysisResult} from "../panels/component/ExploreAnalysisResultTable";
 import {ProblematicCard} from "../../../application/service/graph/AffiliationDistinctionProblemDiagnoseService";
 import {SaveActions} from "../../../application/repository";
 
@@ -11,8 +11,8 @@ export interface GraphOptimizerContextProps {
     showClusterAnalysisResult: boolean;
     setShowClusterAnalysisResult: Dispatch<SetStateAction<boolean>>;
 
-    clusterAnalysisResult: ClusterAnalysisResult[];
-    setClusterAnalysisResult: Dispatch<SetStateAction<ClusterAnalysisResult[]>>;
+    clusterAnalysisResult: TClusterAnalysisResult[];
+    setClusterAnalysisResult: Dispatch<SetStateAction<TClusterAnalysisResult[]>>;
 
     maybeProblems: ProblematicCard[];
     setMaybeProblems: Dispatch<SetStateAction<ProblematicCard[]>>;
