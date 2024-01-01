@@ -43,10 +43,10 @@ export const ProblemTable: React.FC<ProblemTableProps> = ({boardSPI, problems, s
                                                    onClick={() => boardSPI.zoomToCard(problem.candidateCentralOne.id)}>
                                                 {problem.candidateCentralOne.name}
                                             </label>
-                                            problem.candidateCentralOther && (
+                                            {problem.candidateCentralOther && (
                                             <label className="clickable-label" style={{fontSize: '12px'}}
                                                    onClick={() => boardSPI.zoomToCard(problem.candidateCentralOther!.id)}>
-                                                {problem.candidateCentralOther!.name}</label>)
+                                                {problem.candidateCentralOther!.name}</label>)}
                                         </div>
                                     </td>
                                     <td className="number-cell" style={{fontSize: '12px'}}>{problem.diff}</td>
