@@ -6,7 +6,9 @@ import {WorkshopBoardService} from "../../../api/WorkshopBoardService";
 import {OperationLogChannel} from "../types/OperationLogChannels";
 import {concatLogs, deleteOperationLog, restoreLayout, sizeof, stateHistoryKey} from "../utils/OpLogUtils";
 import {TLog} from "../types/TLog";
+import {findLocally} from "../../../utils/localStorage";
 
+const operationLogEventChannel = new BroadcastChannel(OperationLogChannel);
 
 const OperationLogsModal: React.FC = () => {
     const boardSPI = new WorkshopBoardService(miroProxy)
@@ -16,15 +18,15 @@ const OperationLogsModal: React.FC = () => {
     useEffect(() => {
         boardSPI.fetchBoardInfo().then(board => {
             setBoardId(board.id)
-            const savedState = JSON.parse(localStorage.getItem(stateHistoryKey(board.id)) || '{}');
-            if (savedState) {
-                setUndoLogs(savedState.undoStack)
-                setRedoLogs(savedState.redoStack)
-            }
+            findLocally(stateHistoryKey(board.id)).then(savedState => {
+                if (savedState) {
+                    setUndoLogs(savedState.undoStack)
+                    setRedoLogs(savedState.redoStack)
+                }
+            })
         })
     }, [])
 
-    const operationLogEventChannel = new BroadcastChannel(OperationLogChannel);
     const totalSize = sizeof(undoLogs.concat(redoLogs))
     return (
         <div className="w-full">

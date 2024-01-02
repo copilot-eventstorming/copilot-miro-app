@@ -1,4 +1,5 @@
 import {sizeof} from "../application/service/utils/utils";
+import {get, set} from 'idb-keyval';
 
 export class SaveResult {
     success: boolean;
@@ -12,9 +13,9 @@ export class SaveResult {
     }
 }
 
-export function saveLocally(id: string, object: any): SaveResult {
+export async function saveLocally(id: string, object: any): Promise<SaveResult> {
     try {
-        localStorage.setItem(id, JSON.stringify(object));
+        await set(id, object);
         return new SaveResult(true, null, sizeof(object))
     } catch (e) {
         console.log(e);
@@ -22,7 +23,11 @@ export function saveLocally(id: string, object: any): SaveResult {
     }
 }
 
-export function findLocally(id: string): any {
-    const str = localStorage.getItem(id);
-    return JSON.parse(str || 'null');
+export async function findLocally(id: string): Promise<any> {
+    try {
+        return await get(id);
+    } catch (e) {
+        console.log(e);
+        return null;
+    }
 }

@@ -46,7 +46,7 @@ export class SaveActions {
     }
 
     async undo(): Promise<UndoRedoResult> {
-        const previousState = this.stateManager.undo();
+        const previousState = await this.stateManager.undo();
         if (previousState) {
             this.consoleOutputSetter(`undoing ${previousState.state.length} elements in graph...`);
             const result = await this.boardSpi.restoreBoardLayout(previousState.state, this.consoleOutputSetter);
@@ -69,7 +69,7 @@ export class SaveActions {
     }
 
     async redo(): Promise<UndoRedoResult> {
-        const nextState = this.stateManager.redo();
+        const nextState = await this.stateManager.redo();
         console.log("redo", nextState);
         if (nextState) {
             this.consoleOutputSetter(`redoing ${nextState.state.length} elements in graph...`);

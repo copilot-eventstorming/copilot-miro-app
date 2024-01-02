@@ -35,21 +35,22 @@ export class SaveActionState {
         const stateObject = this.mkStateObject(title, sessionType, state, short);
         this.undoStack.push(stateObject);
         this.redoStack = [];
-        const saveResult = this.saveToLocalStorage();
-        this.saveStateToServer(stateObject.id, state);
-        return new StateSaveResult(false, saveResult, sizeof(stateObject));
+        return this.saveToLocalStorage().then(saveResult => {
+            this.saveStateToServer(stateObject.id, state);
+            return new StateSaveResult(false, saveResult, sizeof(stateObject));
+        })
     }
 
-    saveToLocalStorage(): SaveResult {
-        return saveLocally(this.stateHistoryKey(), {
+    async saveToLocalStorage(): Promise<SaveResult> {
+        return await saveLocally(this.stateHistoryKey(), {
             undoStack: this.undoStack,
             redoStack: this.redoStack,
         });
     }
 
-    loadFromLocalStorage(): void {
-        const savedState = findLocally(this.stateHistoryKey());
-        if (savedState) {
+    async loadFromLocalStorage(): Promise<void> {
+        const savedState = await findLocally(this.stateHistoryKey());
+        if (savedState && savedState.undoStack && savedState.redoStack) {
             this.undoStack = savedState.undoStack;
             this.redoStack = savedState.redoStack;
         }
@@ -63,7 +64,7 @@ export class SaveActionState {
         // });
     }
 
-    undo(): any {
+    async undo(): Promise<any> {
         console.log("performing undo action");
         const stateObject = this.undoStack.pop();
         if (stateObject) {
@@ -73,12 +74,12 @@ export class SaveActionState {
         return this.undoStack[this.undoStack.length - 1];
     }
 
-    redo(): any | null {
+    async redo(): Promise<any | null> {
         console.log("performing redo action");
         const stateObject = this.redoStack.pop();
         if (stateObject) {
             this.undoStack.push(stateObject);
-            this.saveToLocalStorage();
+            await this.saveToLocalStorage();
             return stateObject;
         }
         return null;
@@ -128,9 +129,11 @@ export class SaveActionState {
         };
     }
 }
+
 function mkStateId() {
     return crypto.randomUUID();
 }
+
 function hasSameState(stack: { state: any }[], state: any[], short: boolean): boolean {
     for (let i = 0; i < stack.length; i++) {
         if (_.isEqual(stack[i].state, state.map(item => makeShortBoardItem(short)))) {
