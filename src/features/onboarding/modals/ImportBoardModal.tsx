@@ -7,7 +7,7 @@ import {
     ContextMappingSession,
     EventStormingSession,
     strategicSessions,
-    SubdomainExplorationSession
+    SubdomainExplorationSession, TSessionType
 } from "../types/SessionTypes";
 
 import LoadingSpinnerAnimation from "../component/LoadingSpinnerAnimation";
@@ -16,10 +16,6 @@ import {WorkshopBoardService} from "../../../api/WorkshopBoardService";
 import {emptyBoardCoreCards, WorkshopBoardCoreCards} from "../../../application/spi/WorkshopBoardSPI";
 import {SessionLifecycleChannel, SessionTypeChannel} from "../types/SessionChannels";
 import {NotInitialized, SessionInitializingFinished, SessionInitializingStarted} from "../types/SessionEvents";
-
-type TSessionType = {
-    key: string;
-}
 
 type TStateAnimationProps = {
     stateName: { key: string, text: string };

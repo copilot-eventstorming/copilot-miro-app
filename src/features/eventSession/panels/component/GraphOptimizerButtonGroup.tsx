@@ -8,8 +8,8 @@ import {SaveOperation} from "./SaveOperation";
 import {OperationLogChannel} from "../../../operationLogs/types/OperationLogChannels";
 import {GraphOptimizerButtonGroupProps} from "../../types/GraphOptimizerTypes";
 import {GraphOptimizerContext} from "../context/GraphOptimizerContext";
-import {TClusterAnalysisResult} from "./ExploreAnalysisResultTable";
 import {ProblematicCard} from "../../../../application/service/graph/AffiliationDistinctionProblemDiagnoseService";
+import {TClusterAnalysisResult} from "../../types/ExploreAnalysisResultTableTypes";
 
 export const GraphOptimizerButtonGroup: React.FC<GraphOptimizerButtonGroupProps> = ({
                                                                                         boardSPI,

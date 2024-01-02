@@ -7,7 +7,8 @@ import {
     CommandStormingSession,
     ContextMappingSession,
     EventStormingSession,
-    SubdomainExplorationSession
+    SubdomainExplorationSession,
+    TSessionType
 } from "./features/onboarding/types/SessionTypes";
 import {EventStormingBoardPanel} from "./features/eventSession/panels/EventStormingBoardPanel";
 import {SubdomainExplorationBoardPanel} from "./features/subdomainSession/SubdomainExplorationBoardPanel";
@@ -19,9 +20,6 @@ import {CommandStormingBoardPanel} from "./features/commandSession/CommandStormi
 import {AggregateExplorationBoardPanel} from "./features/aggregateSession/AggregateExplorationBoardPanel";
 import {ContextMappingBoardPanel} from "./features/contextSession/ContextMappingBoardPanel";
 
-interface SessionType {
-    key: string;
-}
 
 async function isBoardManaged(boardSPI: WorkshopBoardService) {
     return await boardSPI.fetchBoardInfo().then(board => {
@@ -43,7 +41,7 @@ const App: React.FC = () => {
         const sessionTypeChannel = new BroadcastChannel(SessionTypeChannel);
         const sessionLifecycleChannel = new BroadcastChannel(SessionLifecycleChannel);
 
-        const handleEvent = async (event: MessageEvent) => {
+        const handleEvent = async (event: MessageEvent<TSessionType>) => {
             console.log("sessionTypeChannel event received")
             sessionLifecycleChannel.postMessage(SessionInitializingStarted)
             const page = createPageBySessionType(event.data, boardSPI)
@@ -66,7 +64,7 @@ const App: React.FC = () => {
     }
 };
 
-function createPageBySessionType(sessionType: SessionType, boardSPI: WorkshopBoardService) {
+function createPageBySessionType(sessionType: TSessionType, boardSPI: WorkshopBoardService) {
     switch (sessionType.key) {
         case EventStormingSession.key:
             return <EventStormingBoardPanel boardSPI={boardSPI}/>

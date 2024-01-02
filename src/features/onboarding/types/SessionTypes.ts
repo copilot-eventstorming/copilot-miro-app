@@ -1,3 +1,7 @@
+
+export type TSessionType = {
+    key: string;
+}
 export const EventStormingSession = {"key": "EventStormingSession", "text": "Event Storming Session"};
 export const CommandStormingSession = {"key": "CommandStormingSession", "text": "Command Storming Session"};
 export const AggregateExplorationSession = {
