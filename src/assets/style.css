@@ -46,8 +46,51 @@ input[type="range"]::-moz-range-thumb {
 }
 
 
+.panel-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.panel {
+    width: 100%;
+    min-height: 20px; /* 设置一个最小高度以保证标题可见 */
+    transition: flex 0.5s ease;
+}
+
+.panel.open {
+    flex: 1;
+}
+
 @tailwind base;
 @tailwind components;
+
+
+.agenda {
+    @apply flex flex-col h-full w-full
+}
+
+.agenda-item {
+    @apply w-full duration-500 ease-in-out h-auto relative
+}
+
+.agenda-item-open {
+    @apply flex-1
+}
+
+.agenda-item-btn {
+    @apply flex px-2 py-1 rounded-md relative m-0.5
+    max-w-full text-left font-lato text-sm bg-orange-400 text-white
+    hover:bg-orange-300 hover:-translate-y-0.5 transform transition
+}
+
+.agenda-item-btn::after {
+    @apply absolute right-10 content-[">"] transition-all duration-500 text-sm font-lato
+}
+
+input:checked + .agenda-item-btn::after {
+    transform: rotate(90deg);
+}
 
 .btn-container-panel {
     @apply flex justify-between items-center space-x-1 mx-1 my-2;
@@ -55,7 +98,7 @@ input[type="range"]::-moz-range-thumb {
 
 .btn {
     @apply inline-block px-2 py-2 rounded-md relative
-    text-center font-lato uppercase tracking-wider font-semibold text-sm sm:text-base
+    uppercase tracking-wider font-semibold text-sm sm:text-base
     focus:outline-none focus:ring focus:ring-offset-2;
 }
 
@@ -95,7 +138,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .title {
-    @apply w-full text-center  font-bold text-amber-500 pt-3 font-lato;
+    @apply w-full text-center  font-bold text-amber-500 pb-3 font-lato;
 }
 
 .title-modal {
@@ -121,7 +164,7 @@ input[type="range"]::-moz-range-thumb {
 .header {
     @apply text-xl
     px-1 py-2
-    text-left text-black font-semibold
+    text-left text-black
     font-lato;
 }
 

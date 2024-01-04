@@ -1,4 +1,14 @@
-import {BoardInfo, BoardNode, GetFilter, Item, OnlineUserInfo} from "@mirohq/websdk-types";
+import {
+    BoardInfo,
+    BoardNode,
+    GetFilter,
+    Item,
+    OnlineUserInfo,
+    Shape,
+    ShapeProps,
+    StickyNote,
+    StickyNoteProps
+} from "@mirohq/websdk-types";
 
 interface ApiCalls {
     [key: string]: number[];
@@ -100,6 +110,7 @@ class MiroProxy {
 
     async syncBoard(widget: BoardNode): Promise<void> {
         this.updateApiCalls('boardItem.sync');
+        console.log(widget)
         return await widget.sync();
     }
 
@@ -125,6 +136,14 @@ class MiroProxy {
                 return Promise.reject(error);
             }
         }) as T;
+    }
+
+    createStickyNote(stickyNote: StickyNoteProps): Promise<StickyNote> {
+        return miro.board.createStickyNote(stickyNote);
+    }
+
+    createShape(shape: ShapeProps): Promise<Shape> {
+        return miro.board.createShape(shape)
     }
 }
 

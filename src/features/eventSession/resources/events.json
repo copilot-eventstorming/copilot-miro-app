@@ -1,0 +1,481 @@
+[
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p>Domain</p><p>Event</p><p>Candidate</p><p>Renamed</p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907723",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:14:06.881Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 1730.081112953083,
+    "y": 743.3263073240637,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p>Domain</p><p>Event</p><p>Candidate</p><p>Explained</p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907724",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:14:06.934Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 1513.8209738339483,
+    "y": 743.3263073240637,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p>Domain</p><p>Event</p><p>Candidate</p><p>Accepted</p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907725",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:14:06.966Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 1946.3412520722177,
+    "y": 743.3263073240637,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p>Domain</p><p>Event</p><p>Candidate</p><p>Removed</p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907726",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:14:06.997Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 2162.6013911913524,
+    "y": 743.3263073240637,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p>Domain</p><p>Event</p><p>Candidate</p><p>Deduplicated</p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907728",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:14:07.019Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 1297.5608347148132,
+    "y": 743.3263073240637,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p>Hotspots</p><p>Resolved</p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907729",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:14:07.045Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 1081.3006955956776,
+    "y": 991.1017430987517,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p>Hotspots</p><p>Created</p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907730",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:14:07.064Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 865.040556476542,
+    "y": 991.1017430987517,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p><strong>Domain</strong></p><p><strong>Events</strong></p><p><strong>Aligned</strong></p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907731",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:18:19.708Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 2378.861530310487,
+    "y": 495.55087154937564,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p><strong>Domain</strong></p><p><strong>Event</strong></p><p><strong>Explanation</strong></p><p><strong>Started</strong></p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907732",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:17:55.925Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 1081.3006955956776,
+    "y": 495.55087154937564,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p>Domain</p><p>Events</p><p>Optimized</p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907733",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:14:07.136Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 2811.3818085487565,
+    "y": 991.1017430987517,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p><strong>Domain</strong></p><p><strong>Events</strong></p><p><strong>Normalized</strong></p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907734",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:18:20.668Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 2595.1216694296218,
+    "y": 495.55087154937564,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p>Domain</p><p>Event</p><p>Storming</p><p>Completed</p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907736",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:14:07.183Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 865.040556476542,
+    "y": 495.55087154937564,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p>Domain</p><p>Event</p><p>Candidate</p><p>Created</p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907737",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:14:07.203Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 648.7804173574063,
+    "y": 743.3263073240637,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p>Domain</p><p>Event</p><p>Candidate</p><p>Corrected</p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907738",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:14:07.219Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 648.7804173574063,
+    "y": 495.55087154937564,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p>Domain</p><p>Events</p><p>Backup</p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907740",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:14:07.240Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 3027.641947667891,
+    "y": 991.1017430987517,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p>Domain</p><p>Event</p><p>Storming</p><p>Started</p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907741",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:14:07.258Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 432.52027823827075,
+    "y": 495.55087154937564,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p><strong>Command</strong></p><p><strong>Storming</strong></p><p><strong>Prepared</strong></p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907743",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:18:29.735Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 3243.902086787026,
+    "y": 1238.8771788734398,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p><strong>Workshop</strong></p><p><strong>Concepts</strong></p><p><strong>Aligned</strong></p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907744",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:18:04.848Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 432.52027823827075,
+    "y": 247.77543577468782,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p>Workshop</p><p>Concepts</p><p>Introduced</p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907745",
+
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:14:07.308Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 216.26013911913537,
+    "y": 247.77543577468782,
+    "width": 216.26013911913543
+  },
+  {
+    "type": "sticky_note",
+    "shape": "square",
+    "content": "<p>Agenda</p><p>Introduced</p>",
+    "style": {
+      "fillColor": "orange",
+      "textAlign": "center",
+      "textAlignVertical": "middle"
+    },
+    "tagIds": [],
+    "id": "3458764574660907746",
+    "origin": "center",
+    "relativeTo": "canvas_center",
+    "createdAt": "2024-01-04T11:14:06.107Z",
+    "createdBy": "3074457346363976701",
+    "modifiedAt": "2024-01-04T11:14:07.335Z",
+    "modifiedBy": "3074457346363976701",
+    "linkedTo": "",
+    "connectorIds": [],
+    "x": 0,
+    "y": -5.684341886080802e-14,
+    "width": 216.26013911913543
+  }
+]

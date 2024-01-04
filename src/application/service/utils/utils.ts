@@ -8,6 +8,7 @@ export function calculateAverage(numbers: number[]): number {
     const sum = filteredNumbers.reduce((acc, cur) => acc + cur, 0);
     return sum / filteredNumbers.length;
 }
+
 export function convertConnectorToEdgeKey(edge: Connector): EdgeKey {
     let start = edge!.start;
     let end = edge!.end;
@@ -27,6 +28,7 @@ export function convertConnectorToEdgeKey(edge: Connector): EdgeKey {
     }
     return new EdgeKey(start!.item, end!.item, weight);
 }
+
 export function convertToNodeObject(category: string, level: number, ignoredWhenSizing: boolean = false): (miroObject: WorkshopCard) => NestedGroupNode {
     return (miroObject) => {
         let x = miroObject.x;
@@ -50,7 +52,7 @@ export function convertToNodeObject(category: string, level: number, ignoredWhen
 }
 
 const htmlEntities: { [key: string]: string } = {
-    '<[^>]*>?': '',
+    '<[^>]*>?': ' ',
     '&nbsp;': ' ',
     '&amp;': '&',
     '&lt;': '<',
@@ -68,7 +70,9 @@ const htmlEntities: { [key: string]: string } = {
     '&divide;': '÷',
     '&bull;': '•',
     '&hellip;': '…',
-    '&#xff0c;': ','
+    '&#xff0c;': ',',
+    '&#39;': "'",
+    "\\s+": " ",
 };
 
 export function cleanHtmlTag(title: string | undefined): string {

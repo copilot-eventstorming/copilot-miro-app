@@ -18,7 +18,7 @@ export class SaveActionState {
         return `stateHistory-${this.boardId}`;
     }
 
-    async saveState(title: string, sessionType: string, state: any[], short: boolean = true): Promise<StateSaveResult> {
+    async saveState(title: string, sessionType: string, state: any[], short: boolean = false): Promise<StateSaveResult> {
         console.log("performing save state action");
 
         if (this.redoStack.length > 0 && hasSameState(this.redoStack, state, short)) {

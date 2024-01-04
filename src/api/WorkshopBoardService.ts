@@ -1,5 +1,14 @@
-import {MiroProxy} from "./MiroProxy";
-import {BoardInfo, BoardNode, Connector, OnlineUserInfo, Shape, StickyNote} from "@mirohq/websdk-types";
+import {miroProxy, MiroProxy} from "./MiroProxy";
+import {
+    BoardInfo,
+    BoardNode,
+    Connector,
+    OnlineUserInfo,
+    Shape,
+    ShapeProps,
+    StickyNote,
+    StickyNoteProps
+} from "@mirohq/websdk-types";
 import {
     EventSummary,
     OptimizeResult,
@@ -10,6 +19,13 @@ import {
 } from "../application/spi/WorkshopBoardSPI";
 
 class WorkshopBoardService implements WorkshopBoardSPI {
+
+    clearBoard(): Promise<void> {
+        return this.fetchWorkshopCards().then(cards => {
+            cards.map(card => miro.board.remove(card));
+        });
+    }
+
     private miroProxy: MiroProxy;
 
     constructor(miroProxy: MiroProxy) {
@@ -25,6 +41,15 @@ class WorkshopBoardService implements WorkshopBoardSPI {
     aggregatePredicate = (card: WorkshopCard) => card.type === 'sticky_note' && card.style.fillColor === 'light_yellow' && card.shape === 'rectangle';
     hotspotPredicate = (card: WorkshopCard) => (card as Shape) && (card as Shape).shape === 'rhombus';
 
+    async createStickyNote(stickyNote: StickyNoteProps): Promise<StickyNote> {
+        return miroProxy.createStickyNote(stickyNote);
+    }
+    async createShapes(x: ShapeProps): Promise<Shape> {
+        return this.miroProxy.createShape(x)
+    }
+    updateHotspot(card: Shape): Promise<void> {
+        return this.miroProxy.syncBoard(card);
+    }
     async fetchWorkshopCards(): Promise<WorkshopCard[]> {
         console.log("accessing miro websdk, fetchWorkshopCards");
         return await this.miroProxy.fetchBoardItems({type: ["sticky_note", 'shape']})

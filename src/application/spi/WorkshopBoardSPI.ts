@@ -1,4 +1,13 @@
-import {BoardInfo, BoardNode, Connector, OnlineUserInfo, Shape, StickyNote} from "@mirohq/websdk-types";
+import {
+    BoardInfo,
+    BoardNode,
+    Connector,
+    OnlineUserInfo,
+    Shape,
+    ShapeProps,
+    StickyNote,
+    StickyNoteProps
+} from "@mirohq/websdk-types";
 
 export interface WorkshopBoardSPI {
     domainEventPredicate: (card: WorkshopCard) => boolean;
@@ -9,6 +18,10 @@ export interface WorkshopBoardSPI {
     rolePredicate: (card: WorkshopCard) => boolean;
     aggregatePredicate: (card: WorkshopCard) => boolean;
     hotspotPredicate: (card: WorkshopCard) => boolean;
+
+    createStickyNote(stickyNote: StickyNoteProps): Promise<StickyNote>;
+
+    createShapes(x: ShapeProps): Promise<Shape>;
 
     fetchWorkshopCards(): Promise<WorkshopCard[]>;
 
@@ -41,6 +54,10 @@ export interface WorkshopBoardSPI {
     moveCards2(widgets: { id: string, x: number, y: number }[]): Promise<OptimizeResult>;
 
     restoreBoardLayout(widgets: WorkshopCard[], setConsoleOutput: Function): Promise<OptimizeResult>;
+
+    clearBoard(): Promise<void>;
+
+    updateHotspot(card: Shape): Promise<void>;
 }
 
 
