@@ -100,7 +100,7 @@ const EventSessionQuizModal: React.FC = () => {
 
     const setSelectedAnswers = (questionNumber: number, selection: string[]) => {
         const newAnswers = [...answers];
-        newAnswers[questionNumber] = new Answer(questionNumber, selection);
+        newAnswers[questionNumber] = new Answer(questionNumber, selection.sort());
         setAnswers(newAnswers);
     };
 

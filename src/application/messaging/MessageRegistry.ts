@@ -66,7 +66,7 @@ export class MessageRegistry {
             console.log("Message Registry is processing: ", iMessage)
             this.handlers.get(messageTopic)?.forEach(handler => {
                 if (this.copilotSession === null || iMessage.recipient === null
-                    || iMessage.recipient !== this.copilotSession.miroUserId) {
+                    || iMessage.recipient === this.copilotSession.miroUserId) {
                     handler.handleMessage(iMessage)
                         .then(() => console.log(`Handled ${iMessage.type} by ${typeof (handler)}`))
                         .catch((e) => console.error(`Failed to handle ${iMessage.type} by ${typeof (handler)}`, e))

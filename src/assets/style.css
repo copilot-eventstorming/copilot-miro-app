@@ -62,9 +62,36 @@ input[type="range"]::-moz-range-thumb {
     flex: 1;
 }
 
+.hover-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    padding: 12px 16px;
+    z-index: 1;
+}
+
+tr:hover .hover-content {
+    display: block;
+}
+
+/*.floating-window {*/
+/*    position: absolute;*/
+/*    top:0;*/
+/*    left:0;*/
+/*    background-color: #fff;*/
+/*    border: 1px solid #ccc;*/
+/*    padding: 10px;*/
+/*    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);*/
+/*}*/
+
 @tailwind base;
 @tailwind components;
-
+.floating-window {
+    @apply w-full absolute top-0 left-0 bg-white border-x-2 border-gray-300 p-2 shadow-lg shadow-gray-400
+    ring-1 ring-offset-2 ring-orange-400 ring-opacity-50
+}
 
 .agenda {
     @apply flex flex-col h-full w-full
