@@ -1,7 +1,7 @@
 import {IMessage} from "../../../../application/messaging/IMessage";
 
 export class Answer {
-    constructor(public questionNumber: number, public answer: string[]) {
+    constructor(public questionNumber: number, public answer: string[], public correctAnswers: string[] = []) {
     }
 }
 

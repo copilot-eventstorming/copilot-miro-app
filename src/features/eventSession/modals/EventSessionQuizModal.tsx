@@ -6,6 +6,8 @@ import {Answer, EventSessionQuizAnswer} from "../broadcast/message/EventSessionQ
 import {CopilotSession, copilotSession$} from "../../../application/CopilotSession";
 import {v4 as uuidv4} from 'uuid';
 import {initialize} from "../../../utils/AppInitializer";
+import {TQuestion} from "../types/QuizTypes";
+import {LoadEventSessionQuizService} from "../service/LoadEventSessionQuizService";
 
 interface QuestionProps {
     question: string;
@@ -13,18 +15,7 @@ interface QuestionProps {
     questionNumber: number;
     selectedAnswers: string[];
     setSelectedAnswers: (questionNumber: number, answers: string[]) => void;
-}
-
-interface Question {
-    question: string;
-    answers: string[];
-    correctAnswers: string[];
-}
-
-export async function loadQuestions(): Promise<Question[]> {
-    const response = await fetch('/src/features/eventSession/resources/conceptIntroductionQuestions.json');
-    const questions: Question[] = await response.json();
-    return questions;
+    incorrect: boolean | null;
 }
 
 const Question: React.FC<QuestionProps> = ({
@@ -32,7 +23,8 @@ const Question: React.FC<QuestionProps> = ({
                                                answers,
                                                questionNumber,
                                                selectedAnswers,
-                                               setSelectedAnswers
+                                               setSelectedAnswers,
+                                               incorrect
                                            }) => {
     const handleAnswerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const answer = event.target.value;
@@ -45,7 +37,8 @@ const Question: React.FC<QuestionProps> = ({
 
     return (
         <form>
-            <div className="font-lato my-2 py-2">{questionNumber + 1}. {question}</div>
+            <div
+                className={`font-lato my-2 py-2 ${incorrect ? 'incorrect-answer' : ''}`}>{questionNumber + 1}. {question}</div>
             {answers.map((answer, index) => (
                 <div key={index}>
                     <input
@@ -65,23 +58,31 @@ const Question: React.FC<QuestionProps> = ({
 };
 
 
+function isIncorrect(correctAnswers: string[] | undefined, previousSelected: string[]) {
+    if (previousSelected === undefined || correctAnswers === undefined) return null;
+    const previous = previousSelected!.map((answer) => answer.split(')')[0].trim()).sort();
+    return correctAnswers?.sort().join(",") !== previous.join(",")
+}
+
 const EventSessionQuizModal: React.FC = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const sender = urlParams.get('sender') ?? "facilitator";
     const senderName = urlParams.get('senderName') ?? "facilitator";
-
+    const previousAnswers: Answer[] = JSON.parse(urlParams.get('answers') ?? "[]");
+    console.log("previousAnswers", previousAnswers)
     console.log("sender", sender)
     console.log("senderName", senderName)
 
     const broadcaster = new Broadcaster(miroProxy);
-    const [questions, setQuestions] = useState([] as any[])
+    const [questions, setQuestions] = useState([] as TQuestion[])
     const [copilotSession, setCopilotSession] = useState(copilotSession$.value as CopilotSession);
     useEffect(() => {
         initialize()
     }, []);
 
     useEffect(() => {
-        loadQuestions().then(setQuestions);
+        const quizService = new LoadEventSessionQuizService()
+        quizService.loadEventSessionQuiz().then(setQuestions);
     }, []);
 
     useEffect(() => {
@@ -118,16 +119,19 @@ const EventSessionQuizModal: React.FC = () => {
         <div className="w-full">
             <div className="w-full title title-modal centered">Quiz</div>
             <div className="w-full text-left font-lato space-y-2">
-                {questions.map((question, index) => (
-                    <Question
+                {questions.map((question, index) => {
+                    const previousSelected = questions[index]?.answers.filter((a: string) =>
+                        previousAnswers[index]?.answer.includes(a)) || []
+                    return (<Question
                         key={index}
                         question={question.question}
                         answers={question.answers}
                         questionNumber={index}
-                        selectedAnswers={answers[index]?.answer ?? []}
+                        selectedAnswers={answers[index]?.answer ?? previousSelected}
                         setSelectedAnswers={setSelectedAnswers}
-                    />
-                ))}
+                        incorrect={isIncorrect(previousAnswers[index]?.correctAnswers, previousSelected)}
+                    />)
+                })}
                 <div className="w-full py-2 centered">
                     <button className="btn btn-primary btn-primary-modal px-2" onClick={handleSubmit}>Submit
                     </button>

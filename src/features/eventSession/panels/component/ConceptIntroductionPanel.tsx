@@ -10,11 +10,13 @@ import {
     StartEventSessionConceptIntroductionQuiz
 } from "../../broadcast/message/StartEventSessionConceptIntroductionQuiz";
 import {EventSessionQuizAnswerHandler} from "../../broadcast/handler/EventSessionQuizAnswerHandler";
-import {EventSessionQuizAnswer} from "../../broadcast/message/EventSessionQuizAnswer";
+import {Answer, EventSessionQuizAnswer} from "../../broadcast/message/EventSessionQuizAnswer";
 import {CopilotSession} from "../../../../application/CopilotSession";
 import {v4 as uuidv4} from 'uuid';
 import {messageRegistry} from "../../../../utils/MessagingBroadcastingInitializer";
 import {EventSessionQuizRepository, QuizAnswer} from "../../repository/EventSessionQuizRepository";
+import {LoadEventSessionQuizService} from "../../service/LoadEventSessionQuizService";
+import {TQuestion} from "../../types/QuizTypes";
 
 
 type TConceptIntroductionPanelProps = {
@@ -31,28 +33,59 @@ function truncateString(str: string, maxLength: number): string {
 }
 
 interface FlowingWindowProps {
-    answer: QuizAnswer;
+    quizAnswer: QuizAnswer;
+    questions: TQuestion[];
     style: React.CSSProperties;
 }
 
-const FloatingWindow: React.FC<FlowingWindowProps> = ({answer, style}) => {
+function isIncorrectFn(actualAnswerItem: string, questions: TQuestion[], questionNumber: number): boolean {
+    const answerLetter = actualAnswerItem.split(')')[0].trim();
+    return !questions[questionNumber].correctAnswers.includes(answerLetter);
+}
+
+function missingAnswerFn(actualAnswerItem: string[], questions: TQuestion[], questionNumber: number): string[] {
+    const actualAnswerLetters = actualAnswerItem.map(x => x.split(')')[0].trim());
+    const correctAnswerLetters = questions[questionNumber].correctAnswers;
+    return correctAnswerLetters.filter(x => !actualAnswerLetters.includes(x));
+}
+
+const FloatingWindow: React.FC<FlowingWindowProps> = ({quizAnswer, questions, style}) => {
     return (
         <div className="floating-window w-full">
-            <div className="sub-title sub-title-panel">{answer.userName}'s Answers</div>
+            <div className="sub-title sub-title-panel">{quizAnswer.userName}'s Answers</div>
             <table className="w-full">
                 <thead>
                 <tr className="w-full">
-                    <th className="header header-panel">No.</th>
-                    <th className="header header-panel centered">Answer</th>
+                    <th className="header header-panel text-xs">No.</th>
+                    <th className="header header-panel text-xs text-center">Answers</th>
+                    <th className="header header-panel text-xs">Correct Answers</th>
                 </tr>
                 </thead>
                 <tbody>
-                {answer.answers.map((answer, index) => (
+                {quizAnswer.answers.map((filledAnswer, index) => (
                     <tr key={index} className={index % 2 === 0 ? 'odd_row' : 'even_row'}>
-                        <td className="number-cell number-cell-panel centered">{answer.questionNumber + 1}</td>
-                        <td className="text-cell text-cell-panel">{answer.actualAnswer.map((answer, index) => {
-                            return (<li key={index}>{answer}</li>)
+                        <td className="number-cell number-cell-panel centered">{filledAnswer.questionNumber + 1}</td>
+                        <td className="text-cell text-cell-panel">{filledAnswer.actualAnswer.map((singleAnswerItem, index) => {
+                            const isIncorrect = isIncorrectFn(singleAnswerItem, questions, filledAnswer.questionNumber);
+                            return (
+                                <li key={index} className={isIncorrect ? 'incorrect-answer' : ''}>
+                                    {singleAnswerItem}
+                                </li>
+                            );
                         })}</td>
+                        <td className="text-cell, text-cell-panel">{questions[filledAnswer.questionNumber]
+                            .correctAnswers
+                            .map((correctAnswerItem, index) => {
+                                const isMissing = missingAnswerFn(filledAnswer.actualAnswer, questions, filledAnswer.questionNumber)
+                                    .includes(correctAnswerItem);
+                                return (
+                                    <li key={index} className={isMissing ? 'missing-answer' : ''}>
+                                        {correctAnswerItem}
+                                    </li>
+                                );
+
+                            })
+                            }</td>
                     </tr>
                 ))}
                 </tbody>
@@ -70,7 +103,12 @@ export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> 
     const quizRepository: EventSessionQuizRepository | null = copilotSession ? new EventSessionQuizRepository(copilotSession.miroBoardId) : null
     const [quizAnswers, setQuizAnswers] = useState<QuizAnswer[]>([])
     const [hoveredScoreIndex, setHoveredScoreIndex] = useState<number>(-1)
+    const [questions, setQuestions] = useState([] as TQuestion[])
 
+    useEffect(() => {
+        const quizService = new LoadEventSessionQuizService()
+        quizService.loadEventSessionQuiz().then(setQuestions);
+    }, []);
     console.log("ConceptIntroductionPanel", copilotSession)
 
     useEffect(() => {
@@ -81,6 +119,12 @@ export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> 
             messageRegistry.unregisterHandler(EventSessionQuizAnswer.MESSAGE_TYPE, answerHandler)
         }
     }, [])
+
+    useEffect(() => {
+        if (quizRepository) {
+            quizRepository.loadQuizAnswer().then(setQuizAnswers)
+        }
+    }, []);
 
     const handleMouseEnter = (rowIndex: number, event: React.MouseEvent<HTMLTableRowElement>) => {
         const trElement = event.currentTarget;
@@ -168,29 +212,37 @@ export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> 
             </tr>
             </thead>
             <tbody>
-            {quizAnswers.map((answer, index) => (
-                <tr key={index} className={index % 2 === 0 ? 'odd_row' : 'even_row'}
+            {quizAnswers.map((actualAnswer, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'w-full odd_row' : 'w-full even_row'}
                     onMouseEnter={(e) => handleMouseEnter(index, e)}
                     onMouseLeave={handleMouseLeave}
                 >
-                    <td className="text-cell text-cell-panel">{answer.userName}</td>
-                    <td className="number-cell number-cell-panel centered">{answer.answers.filter(x => x !== undefined).length}</td>
-                    <td>
+                    <td className="text-cell text-cell-panel clickable-label">{actualAnswer.userName}</td>
+                    <td className="number-cell number-cell-panel centered  clickable-label">
+                        {actualAnswer.answers.filter(x => {
+                                const actual = x.actualAnswer.map(y => y.split(')')[0].trim()).sort().join(",")
+                                const expected = questions[x.questionNumber].correctAnswers.sort().join(",")
+                                return actual === expected
+                            }
+                        ).length} / {questions.length}
+                    </td>
+                    <td className="">
                         <button className="btn btn-secondary btn-secondary-panel px-2 py-1"
                                 onClick={async () => {
                                     await broadcaster.broadcast(
                                         new StartEventSessionConceptIntroductionQuiz(
-                                            uuidv4(), answer.userId,
+                                            uuidv4(), actualAnswer.userId,
                                             copilotSession?.miroUserId,
                                             copilotSession?.miroUsername ?? "",
-                                            copilotSession?.miroUserId
+                                            copilotSession?.miroUserId,
+                                            actualAnswer.answers.map(x => new Answer(x.questionNumber, x.actualAnswer, questions[x.questionNumber].correctAnswers))
                                         ))
                                     console.log(miroProxy.getApiCallsInLastMinute())
                                 }}>Retry
                         </button>
                     </td>
                     {hoveredScoreIndex == index &&
-                        <FloatingWindow answer={answer} style={{}}/>}
+                        <FloatingWindow quizAnswer={actualAnswer} questions={questions} style={{}}/>}
                 </tr>
             ))}
             </tbody>
@@ -203,7 +255,7 @@ export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> 
                     console.log("Start a quiz")
                     await broadcaster.broadcast(
                         new StartEventSessionConceptIntroductionQuiz(
-                            uuidv4(), "participant",
+                            uuidv4(), null,
                             copilotSession?.miroUserId,
                             copilotSession?.miroUsername ?? "",
                             copilotSession?.miroUserId ?? null

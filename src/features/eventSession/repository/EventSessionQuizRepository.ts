@@ -1,6 +1,6 @@
 import {findLocally, saveLocally, SaveResult} from "../../../utils/localStorage";
 
-export interface Answer {
+export type TAnswer = {
     questionNumber: number;
     actualAnswer: string[];
     expectedAnswer: string[];
@@ -9,7 +9,7 @@ export interface Answer {
 export interface QuizAnswer {
     userId: string;
     userName: string;
-    answers: Answer[];
+    answers: TAnswer[];
 }
 
 export class EventSessionQuizRepository {

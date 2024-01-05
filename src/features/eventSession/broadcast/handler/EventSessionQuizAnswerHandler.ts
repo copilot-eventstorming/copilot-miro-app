@@ -43,13 +43,14 @@ export class EventSessionQuizAnswerHandler implements IMessageHandler<EventSessi
 
     private mkNewQuizAnswers(quizAnswers: QuizAnswer[], sender: string, senderName: string, answers: Answer[]) {
         const otherAnswers = quizAnswers?.filter((quizAnswer) => quizAnswer.userId !== sender) ?? []
+        const maybeOldAnswer = quizAnswers?.find((quizAnswer) => quizAnswer.userId === sender)
         const quizAnswer = {
             userId: sender,
             userName: senderName,
-            answers: answers.map((answer) => {
+            answers: answers.map((answer, index) => {
                 return {
-                    questionNumber: answer.questionNumber,
-                    actualAnswer: answer.answer,
+                    questionNumber: answer?.questionNumber ?? index,
+                    actualAnswer: answer?.answer ?? maybeOldAnswer?.answers[index]?.actualAnswer ?? [],
                     expectedAnswer: []
                 }
             })
