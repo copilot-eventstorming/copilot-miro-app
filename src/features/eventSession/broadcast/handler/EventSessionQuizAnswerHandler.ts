@@ -20,6 +20,9 @@ export class EventSessionQuizAnswerHandler implements IMessageHandler<EventSessi
             console.log('Sender is null', JSON.stringify(message))
             return Promise.reject(new Error('Sender is null'))
         }
+        if (null === message.answers || undefined === message.answers || 0 >= message.answers.length) {
+            return Promise.reject(new Error('Answers is null or undefined or empty'))
+        }
 
         if (this.quizRepository) {
             this.quizRepository.loadQuizAnswer().then((savedQuizAnswers) => {

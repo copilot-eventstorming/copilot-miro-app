@@ -221,7 +221,7 @@ export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> 
                     <td className="number-cell number-cell-panel centered  clickable-label">
                         {actualAnswer.answers.filter(x => {
                                 const actual = x.actualAnswer.map(y => y.split(')')[0].trim()).sort().join(",")
-                                const expected = questions[x.questionNumber].correctAnswers.sort().join(",")
+                                const expected = questions[x.questionNumber]?.correctAnswers.sort().join(",")
                                 return actual === expected
                             }
                         ).length} / {questions.length}

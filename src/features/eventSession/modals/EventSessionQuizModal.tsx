@@ -8,6 +8,7 @@ import {v4 as uuidv4} from 'uuid';
 import {initialize} from "../../../utils/AppInitializer";
 import {TQuestion} from "../types/QuizTypes";
 import {LoadEventSessionQuizService} from "../service/LoadEventSessionQuizService";
+import {EventSessionQuizModalChannel, QuizSubmittedMessage} from "../types/QuizModalChannels";
 
 interface QuestionProps {
     question: string;
@@ -64,6 +65,8 @@ function isIncorrect(correctAnswers: string[] | undefined, previousSelected: str
     return correctAnswers?.sort().join(",") !== previous.join(",")
 }
 
+const broadcastChannel = new BroadcastChannel(EventSessionQuizModalChannel);
+
 const EventSessionQuizModal: React.FC = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const sender = urlParams.get('sender') ?? "facilitator";
@@ -113,6 +116,7 @@ const EventSessionQuizModal: React.FC = () => {
             copilotSession?.miroUsername ?? "",
             answers);
         broadcaster.broadcast(message);
+        broadcastChannel.postMessage(QuizSubmittedMessage);
     };
 
     return (

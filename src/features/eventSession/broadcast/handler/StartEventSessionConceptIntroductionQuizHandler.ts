@@ -1,8 +1,11 @@
 import {IMessageHandler} from "../../../../application/messaging/IMessageHandler";
 import {StartEventSessionConceptIntroductionQuiz} from "../message/StartEventSessionConceptIntroductionQuiz";
+import {EventSessionQuizModalChannel, QuizSubmittedMessage} from "../../types/QuizModalChannels";
 
 export class StartEventSessionConceptIntroductionQuizHandler
     implements IMessageHandler<StartEventSessionConceptIntroductionQuiz> {
+    broadcastChannel = new BroadcastChannel(EventSessionQuizModalChannel);
+
     async handleMessage(message: StartEventSessionConceptIntroductionQuiz) {
         console.log('StartEventSessionConceptIntroductionQuizHandler', JSON.stringify(message));
         if (await miro.board.ui.canOpenModal()) {
@@ -13,6 +16,12 @@ export class StartEventSessionConceptIntroductionQuizHandler
             await miro.board.ui.openModal({
                 url: url.toString(), width: 800, height: 640, fullscreen: false,
             });
+            this.broadcastChannel.addEventListener('message', (event) => {
+                console.log('StartEventSessionConceptIntroductionQuizHandler broadcastChannel', event);
+                if (event.data === QuizSubmittedMessage) {
+                    miro.board.ui.closeModal();
+                }
+            })
         }
     }
 }
