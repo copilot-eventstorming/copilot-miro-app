@@ -10,6 +10,9 @@ import {OptimizeConnectorsService} from "../../../application/service";
 import {HotspotAffiliationDistinctionAnalysisService} from "../service/HotspotAffiliationDistinctionAnalysisService";
 import {ProblematicCard} from "../../../application/service/graph/AffiliationDistinctionProblemDiagnoseService";
 import {HotspotAffiliationDistinctionDiagnoseService} from "../service/HotspotAffiliationDistinctionDiagnoseService";
+import {
+    AggregateSessionPrettifyLayoutService
+} from "../../aggregateSession/service/AggregateSessionPrettifyLayoutService";
 
 export function handleOptimizeLayout(widthPaddingFactor = 1, heightPaddingFactor = 1,
                               verticalOverlapThreshold = 0.5, horizontalOverlapThreshold = 0.5,
@@ -22,8 +25,8 @@ export function handleOptimizeLayout(widthPaddingFactor = 1, heightPaddingFactor
             .then(() => {
                 setShowClusterAnalysisResult(false)
                 setShowMaybeProblems(false)
-                const service = new EventSessionPrettifyLayoutService(boardSPI)
-                // const service = new AggregateSessionPrettifyLayoutService(boardSPI)
+                // const service = new EventSessionPrettifyLayoutService(boardSPI)
+                const service = new AggregateSessionPrettifyLayoutService(boardSPI)
                 service
                     .perform(widthPaddingFactor, heightPaddingFactor, verticalOverlapThreshold, horizontalOverlapThreshold)
                     .then(async layoutOpResult => {

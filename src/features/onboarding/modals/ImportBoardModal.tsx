@@ -16,6 +16,7 @@ import {WorkshopBoardService} from "../../../api/WorkshopBoardService";
 import {emptyBoardCoreCards, WorkshopBoardCoreCards} from "../../../application/spi/WorkshopBoardSPI";
 import {SessionLifecycleChannel, SessionTypeChannel} from "../types/SessionChannels";
 import {NotInitialized, SessionInitializingFinished, SessionInitializingStarted} from "../types/SessionEvents";
+import {initialize} from "../../../utils/AppInitializer";
 
 type TStateAnimationProps = {
     stateName: { key: string, text: string };
@@ -71,6 +72,10 @@ const ImportBoardModal: React.FC = () => {
     const [boardSummary, setBoardSummary] = useState<WorkshopBoardCoreCards>(emptyBoardCoreCards)
     const [name, setName] = useState("")
     const [id, setId] = useState("")
+
+    useEffect(() => {
+        initialize()
+    }, []);
 
     useEffect(() => {
         const sessionLifecycleChannel = new BroadcastChannel(SessionLifecycleChannel);

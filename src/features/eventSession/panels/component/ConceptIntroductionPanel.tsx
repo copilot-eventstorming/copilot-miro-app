@@ -4,11 +4,23 @@ import {WorkshopBoardSPI} from "../../../../application/spi/WorkshopBoardSPI";
 import {Hotspot} from "../../types/Hotspot";
 import {FetchHotspotsService} from "../../service/FetchHotspotsService";
 import {Shape} from "@mirohq/websdk-types";
+import {Broadcaster} from "../../../../application/messaging/Broadcaster";
+import {miroProxy} from "../../../../api/MiroProxy";
+import {
+    StartEventSessionConceptIntroductionQuiz
+} from "../../broadcast/message/StartEventSessionConceptIntroductionQuiz";
+import {EventSessionQuizAnswerHandler} from "../../broadcast/handler/EventSessionQuizAnswerHandler";
+import {EventSessionQuizAnswer} from "../../broadcast/message/EventSessionQuizAnswer";
+import {CopilotSession} from "../../../../application/CopilotSession";
+import {v4 as uuidv4} from 'uuid';
+import {messageRegistry} from "../../../../utils/MessagingBroadcastingInitializer";
 
 
 type TConceptIntroductionPanelProps = {
     boardSPI: WorkshopBoardSPI
+    copilotSession: CopilotSession
 }
+
 function truncateString(str: string, maxLength: number): string {
     if (str.length > maxLength) {
         return str.slice(0, maxLength) + '...';
@@ -16,12 +28,22 @@ function truncateString(str: string, maxLength: number): string {
         return str;
     }
 }
-export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> = ({boardSPI}) => {
+
+export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> = ({boardSPI, copilotSession}) => {
     const sampleService = new AddEventStormingSampleService(boardSPI)
     const hotspotService = new FetchHotspotsService(boardSPI)
+    const broadcaster = new Broadcaster(miroProxy)
     const [hotspots, setHotspots] = useState<Hotspot[]>([])
+
+    console.log("ConceptIntroductionPanel", copilotSession)
+
     useEffect(() => {
+        const answerHandler = new EventSessionQuizAnswerHandler()
         hotspotService.fetchHotspots().then(setHotspots)
+        messageRegistry.registerHandler(EventSessionQuizAnswer.MESSAGE_TYPE, answerHandler)
+        return () => {
+            messageRegistry.unregisterHandler(EventSessionQuizAnswer.MESSAGE_TYPE, answerHandler)
+        }
     }, [])
     return (<div className="flex flex-col w-full">
         <div className="flex flex-col w-full my-4 px-4 py-2 font-lato text-sm">
@@ -36,14 +58,14 @@ export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> 
         </div>
         <div className="flex flex-row w-full centered">
             <div className="px-2 py-2">
-                <button className="btn btn-primary btn-primary-panel px-2" onClick={() => {
-                    sampleService.addSample()
+                <button className="btn btn-primary btn-primary-panel px-2" onClick={async () => {
+                    await sampleService.addSample()
                 }}>Add Sample
                 </button>
             </div>
             <div className="px-2 py-2">
-                <button className="btn btn-primary btn-primary-panel px-2" onClick={() => {
-                    sampleService.clearBoard()
+                <button className="btn btn-primary btn-primary-panel px-2" onClick={async () => {
+                    await sampleService.clearBoard()
                 }}>Clear Board
                 </button>
             </div>
@@ -64,7 +86,8 @@ export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> 
                 {hotspots.map((item, index) => (
                     <tr key={index} className={index % 2 === 0 ? 'odd_row' : 'even_row'}>
                         <td className="text-cell text-cell-panel clickable-label"
-                            onClick={() => boardSPI.zoomToCard(item.id)} title={item.content}>{truncateString(item.content, 30)}</td>
+                            onClick={() => boardSPI.zoomToCard(item.id)}
+                            title={item.content}>{truncateString(item.content, 30)}</td>
                         <td className="text-cell text-cell-panel">{item.createdBy}</td>
                         <td className="text-cell text-cell-panel centered"><input type='checkbox'
                                                                                   checked={item.resolved}
@@ -81,8 +104,22 @@ export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> 
                 </tbody>
             </table>
         </div>
+        <div className="divider"/>
         <div>
-
+            <div className="px-2 py-2 centered">
+                <button className="btn btn-primary btn-primary-panel px-2" onClick={async () => {
+                    console.log("Start a quiz")
+                    await broadcaster.broadcast(
+                        new StartEventSessionConceptIntroductionQuiz(
+                            uuidv4(), "participant",
+                            copilotSession?.miroUserId,
+                            copilotSession?.miroUsername ?? "",
+                            copilotSession?.miroUserId ?? null
+                        ))
+                    console.log(miroProxy.getApiCallsInLastMinute())
+                }}>Start a Quiz
+                </button>
+            </div>
         </div>
     </div>)
 }

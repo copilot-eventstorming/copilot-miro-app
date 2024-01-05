@@ -7,6 +7,7 @@ import {OperationLogChannel} from "../types/OperationLogChannels";
 import {concatLogs, deleteOperationLog, restoreLayout, sizeof, stateHistoryKey} from "../utils/OpLogUtils";
 import {TLog} from "../types/TLog";
 import {findLocally} from "../../../utils/localStorage";
+import {initialize} from "../../../utils/AppInitializer";
 
 const operationLogEventChannel = new BroadcastChannel(OperationLogChannel);
 
@@ -15,6 +16,11 @@ const OperationLogsModal: React.FC = () => {
     const [undoLogs, setUndoLogs] = useState<TLog[]>([])
     const [redoLogs, setRedoLogs] = useState<TLog[]>([])
     const [boardId, setBoardId] = useState<string>("")
+
+    useEffect(() => {
+        initialize()
+    }, []);
+
     useEffect(() => {
         boardSPI.fetchBoardInfo().then(board => {
             setBoardId(board.id)

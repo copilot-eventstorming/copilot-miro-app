@@ -19,6 +19,8 @@ import {SessionInitializingFinished, SessionInitializingStarted} from "./feature
 import {CommandStormingBoardPanel} from "./features/commandSession/CommandStormingBoardPanel";
 import {AggregateExplorationBoardPanel} from "./features/aggregateSession/AggregateExplorationBoardPanel";
 import {ContextMappingBoardPanel} from "./features/contextSession/ContextMappingBoardPanel";
+import {useEffect} from "react";
+import {initialize} from "./utils/AppInitializer";
 
 
 async function isBoardManaged(boardSPI: WorkshopBoardService) {
@@ -32,6 +34,10 @@ const App: React.FC = () => {
     console.log("init app")
     const [managed, setManaged] = React.useState(false)
     const [page, setPage] = React.useState<JSX.Element | null>(null)
+
+    useEffect(() => {
+        initialize()
+    }, []);
 
     React.useEffect(() => {
         isBoardManaged(boardSPI).then(setManaged)

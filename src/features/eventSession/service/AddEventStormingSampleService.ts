@@ -71,8 +71,8 @@ export class AddEventStormingSampleService {
     }
 
 
-    clearBoard() {
-        this.boardSPI.clearBoard();
+    async clearBoard() {
+        await this.boardSPI.clearBoard();
     }
 
     private async loadHotspots(): Promise<ShapeProps[]> {

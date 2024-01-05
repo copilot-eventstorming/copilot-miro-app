@@ -9,6 +9,7 @@ import {
     StickyNote,
     StickyNoteProps
 } from "@mirohq/websdk-types";
+import {IMessage} from "../application/messaging/IMessage";
 
 interface ApiCalls {
     [key: string]: number[];
@@ -139,11 +140,19 @@ class MiroProxy {
     }
 
     createStickyNote(stickyNote: StickyNoteProps): Promise<StickyNote> {
+        this.updateApiCalls('createStickyNote');
         return miro.board.createStickyNote(stickyNote);
     }
 
     createShape(shape: ShapeProps): Promise<Shape> {
+        this.updateApiCalls('createShape');
+
         return miro.board.createShape(shape)
+    }
+
+    async broadcast(message: IMessage) {
+        this.updateApiCalls('broadcast');
+        await miro.board.events.broadcast(message.type, JSON.stringify(message));
     }
 }
 

@@ -1,0 +1,52 @@
+[
+  {
+    "question": "What is the purpose of the 'Domain Event Candidate'?",
+    "answers": [
+      "a) To explain domain events",
+      "b) To align domain events",
+      "c) To create domain event candidates",
+      "d) To remove domain event candidates"
+    ],
+    "correctAnswers": ["a", "b"]
+  },
+  {
+    "question": "Which action has been completed in the 'Hotspots' category?",
+    "answers": [
+      "a) Resolved hotspots",
+      "b) Created hotspots",
+      "c) Explained hotspots",
+      "d) Accepted hotspots"
+    ],
+    "correctAnswers": ["a", "d"]
+  },
+  {
+    "question": "What is the status of the 'Domain Event Explanation'?",
+    "answers": [
+      "a) Started",
+      "b) Completed",
+      "c) Explained",
+      "d) Optimized"
+    ],
+    "correctAnswers": ["b"]
+  },
+  {
+    "question": "What is the purpose of the 'Command Storming'?",
+    "answers": [
+      "a) To prepare for command storming",
+      "b) To introduce workshop concepts",
+      "c) To align workshop concepts",
+      "d) To introduce the agenda"
+    ],
+    "correctAnswers": ["a", "d"]
+  },
+  {
+    "question": "What has been done with the 'Workshop Concepts'?",
+    "answers": [
+      "a) Aligned workshop concepts",
+      "b) Introduced workshop concepts",
+      "c) Resolved workshop concepts",
+      "d) Optimized workshop concept"
+    ],
+    "correctAnswers": ["b", "c"]
+  }
+]

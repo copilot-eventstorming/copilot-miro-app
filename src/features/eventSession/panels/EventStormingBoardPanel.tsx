@@ -5,6 +5,7 @@ import {emptyEventSummary} from "../types/EventSummaryTypes";
 import {reloadEventSummary} from "../utils/EventSummaryUtils";
 import {GraphOptimizerButtonGroup} from "./component/GraphOptimizerButtonGroup";
 import {ConceptIntroductionPanel} from "./component/ConceptIntroductionPanel";
+import {CopilotSession, copilotSession$} from "../../../application/CopilotSession";
 
 const Console: React.FC<TConsoleProps> = ({output}) => {
     return (
@@ -25,7 +26,9 @@ const AgendaItem: React.FC<TPanelProps> = ({title, children, index, currentStep,
     return (
         <div className={`agenda-item ${index === currentStep ? 'agenda-item-open' : ''}`}>
             <div className="w-full">
-                <input type="radio" id={`agenda-item-${index}`} className="hidden" checked={index === currentStep} onChange={() => {}} />
+                <input type="radio" id={`agenda-item-${index}`} className="hidden" checked={index === currentStep}
+                       onChange={() => {
+                       }}/>
                 <label className="agenda-item-btn" onClick={onClick} htmlFor={`agenda-item-${index}`}>
                     {title}
                 </label>
@@ -40,9 +43,21 @@ export const EventStormingBoardPanel: React.FC<TEventStormingBoardPanelProps> = 
     const [currentStep, setCurrentStep] = useState(0);
     const [eventSummary, setEventSummary] = useState(emptyEventSummary);
     const [consoleOutput, setConsoleOutput] = useState("");
-
+    const [copilotSession, setCopilotSession] = useState(copilotSession$.value as CopilotSession);
     useEffect(() => {
         reloadEventSummary(boardSPI, setEventSummary);
+    }, []);
+    useEffect(() => {
+        const subscription = copilotSession$.subscribe(maybeCopilotSession => {
+            console.log("EventStormingBoardPanel", "maybeCopilotSession", maybeCopilotSession)
+            if (maybeCopilotSession) {
+                setCopilotSession(maybeCopilotSession);
+            }
+        })
+
+        return () => {
+            subscription.unsubscribe()
+        }
     }, []);
     return (
         <div className="agenda">
@@ -54,8 +69,7 @@ export const EventStormingBoardPanel: React.FC<TEventStormingBoardPanelProps> = 
                 currentStep={currentStep}
                 onClick={() => setCurrentStep(0)}
             >
-                {/* Introduction content */}
-                <ConceptIntroductionPanel boardSPI={boardSPI}/>
+                <ConceptIntroductionPanel boardSPI={boardSPI} copilotSession={copilotSession}/>
             </AgendaItem>
             <AgendaItem
                 title="2. Event Storming"
