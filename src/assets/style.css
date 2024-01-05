@@ -129,7 +129,8 @@ input:checked + .agenda-item-btn::after {
     @apply bg-orange-500 text-white
     hover:bg-orange-300 hover:-translate-y-0.5 transform transition
     focus:ring focus:outline-none focus:ring-offset-2 focus:ring-orange-300 focus:ring-opacity-80
-    active:bg-orange-500 shadow-sm shadow-gray-400;
+    active:bg-orange-500 shadow-sm shadow-gray-400
+    disabled:bg-gray-300;
 }
 
 .btn-secondary {

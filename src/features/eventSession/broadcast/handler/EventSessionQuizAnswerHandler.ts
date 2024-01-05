@@ -3,6 +3,9 @@ import {Answer, EventSessionQuizAnswer} from "../message/EventSessionQuizAnswer"
 import {EventSessionQuizRepository, QuizAnswer} from "../../repository/EventSessionQuizRepository";
 
 export class EventSessionQuizAnswerHandler implements IMessageHandler<EventSessionQuizAnswer> {
+    release(): void {
+    }
+
     private quizRepository: EventSessionQuizRepository | null;
     private callback: (quizAnswers: QuizAnswer[]) => void = (message) => {
     }
@@ -44,21 +47,43 @@ export class EventSessionQuizAnswerHandler implements IMessageHandler<EventSessi
         return Promise.resolve(console.log(message))
     }
 
-    private mkNewQuizAnswers(quizAnswers: QuizAnswer[], sender: string, senderName: string, answers: Answer[]) {
+    private mkNewQuizAnswers(quizAnswers: QuizAnswer[], sender: string, senderName: string, receivedAnswers: Answer[]) {
         const otherAnswers = quizAnswers?.filter((quizAnswer) => quizAnswer.userId !== sender) ?? []
         const maybeOldAnswer = quizAnswers?.find((quizAnswer) => quizAnswer.userId === sender)
         const quizAnswer = {
             userId: sender,
             userName: senderName,
-            answers: answers.map((answer, index) => {
+            answers: this.populate(receivedAnswers, maybeOldAnswer)
+        }
+        const newQuizAnswers = [...otherAnswers, quizAnswer]
+        return {quizAnswer, newQuizAnswers};
+    }
+
+    private populate(updatedAnswers: Answer[], maybeOldAnswer: QuizAnswer | undefined) {
+        if (maybeOldAnswer === undefined) {
+            return updatedAnswers.map((answer, index) => {
+                return {
+                    questionNumber: answer?.questionNumber ?? index,
+                    actualAnswer: answer?.answer ?? [],
+                    expectedAnswer: []
+                }
+            });
+        } else if (updatedAnswers.length >= maybeOldAnswer.answers.length) {
+            return updatedAnswers.map((answer, index) => {
                 return {
                     questionNumber: answer?.questionNumber ?? index,
                     actualAnswer: answer?.answer ?? maybeOldAnswer?.answers[index]?.actualAnswer ?? [],
                     expectedAnswer: []
                 }
-            })
+            });
+        } else {
+            return maybeOldAnswer.answers.map((oldAnswer, index) => {
+                return {
+                    questionNumber: oldAnswer?.questionNumber ?? index,
+                    actualAnswer: updatedAnswers[index]?.answer ?? oldAnswer?.actualAnswer ?? [],
+                    expectedAnswer: updatedAnswers[index]?.answer ?? maybeOldAnswer!.answers[index].expectedAnswer
+                }
+            });
         }
-        const newQuizAnswers = [...otherAnswers, quizAnswer]
-        return {quizAnswer, newQuizAnswers};
     }
 }

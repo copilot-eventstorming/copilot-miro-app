@@ -7,6 +7,8 @@ import {
     StartEventSessionConceptIntroductionQuizHandler
 } from "../features/eventSession/broadcast/handler/StartEventSessionConceptIntroductionQuizHandler";
 import {copilotSession$} from "../application/CopilotSession";
+import {EventSessionQuizAnswerHandler} from "../features/eventSession/broadcast/handler/EventSessionQuizAnswerHandler";
+import {EventSessionQuizAnswer} from "../features/eventSession/broadcast/message/EventSessionQuizAnswer";
 
 export const messageRegistry = new MessageRegistry(MessageTopics)
 
@@ -27,4 +29,9 @@ export function initializeMessaging() {
         StartEventSessionConceptIntroductionQuiz.MESSAGE_TYPE,
         startEventSessionConceptIntroductionQuizHandler
     )
+
+}
+
+export function releaseMessaging() {
+    messageRegistry.release();
 }

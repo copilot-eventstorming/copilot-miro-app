@@ -109,11 +109,10 @@ export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> 
         const quizService = new LoadEventSessionQuizService()
         quizService.loadEventSessionQuiz().then(setQuestions);
     }, []);
-    console.log("ConceptIntroductionPanel", copilotSession)
 
     useEffect(() => {
-        const answerHandler = new EventSessionQuizAnswerHandler(quizRepository, setQuizAnswers)
         hotspotService.fetchHotspots().then(setHotspots)
+        const answerHandler = new EventSessionQuizAnswerHandler(quizRepository, setQuizAnswers)
         messageRegistry.registerHandler(EventSessionQuizAnswer.MESSAGE_TYPE, answerHandler)
         return () => {
             messageRegistry.unregisterHandler(EventSessionQuizAnswer.MESSAGE_TYPE, answerHandler)
@@ -252,7 +251,6 @@ export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> 
         <div>
             <div className="px-2 py-2 centered">
                 <button className="btn btn-primary btn-primary-panel px-2" onClick={async () => {
-                    console.log("Start a quiz")
                     await broadcaster.broadcast(
                         new StartEventSessionConceptIntroductionQuiz(
                             uuidv4(), null,

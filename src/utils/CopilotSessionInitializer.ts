@@ -10,6 +10,5 @@ export function initializeSession() {
                 miroBoardId: board.id
             })
         })
-        console.log('init copilot session', copilotSession$.value)
     })
 }

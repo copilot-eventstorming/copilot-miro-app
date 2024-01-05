@@ -163,7 +163,6 @@ export function handleMaybeProblems(
             const [ambiguousProblems, tooFarProblems] = resultItems
             setMaybeProblems(resultItems[0].concat(resultItems[1]))
             setConsoleOutput(`Problem diagnosis finished.\n\n    Totally ${ambiguousProblems.length + tooFarProblems.length} problems detected.`);
-            console.log("Maybe Problems")
         })
     }
 }

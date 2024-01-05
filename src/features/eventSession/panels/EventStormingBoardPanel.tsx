@@ -49,7 +49,6 @@ export const EventStormingBoardPanel: React.FC<TEventStormingBoardPanelProps> = 
     }, []);
     useEffect(() => {
         const subscription = copilotSession$.subscribe(maybeCopilotSession => {
-            console.log("EventStormingBoardPanel", "maybeCopilotSession", maybeCopilotSession)
             if (maybeCopilotSession) {
                 setCopilotSession(maybeCopilotSession);
             }

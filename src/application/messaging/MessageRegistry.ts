@@ -75,4 +75,11 @@ export class MessageRegistry {
         }
     }
 
+    release() {
+        [...this.handlers.entries()].forEach((entry) => {
+            entry[1].forEach((handler) => {
+                handler.release()
+            })
+        })
+    }
 }

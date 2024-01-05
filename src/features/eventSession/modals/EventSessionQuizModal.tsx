@@ -5,7 +5,7 @@ import {miroProxy} from "../../../api/MiroProxy";
 import {Answer, EventSessionQuizAnswer} from "../broadcast/message/EventSessionQuizAnswer";
 import {CopilotSession, copilotSession$} from "../../../application/CopilotSession";
 import {v4 as uuidv4} from 'uuid';
-import {initialize} from "../../../utils/AppInitializer";
+import {initialize, release} from "../../../utils/AppInitializer";
 import {TQuestion} from "../types/QuizTypes";
 import {LoadEventSessionQuizService} from "../service/LoadEventSessionQuizService";
 import {EventSessionQuizModalChannel, QuizSubmittedMessage} from "../types/QuizModalChannels";
@@ -39,7 +39,7 @@ const Question: React.FC<QuestionProps> = ({
     return (
         <form>
             <div
-                className={`font-lato my-2 py-2 ${incorrect ? 'incorrect-answer' : ''}`}>{questionNumber + 1}. {question}</div>
+                className={`font-lato text-lg my-2 py-2 ${incorrect ? 'incorrect-answer' : ''}`}>{questionNumber + 1}. {question}</div>
             {answers.map((answer, index) => (
                 <div key={index}>
                     <input
@@ -51,7 +51,7 @@ const Question: React.FC<QuestionProps> = ({
                         checked={selectedAnswers?.includes(answer)}
                         onChange={handleAnswerChange}
                     />
-                    <label className="font-lato text-sm px-2" htmlFor={`answer${index}`}>{answer}</label>
+                    <label className="font-lato text-lg px-2" htmlFor={`answer${index}`}>{answer}</label>
                 </div>
             ))}
         </form>
@@ -65,20 +65,24 @@ function isIncorrect(correctAnswers: string[] | undefined, previousSelected: str
     return correctAnswers?.sort().join(",") !== previous.join(",")
 }
 
-const broadcastChannel = new BroadcastChannel(EventSessionQuizModalChannel);
+function everyWithNull<T>(array: (T | null | undefined)[]): boolean {
+    for (let i = 0; i < array.length; i++) {
+        if (array[i] === null || array[i] === undefined) return false;
+    }
+    return true;
+}
+
 
 const EventSessionQuizModal: React.FC = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const sender = urlParams.get('sender') ?? "facilitator";
     const senderName = urlParams.get('senderName') ?? "facilitator";
     const previousAnswers: Answer[] = JSON.parse(urlParams.get('answers') ?? "[]");
-    console.log("previousAnswers", previousAnswers)
-    console.log("sender", sender)
-    console.log("senderName", senderName)
-
     const broadcaster = new Broadcaster(miroProxy);
     const [questions, setQuestions] = useState([] as TQuestion[])
     const [copilotSession, setCopilotSession] = useState(copilotSession$.value as CopilotSession);
+
+
     useEffect(() => {
         initialize()
     }, []);
@@ -90,7 +94,6 @@ const EventSessionQuizModal: React.FC = () => {
 
     useEffect(() => {
         const subscription = copilotSession$.subscribe(maybeCopilotSession => {
-            console.log("maybeCopilotSession", maybeCopilotSession)
             if (maybeCopilotSession) {
                 setCopilotSession(maybeCopilotSession);
             }
@@ -101,12 +104,32 @@ const EventSessionQuizModal: React.FC = () => {
     }, []);
 
     const [answers, setAnswers] = useState<Answer[]>([]);
-
+    // const isEveryQuestionAnswered =
+    //     ( questions.length > 0)
+    //     && (answers.length === questions.length || previousAnswers.length === questions.length)
+    //     && answers.every(answer => previousAnswers.length > 0 || answer !== undefined && answer !== null)
+    //     && answers.some(answer => answer !== undefined && answer !== null && answer.answer.length > 0);
+    const isEveryQuestionAnswered =
+        (questions.length > 0)
+        && (answers.length === questions.length || previousAnswers.length === questions.length)
+        && answers.every(answer => answer !== undefined && answer !== null && (previousAnswers.length > 0 || answer.answer.length > 0))
+        && answers.some(answer => answer !== undefined && answer !== null && answer.answer.length > 0)
+        // && everyWithNull(answers);
     const setSelectedAnswers = (questionNumber: number, selection: string[]) => {
         const newAnswers = [...answers];
         newAnswers[questionNumber] = new Answer(questionNumber, selection.sort());
         setAnswers(newAnswers);
     };
+    const [broadcastChannel, setBroadcastChannel] = useState<BroadcastChannel | null>(null);
+
+    useEffect(() => {
+        const channel = new BroadcastChannel(EventSessionQuizModalChannel);
+        setBroadcastChannel(channel);
+
+        return () => {
+            channel.close();
+        };
+    }, []);
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
@@ -116,7 +139,10 @@ const EventSessionQuizModal: React.FC = () => {
             copilotSession?.miroUsername ?? "",
             answers);
         broadcaster.broadcast(message);
-        broadcastChannel.postMessage(QuizSubmittedMessage);
+        if (broadcastChannel) {
+            release();
+            broadcastChannel.postMessage(QuizSubmittedMessage);
+        }
     };
 
     return (
@@ -137,7 +163,8 @@ const EventSessionQuizModal: React.FC = () => {
                     />)
                 })}
                 <div className="w-full py-2 centered">
-                    <button className="btn btn-primary btn-primary-modal px-2" onClick={handleSubmit}>Submit
+                    <button className="btn btn-primary btn-primary-modal px-2" onClick={handleSubmit}
+                            disabled={!isEveryQuestionAnswered}>Submit
                     </button>
                 </div>
             </div>
