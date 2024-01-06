@@ -211,7 +211,7 @@ export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> 
             </tr>
             </thead>
             <tbody>
-            {quizAnswers.map((actualAnswer, index) => (
+            {quizAnswers?.map((actualAnswer, index) => (
                 <tr key={index} className={index % 2 === 0 ? 'w-full odd_row' : 'w-full even_row'}
                     onMouseEnter={(e) => handleMouseEnter(index, e)}
                     onMouseLeave={handleMouseLeave}

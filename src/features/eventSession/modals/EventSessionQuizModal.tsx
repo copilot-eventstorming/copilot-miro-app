@@ -103,12 +103,7 @@ const EventSessionQuizModal: React.FC = () => {
         }
     }, []);
 
-    const [answers, setAnswers] = useState<Answer[]>([]);
-    // const isEveryQuestionAnswered =
-    //     ( questions.length > 0)
-    //     && (answers.length === questions.length || previousAnswers.length === questions.length)
-    //     && answers.every(answer => previousAnswers.length > 0 || answer !== undefined && answer !== null)
-    //     && answers.some(answer => answer !== undefined && answer !== null && answer.answer.length > 0);
+    const [answers, setAnswers] = useState<Answer[]>(previousAnswers);
     const isEveryQuestionAnswered =
         (questions.length > 0)
         && (answers.length === questions.length || previousAnswers.length === questions.length)
