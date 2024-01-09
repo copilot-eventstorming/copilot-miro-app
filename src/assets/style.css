@@ -82,6 +82,15 @@ tr:hover .hover-content {
     color: red;
 }
 
+@keyframes cellChange {
+    0% { background-color: transparent; }
+    100% { background-color: orange; }
+}
+
+.cell-change {
+    animation: cellChange 3s; /* 3s 是动画持续时间，可以根据需求调整 */
+}
+
 @tailwind base;
 @tailwind components;
 .floating-window {

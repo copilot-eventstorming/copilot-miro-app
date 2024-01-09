@@ -123,8 +123,8 @@ export function mkItems(eventSummary: EventSummaryTypes) {
             unique: eventSummary.hotspotIn1mUniques,
             blank: eventSummary.hotspotIn1mBlank
         },
-        {type: 'Others', total: eventSummary.otherCards, unique: '-', blank: '-'},
-        {type: 'Online Users', total: eventSummary.users, unique: '-', blank: '-'},
-        {type: 'Contributors', total: eventSummary.contributors, unique: '-', blank: '-'},
+        {type: 'Others', total: eventSummary.otherCards, unique: undefined, blank: undefined},
+        {type: 'Online Users', total: eventSummary.users, unique: undefined, blank: undefined},
+        {type: 'Contributors', total: eventSummary.contributors, unique: undefined, blank: undefined},
     ];
 }

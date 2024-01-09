@@ -34,8 +34,8 @@ export interface EventSummaryTypes {
 export interface EventSummaryItem {
     type: string;
     total: number;
-    unique: number | string;
-    blank: number | string;
+    unique: number | undefined;
+    blank: number | undefined;
 }
 
 export const emptyEventSummary: EventSummaryTypes = {
@@ -88,4 +88,6 @@ export interface EventSummaryTableProps {
     setEventSummary: React.Dispatch<React.SetStateAction<EventSummaryTypes>>;
     drawerOpen: boolean;
     toggleDrawer: () => void;
+    autoRefresh: boolean; // 新增一个props来接收autoRefresh状态
+    setAutoRefresh: (on:boolean) => void;// 新增一个props来接收setAutoRefresh函数
 }
