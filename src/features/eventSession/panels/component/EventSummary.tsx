@@ -15,6 +15,7 @@ import {Tab, TabList, TabPanel, Tabs} from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import {contentEquals} from "../../../../utils/WorkshopCardUtils";
 import {DropEventService} from "../../service/DropEventService";
+import '../../../../assets/LoadingSpinner.css'
 
 const EventSummaryTable: React.FC<EventSummaryTableProps> = ({
                                                                  boardSPI,
@@ -134,9 +135,10 @@ const EventSummaryTable: React.FC<EventSummaryTableProps> = ({
     </>
 };
 
-function analysisByCopilot(eventCards: WorkshopCard[], service: ValidateDomainEventService, setAnalysisResult: (value: (((prevState: TValidateDomainEventResponse) => TValidateDomainEventResponse) | TValidateDomainEventResponse)) => void) {
+function analysisByCopilot(eventCards: WorkshopCard[], service: ValidateDomainEventService, setAnalysisResult: (value: (((prevState: TValidateDomainEventResponse) => TValidateDomainEventResponse) | TValidateDomainEventResponse)) => void): Promise<void> {
     const cardNames: string[] = eventCards.map((card) => cleanHtmlTag(card.content))
-    service.perform(cardNames).then(setAnalysisResult)
+
+    return service.perform(cardNames).then(setAnalysisResult)
 }
 
 function dropEvent(eventCards: WorkshopCard[], event: TInvalidDomainEventCandidate, boardSPI: WorkshopBoardSPI) {
@@ -160,6 +162,80 @@ function zoomToEvent(eventCards: WorkshopCard[], event: TInvalidDomainEventCandi
     if (card) boardSPI.zoomToCard(card.id)
 }
 
+function AnalysisResult(analysisResult: TValidateDomainEventResponse, keptEvents: string[], eventCards: WorkshopCard[], boardSPI: WorkshopBoardSPI, setKeptEvents: (value: (((prevState: string[]) => string[]) | string[])) => void) {
+    return <Tabs>
+        <TabList>
+            <Tab>
+                <div className="text-cell text-cell-panel font-bold">Invalids Candidates</div>
+            </Tab>
+            <Tab>
+                <div className="text-cell text-cell-panel font-bold">Valids Candidates</div>
+            </Tab>
+        </TabList>
+        <TabPanel>
+            <table>
+                <thead>
+                <tr>
+                    <th className='header header-panel'>Name</th>
+                    <th className='header header-panel'>Reason</th>
+                    <th className='header header-panel'>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                {analysisResult.invalidDomainEvents
+                    .filter(candidate => !keptEvents.includes(candidate.name))
+                    .map((event: TInvalidDomainEventCandidate, index: number) => (
+                        <tr key={index} className={index % 2 === 0 ? 'odd_row' : 'even_row'}>
+                            <td className="text-cell text-cell-panel clickable-label" onClick={
+                                () => {
+                                    zoomToEvent(eventCards, event, boardSPI);
+                                }
+                            }>{event.name}</td>
+                            <td className="text-cell text-cell-panel">{event.reason}</td>
+                            <td>
+                                <button className="btn btn-secondary btn-secondary-panel" onClick={() => {
+                                    if (event.fix.action === 'drop') {
+                                        dropEvent(eventCards, event, boardSPI)
+                                    }
+                                }}>{event.fix.action}
+                                </button>
+                                <button className="btn btn-secondary btn-secondary-panel" onClick={() => {
+                                    setKeptEvents([...keptEvents, event.name])
+                                }}>Keep
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </TabPanel>
+        <TabPanel>
+            <table>
+                <thead>
+                <tr>
+                    <th className='header header-panel'>Name</th>
+                    <th className='header header-panel'>Comment</th>
+                </tr>
+                </thead>
+                <tbody>
+                {analysisResult.validDomainEvents
+                    .concat(keptEvents.map((name) => ({name, comments: 'Kept'})))
+                    .map((event: TValidDomainEventCandidate, index: number) => (
+                        <tr key={index} className={index % 2 === 0 ? 'odd_row' : 'even_row'}>
+                            <td className="text-cell text-cell-panel  clickable-label" onClick={
+                                () => {
+                                    zoomToEvent(eventCards, event, boardSPI);
+                                }
+                            }>{event.name}</td>
+                            <td className="text-cell text-cell-panel">{event.comments}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </TabPanel>
+    </Tabs>;
+}
+
 const EventAnalysis: React.FC<{ boardSPI: WorkshopBoardSPI }> = ({boardSPI}) => {
     const service = new ValidateDomainEventService()
     const [eventCards, setEventCards] = useState([] as WorkshopCard[])
@@ -167,6 +243,8 @@ const EventAnalysis: React.FC<{ boardSPI: WorkshopBoardSPI }> = ({boardSPI}) => 
         validDomainEvents: [], invalidDomainEvents: []
     } as TValidateDomainEventResponse)
     const [keptEvents, setKeptEvents] = useState([] as string[])
+    const [isLoading, setIsLoading] = useState(false) // 新增一个状态来跟踪异步操作是否正在进行
+
     useEffect(() => {
         boardSPI.fetchEventCards().then((cards) => {
             setEventCards(cards)
@@ -177,85 +255,22 @@ const EventAnalysis: React.FC<{ boardSPI: WorkshopBoardSPI }> = ({boardSPI}) => 
     return (
         <div className="w-full">
             <div className="divider w-full"/>
-            <div className="w-full centered">
-                <button className="btn btn-primary btn-secondary-panel centered" onClick={() =>
-                    analysisByCopilot(eventCards, service, setAnalysisResult)}>Analysis by Copilot
+            <div className="w-full centered relative"> {/* 添加 relative 类 */}
+                <button className="btn btn-primary btn-secondary-panel centered" onClick={() => {
+                    setIsLoading(true)
+                    analysisByCopilot(eventCards, service, setAnalysisResult)
+                        .then(() => setIsLoading(false))
+                }
+                }>Analysis by Copilot
                 </button>
+                {isLoading && <div className="spinner" style={{position: 'absolute', top: 'calc(100%)', left: '42%', transform: 'translateX(-50%)'}}></div>}
             </div>
             <div className="divider w-full"/>
-            {(analysisResult.validDomainEvents.length > 0 || analysisResult.invalidDomainEvents.length > 0) && (
-                <Tabs>
-                    <TabList>
-                        <Tab>
-                            <div className="text-cell text-cell-panel font-bold">Invalids Candidates</div>
-                        </Tab>
-                        <Tab>
-                            <div className="text-cell text-cell-panel font-bold">Valids Candidates</div>
-                        </Tab>
-                    </TabList>
-                    <TabPanel>
-                        <table>
-                            <thead>
-                            <tr>
-                                <th className='header header-panel'>Name</th>
-                                <th className='header header-panel'>Reason</th>
-                                <th className='header header-panel'>Action</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {analysisResult.invalidDomainEvents
-                                .filter(candidate => !keptEvents.includes(candidate.name))
-                                .map((event: TInvalidDomainEventCandidate, index: number) => (
-                                    <tr key={index} className={index % 2 === 0 ? 'odd_row' : 'even_row'}>
-                                        <td className="text-cell text-cell-panel clickable-label" onClick={
-                                            () => {
-                                                zoomToEvent(eventCards, event, boardSPI);
-                                            }
-                                        }>{event.name}</td>
-                                        <td className="text-cell text-cell-panel">{event.reason}</td>
-                                        <td>
-                                            <button className="btn btn-secondary btn-secondary-panel" onClick={() => {
-                                               if (event.fix.action === 'drop') {
-                                                   dropEvent(eventCards, event, boardSPI)
-                                               }
-                                            }}>{event.fix.action}
-                                            </button>
-                                            <button className="btn btn-secondary btn-secondary-panel" onClick={() => {
-                                                setKeptEvents([...keptEvents, event.name])
-                                            }}>Keep
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </TabPanel>
-                    <TabPanel>
-                        <table>
-                            <thead>
-                            <tr>
-                                <th className='header header-panel'>Name</th>
-                                <th className='header header-panel'>Comment</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {analysisResult.validDomainEvents
-                                .concat(keptEvents.map((name) => ({name, comments: 'Kept'})))
-                                .map((event: TValidDomainEventCandidate, index: number) => (
-                                    <tr key={index} className={index % 2 === 0 ? 'odd_row' : 'even_row'}>
-                                        <td className="text-cell text-cell-panel  clickable-label" onClick={
-                                            () => {
-                                                zoomToEvent(eventCards, event, boardSPI);
-                                            }
-                                        }>{event.name}</td>
-                                        <td className="text-cell text-cell-panel">{event.comments}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </TabPanel>
-                </Tabs>
-            )}
+            <div className="w-full">
+                {
+                    !isLoading && (analysisResult.validDomainEvents.length > 0 || analysisResult.invalidDomainEvents.length > 0)
+                    && AnalysisResult(analysisResult, keptEvents, eventCards, boardSPI, setKeptEvents)}
+            </div>
         </div>
     )
 }

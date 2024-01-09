@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import {CompletionCreateParamsNonStreaming} from 'openai/resources';
+import {sleep} from "openai/core";
 
 export type TValidDomainEventCandidate = {
     name: string;
@@ -47,6 +48,7 @@ export class ValidateDomainEventService {
     }
 
     async perform(cards: string[]): Promise<TValidateDomainEventResponse> {
+        await sleep(3000);
         this.openaiApiCall(cards)
             .then(result => console.log(result))
             .catch(error => console.error(error));
