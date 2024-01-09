@@ -17,6 +17,7 @@ import {messageRegistry} from "../../../../utils/MessagingBroadcastingInitialize
 import {EventSessionQuizRepository, QuizAnswer} from "../../repository/EventSessionQuizRepository";
 import {LoadEventSessionQuizService} from "../../service/LoadEventSessionQuizService";
 import {TQuestion} from "../../types/QuizTypes";
+import Switch from "react-switch";
 
 
 type TConceptIntroductionPanelProps = {
@@ -68,7 +69,7 @@ const FloatingWindow: React.FC<FlowingWindowProps> = ({quizAnswer, questions, st
                         <td className="text-cell text-cell-panel">{filledAnswer.actualAnswer.map((singleAnswerItem, index) => {
                             const isIncorrect = isIncorrectFn(singleAnswerItem, questions, filledAnswer.questionNumber);
                             return (
-                                <li key={index} className={isIncorrect ? 'incorrect-answer' : ''}>
+                                <li key={index} className={isIncorrect ? 'incorrect-answer' : 'correct-answer'}>
                                     {singleAnswerItem}
                                 </li>
                             );
@@ -85,7 +86,7 @@ const FloatingWindow: React.FC<FlowingWindowProps> = ({quizAnswer, questions, st
                                 );
 
                             })
-                            }</td>
+                        }</td>
                     </tr>
                 ))}
                 </tbody>
@@ -95,7 +96,10 @@ const FloatingWindow: React.FC<FlowingWindowProps> = ({quizAnswer, questions, st
         ;
 };
 
-export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> = ({boardSPI, copilotSession}) => {
+export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> = ({
+                                                                                       boardSPI,
+                                                                                       copilotSession
+                                                                                   }) => {
     const sampleService = new AddEventStormingSampleService(boardSPI)
     const hotspotService = new FetchHotspotsService(boardSPI)
     const broadcaster = new Broadcaster(miroProxy)
@@ -104,11 +108,27 @@ export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> 
     const [quizAnswers, setQuizAnswers] = useState<QuizAnswer[]>([])
     const [hoveredScoreIndex, setHoveredScoreIndex] = useState<number>(-1)
     const [questions, setQuestions] = useState([] as TQuestion[])
+    const [autoRefresh, setAutoRefresh] = useState(true); // 新增一个状态来控制是否启用自动刷新
 
     useEffect(() => {
         const quizService = new LoadEventSessionQuizService()
         quizService.loadEventSessionQuiz().then(setQuestions);
     }, []);
+
+    useEffect(() => {
+        let intervalId: NodeJS.Timeout;
+        if (autoRefresh) { // 当autoRefresh为真时，设置定时器
+            intervalId = setInterval(() => {
+                hotspotService.fetchHotspots().then(setHotspots)
+            }, 1000); // 设置为每5秒自动加载一次
+        }
+
+        return () => {
+            if (intervalId) { // 在组件卸载时或autoRefresh变为假时，清除定时器
+                clearInterval(intervalId);
+            }
+        };
+    }, [boardSPI, autoRefresh]);
 
     useEffect(() => {
         hotspotService.fetchHotspots().then(setHotspots)
@@ -169,7 +189,17 @@ export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> 
         </div>
     </>;
     const HotspotList: React.FC = () => <div>
-        <div className="sub-title sub-title-panel">Hotspot List</div>
+        <div className="flex justify-between items-center w-full px-1.5">
+            <div className="sub-title sub-title-panel">Hotspot List</div>
+            <div className="flex items-center">
+                <label className="font-lato text-sm">Auto Refresh</label>
+                <div className="mx-2 centered">
+                    <Switch checked={autoRefresh} onChange={setAutoRefresh} height={20} width={40}
+                            onColor="#00ff00"
+                            offColor="#ff0000"/>
+                </div>
+            </div>
+        </div>
         <table className="w-full">
             <thead>
             <tr>

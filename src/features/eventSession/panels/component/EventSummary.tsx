@@ -3,8 +3,16 @@ import {Drawer} from "../../../../component/drawer";
 import {mkItems, reloadEventSummary} from "../../utils/EventSummaryUtils";
 import {EventSummaryItem, EventSummaryProps, EventSummaryTableProps} from "../../types/EventSummaryTypes";
 import Switch from "react-switch"; // 引入Switch组件
-import {Transition} from 'react-transition-group'; // 引入Transition组件
-
+import {
+    TInvalidDomainEventCandidate,
+    TValidateDomainEventResponse,
+    TValidDomainEventCandidate,
+    ValidateDomainEventService
+} from "../../service/ValidateDomainEventService";
+import {WorkshopBoardSPI, WorkshopCard} from "../../../../application/spi/WorkshopBoardSPI";
+import {cleanHtmlTag} from "../../../../application/service/utils/utils"; // 引入Transition组件
+import {Tab, TabList, TabPanel, Tabs} from 'react-tabs';
+import 'react-tabs/style/react-tabs.css';
 
 const EventSummaryTable: React.FC<EventSummaryTableProps> = ({
                                                                  boardSPI,
@@ -80,9 +88,9 @@ const EventSummaryTable: React.FC<EventSummaryTableProps> = ({
                     {items.map((item, index) => {
                         const prevItem = prevItemsRef.current.find(i => i.type === item.type);
 
-                        const getArrowDirection = (current:number|undefined, prev: number|undefined) => {
+                        const getArrowDirection = (current: number | undefined, prev: number | undefined) => {
                             if (!prev) return null;
-                            if(!current) return null;
+                            if (!current) return null;
                             if (current > prev) {
                                 return 'up';
                             } else if (current < prev) {
@@ -124,6 +132,102 @@ const EventSummaryTable: React.FC<EventSummaryTableProps> = ({
     </>
 };
 
+function analysisByCopilot(eventCards: WorkshopCard[], service: ValidateDomainEventService, setAnalysisResult: (value: (((prevState: TValidateDomainEventResponse) => TValidateDomainEventResponse) | TValidateDomainEventResponse)) => void) {
+    const cardNames: string[] = eventCards.map((card) => cleanHtmlTag(card.content))
+    service.perform(cardNames).then(setAnalysisResult)
+}
+
+const EventAnalysis: React.FC<{ boardSPI: WorkshopBoardSPI }> = ({boardSPI}) => {
+    const service = new ValidateDomainEventService()
+    const [eventCards, setEventCards] = useState([] as WorkshopCard[])
+    const [analysisResult, setAnalysisResult] = useState({
+        validDomainEvents: [], invalidDomainEvents: []
+    } as TValidateDomainEventResponse)
+    const [keptEvents, setKeptEvents] = useState([] as string[])
+    useEffect(() => {
+        boardSPI.fetchEventCards().then((cards) => {
+            setEventCards(cards)
+        })
+    }, []);
+
+    // useEffect(() => {
+    //     analysisByCopilot(eventCards, service, setAnalysisResult);
+    // }, [eventCards]);
+    return (
+        <div className="w-full">
+            <div className="divider w-full"/>
+            <div className="w-full centered">
+                <button className="btn btn-primary btn-secondary-panel centered" onClick={() =>
+                    analysisByCopilot(eventCards, service, setAnalysisResult)}>Analysis by Copilot
+                </button>
+            </div>
+            <div className="divider w-full"/>
+            {(analysisResult.validDomainEvents.length > 0 || analysisResult.invalidDomainEvents.length > 0) && (
+                <Tabs>
+                    <TabList>
+                        <Tab>
+                            <div className="text-cell text-cell-panel font-bold">Invalids Candidates</div>
+                        </Tab>
+                        <Tab>
+                            <div className="text-cell text-cell-panel font-bold">Valids Candidates</div>
+                        </Tab>
+                    </TabList>
+                    <TabPanel>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th className='header header-panel'>Name</th>
+                                <th className='header header-panel'>Reason</th>
+                                <th className='header header-panel'>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {analysisResult.invalidDomainEvents
+                                .filter(candidate => !keptEvents.includes(candidate.name))
+                                .map((event: TInvalidDomainEventCandidate, index: number) => (
+                                    <tr key={index} className={index % 2 === 0 ? 'odd_row' : 'even_row'}>
+                                        <td className="text-cell text-cell-panel">{event.name}</td>
+                                        <td className="text-cell text-cell-panel">{event.reason}</td>
+                                        <td>
+                                            <button className="btn btn-secondary btn-secondary-panel" onClick={() => {/* handle action here */
+                                            }}>{event.fix.action}
+                                            </button>
+                                            <button className="btn btn-secondary btn-secondary-panel" onClick={() => {
+                                                setKeptEvents([...keptEvents, event.name])
+                                            }}>Keep
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </TabPanel>
+                    <TabPanel>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th className='header header-panel'>Name</th>
+                                <th className='header header-panel'>Comment</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {analysisResult.validDomainEvents
+                                .concat(keptEvents.map((name) => ({name, comments: 'Kept'})))
+                                .map((event: TValidDomainEventCandidate, index: number) => (
+                                <tr key={index} className={index % 2 === 0 ? 'odd_row' : 'even_row'}>
+                                    <td className="text-cell text-cell-panel">{event.name}</td>
+                                    <td className="text-cell text-cell-panel">{event.comments}</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </TabPanel>
+                </Tabs>
+            )}
+        </div>
+    )
+}
+
 const EventSummary: React.FC<EventSummaryProps> = ({boardSPI, eventSummary, setEventSummary}) => {
     const [drawerOpen, setDrawerOpen] = React.useState(true);
     const [autoRefresh, setAutoRefresh] = useState(true); // 新增一个状态来控制是否启用自动刷新
@@ -140,8 +244,11 @@ const EventSummary: React.FC<EventSummaryProps> = ({boardSPI, eventSummary, setE
                                autoRefresh={autoRefresh}
                                setAutoRefresh={setAutoRefresh}
             />
+            <div className="divider"/>
+            <EventAnalysis boardSPI={boardSPI}/>
         </div>
     );
 };
+
 
 export {EventSummary};
