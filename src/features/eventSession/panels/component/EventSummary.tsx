@@ -13,6 +13,7 @@ import {WorkshopBoardSPI, WorkshopCard} from "../../../../application/spi/Worksh
 import {cleanHtmlTag} from "../../../../application/service/utils/utils"; // 引入Transition组件
 import {Tab, TabList, TabPanel, Tabs} from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
+import {contentEquals} from "../../../../utils/WorkshopCardUtils";
 
 const EventSummaryTable: React.FC<EventSummaryTableProps> = ({
                                                                  boardSPI,
@@ -137,6 +138,12 @@ function analysisByCopilot(eventCards: WorkshopCard[], service: ValidateDomainEv
     service.perform(cardNames).then(setAnalysisResult)
 }
 
+function zoomToEvent(eventCards: WorkshopCard[], event: TInvalidDomainEventCandidate|TValidDomainEventCandidate, boardSPI: WorkshopBoardSPI) {
+    const card = eventCards
+        .find(card => contentEquals(card.content, event.name))
+    if (card) boardSPI.zoomToCard(card.id)
+}
+
 const EventAnalysis: React.FC<{ boardSPI: WorkshopBoardSPI }> = ({boardSPI}) => {
     const service = new ValidateDomainEventService()
     const [eventCards, setEventCards] = useState([] as WorkshopCard[])
@@ -150,9 +157,7 @@ const EventAnalysis: React.FC<{ boardSPI: WorkshopBoardSPI }> = ({boardSPI}) => 
         })
     }, []);
 
-    // useEffect(() => {
-    //     analysisByCopilot(eventCards, service, setAnalysisResult);
-    // }, [eventCards]);
+
     return (
         <div className="w-full">
             <div className="divider w-full"/>
@@ -186,7 +191,11 @@ const EventAnalysis: React.FC<{ boardSPI: WorkshopBoardSPI }> = ({boardSPI}) => 
                                 .filter(candidate => !keptEvents.includes(candidate.name))
                                 .map((event: TInvalidDomainEventCandidate, index: number) => (
                                     <tr key={index} className={index % 2 === 0 ? 'odd_row' : 'even_row'}>
-                                        <td className="text-cell text-cell-panel">{event.name}</td>
+                                        <td className="text-cell text-cell-panel clickable-label" onClick={
+                                            () => {
+                                                zoomToEvent(eventCards, event, boardSPI);
+                                            }
+                                        }>{event.name}</td>
                                         <td className="text-cell text-cell-panel">{event.reason}</td>
                                         <td>
                                             <button className="btn btn-secondary btn-secondary-panel" onClick={() => {/* handle action here */
@@ -214,11 +223,15 @@ const EventAnalysis: React.FC<{ boardSPI: WorkshopBoardSPI }> = ({boardSPI}) => 
                             {analysisResult.validDomainEvents
                                 .concat(keptEvents.map((name) => ({name, comments: 'Kept'})))
                                 .map((event: TValidDomainEventCandidate, index: number) => (
-                                <tr key={index} className={index % 2 === 0 ? 'odd_row' : 'even_row'}>
-                                    <td className="text-cell text-cell-panel">{event.name}</td>
-                                    <td className="text-cell text-cell-panel">{event.comments}</td>
-                                </tr>
-                            ))}
+                                    <tr key={index} className={index % 2 === 0 ? 'odd_row' : 'even_row'}>
+                                        <td className="text-cell text-cell-panel  clickable-label" onClick={
+                                            () => {
+                                                zoomToEvent(eventCards, event, boardSPI);
+                                            }
+                                        }>{event.name}</td>
+                                        <td className="text-cell text-cell-panel">{event.comments}</td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </TabPanel>
