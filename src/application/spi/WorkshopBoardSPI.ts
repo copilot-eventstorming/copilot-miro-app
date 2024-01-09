@@ -58,6 +58,12 @@ export interface WorkshopBoardSPI {
     clearBoard(): Promise<void>;
 
     updateHotspot(card: Shape): Promise<void>;
+
+    dropCard(card: WorkshopCard): Promise<void>;
+
+    showNotification(message: string): Promise<void>;
+
+    showFailure(failure: string): Promise<void>;
 }
 
 

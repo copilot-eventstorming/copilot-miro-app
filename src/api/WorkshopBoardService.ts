@@ -19,11 +19,11 @@ import {
 } from "../application/spi/WorkshopBoardSPI";
 
 class WorkshopBoardService implements WorkshopBoardSPI {
-
-    clearBoard(): Promise<void> {
-        return this.fetchWorkshopCards().then(cards => {
-            cards.map(card => miro.board.remove(card));
-        });
+    showFailure(failure: string): Promise<void> {
+        return miro.board.notifications.showError(failure);
+    }
+    showNotification(message: string): Promise<void> {
+        return miro.board.notifications.showInfo(message);
     }
 
     private miroProxy: MiroProxy;
@@ -193,6 +193,15 @@ class WorkshopBoardService implements WorkshopBoardSPI {
             console.log('restoreBoardLayout failed', e)
             return this.mkFailedOptimizeResult(widgets);
         }
+    }
+
+    dropCard(card: WorkshopCard): Promise<void> {
+        return miro.board.remove(card);
+    }
+
+    async clearBoard(): Promise<void> {
+        const cards = await this.fetchWorkshopCards();
+        cards.map(card => miro.board.remove(card));
     }
 
     private mkFailedOptimizeResult(widgets: { id: string, x: number, y: number }[]) {

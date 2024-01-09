@@ -14,6 +14,7 @@ import {cleanHtmlTag} from "../../../../application/service/utils/utils"; // 引
 import {Tab, TabList, TabPanel, Tabs} from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import {contentEquals} from "../../../../utils/WorkshopCardUtils";
+import {DropEventService} from "../../service/DropEventService";
 
 const EventSummaryTable: React.FC<EventSummaryTableProps> = ({
                                                                  boardSPI,
@@ -138,7 +139,22 @@ function analysisByCopilot(eventCards: WorkshopCard[], service: ValidateDomainEv
     service.perform(cardNames).then(setAnalysisResult)
 }
 
-function zoomToEvent(eventCards: WorkshopCard[], event: TInvalidDomainEventCandidate|TValidDomainEventCandidate, boardSPI: WorkshopBoardSPI) {
+function dropEvent(eventCards: WorkshopCard[], event: TInvalidDomainEventCandidate, boardSPI: WorkshopBoardSPI) {
+    const card = eventCards
+        .find(card => contentEquals(card.content, event.name))
+    if (card) {
+        const service = new DropEventService(boardSPI)
+        service.perform(card)
+            .then(() => console.log("dropEvent Success", cleanHtmlTag(card.content)))
+            .catch(reason => console.log("dropEvent Failed", reason))
+    } else {
+        boardSPI.showFailure("Event name might contain special chars")
+            .then(() => {/*ignored*/
+            })
+    }
+}
+
+function zoomToEvent(eventCards: WorkshopCard[], event: TInvalidDomainEventCandidate | TValidDomainEventCandidate, boardSPI: WorkshopBoardSPI) {
     const card = eventCards
         .find(card => contentEquals(card.content, event.name))
     if (card) boardSPI.zoomToCard(card.id)
@@ -198,7 +214,10 @@ const EventAnalysis: React.FC<{ boardSPI: WorkshopBoardSPI }> = ({boardSPI}) => 
                                         }>{event.name}</td>
                                         <td className="text-cell text-cell-panel">{event.reason}</td>
                                         <td>
-                                            <button className="btn btn-secondary btn-secondary-panel" onClick={() => {/* handle action here */
+                                            <button className="btn btn-secondary btn-secondary-panel" onClick={() => {
+                                               if (event.fix.action === 'drop') {
+                                                   dropEvent(eventCards, event, boardSPI)
+                                               }
                                             }}>{event.fix.action}
                                             </button>
                                             <button className="btn btn-secondary btn-secondary-panel" onClick={() => {
