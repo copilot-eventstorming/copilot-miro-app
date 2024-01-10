@@ -52,46 +52,48 @@ function missingAnswerFn(actualAnswerItem: string[], questions: TQuestion[], que
 
 const FloatingWindow: React.FC<FlowingWindowProps> = ({quizAnswer, questions, style}) => {
     return (
-        <div className="floating-window w-full">
-            <div className="sub-title sub-title-panel">{quizAnswer.userName}'s Answers</div>
-            <table className="w-full">
-                <thead>
-                <tr className="w-full">
-                    <th className="header header-panel text-xs">No.</th>
-                    <th className="header header-panel text-xs text-center">Answers</th>
-                    <th className="header header-panel text-xs">Correct Answers</th>
-                </tr>
-                </thead>
-                <tbody>
-                {quizAnswer.answers.map((filledAnswer, index) => (
-                    <tr key={index} className={index % 2 === 0 ? 'odd_row' : 'even_row'}>
-                        <td className="number-cell number-cell-panel centered">{filledAnswer.questionNumber + 1}</td>
-                        <td className="text-cell text-cell-panel">{filledAnswer.actualAnswer.map((singleAnswerItem, index) => {
-                            const isIncorrect = isIncorrectFn(singleAnswerItem, questions, filledAnswer.questionNumber);
-                            return (
-                                <li key={index} className={isIncorrect ? 'incorrect-answer' : 'correct-answer'}>
-                                    {singleAnswerItem}
-                                </li>
-                            );
-                        })}</td>
-                        <td className="text-cell, text-cell-panel">{questions[filledAnswer.questionNumber]
-                            .correctAnswers
-                            .map((correctAnswerItem, index) => {
-                                const isMissing = missingAnswerFn(filledAnswer.actualAnswer, questions, filledAnswer.questionNumber)
-                                    .includes(correctAnswerItem);
+        <>
+            <div className="floating-window w-full">
+                <div className="sub-title sub-title-panel">{quizAnswer.userName}'s Answers</div>
+                <table className="w-full">
+                    <thead>
+                    <tr className="w-full">
+                        <th className="header header-panel text-xs">No.</th>
+                        <th className="header header-panel text-xs text-center">Answers</th>
+                        <th className="header header-panel text-xs">Correct Answers</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {quizAnswer.answers.map((filledAnswer, index) => (
+                        <tr key={index} className={index % 2 === 0 ? 'odd_row' : 'even_row'}>
+                            <td className="number-cell number-cell-panel centered">{filledAnswer.questionNumber + 1}</td>
+                            <td className="text-cell text-cell-panel">{filledAnswer.actualAnswer.map((singleAnswerItem, index) => {
+                                const isIncorrect = isIncorrectFn(singleAnswerItem, questions, filledAnswer.questionNumber);
                                 return (
-                                    <li key={index} className={isMissing ? 'missing-answer' : ''}>
-                                        {correctAnswerItem}
+                                    <li key={index} className={isIncorrect ? 'incorrect-answer' : 'correct-answer'}>
+                                        {singleAnswerItem}
                                     </li>
                                 );
+                            })}</td>
+                            <td className="text-cell, text-cell-panel">{questions[filledAnswer.questionNumber]
+                                .correctAnswers
+                                .map((correctAnswerItem, index) => {
+                                    const isMissing = missingAnswerFn(filledAnswer.actualAnswer, questions, filledAnswer.questionNumber)
+                                        .includes(correctAnswerItem);
+                                    return (
+                                        <li key={index} className={isMissing ? 'missing-answer' : ''}>
+                                            {correctAnswerItem}
+                                        </li>
+                                    );
 
-                            })
-                        }</td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-        </div>
+                                })
+                            }</td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
+        </>
     )
         ;
 };
@@ -165,7 +167,14 @@ export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> 
     const ConceptIntroduction: React.FC = () => <>
         <div className="flex flex-col w-full my-4 px-4 py-2 font-lato text-sm">
             <b>Core Concepts</b>
-            <li>Domain Event and Granularity</li>
+            <li>Domain Event and Granularity
+                <ul style={{ listStyleType: 'disc',  paddingLeft: '30px'}}>
+                    <li>Past Tense</li>
+                    <li>Specific Meaning</li>
+                    <li>Independence</li>
+                    <li>Value and Impact</li>
+                </ul>
+            </li>
             <b>Notions</b>
             <li>Domain Event Sticky Note</li>
             <li>Hotspot Shape</li>
