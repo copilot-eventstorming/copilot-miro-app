@@ -16,6 +16,129 @@ import 'react-tabs/style/react-tabs.css';
 import {contentEquals} from "../../../../utils/WorkshopCardUtils";
 import {DropEventService} from "../../service/DropEventService";
 import '../../../../assets/LoadingSpinner.css'
+import {OnlineUserInfo} from "@mirohq/websdk-types";
+
+/*
+Enhancement:
+- [x] Add Tables to show Contributions
+- [] Add Methods to recognize de-duplicate events, the duplication number indicates the importance/alignment of the event
+- [] Add Modal to let everyone vote for others' events:
+   - I think I know what it means. if yes, then
+   - is it a valid event on the 4 characteristics: past tense, value and impact, specific meaning, and independent
+- [] After Vote, participants will see the vote statistics about their events from left hand side panel opened.
+- [] Add Table/Modal to show the vote statistics
+   - List the deduplicated events order by 'familiarity percentage', and 'consensus' with ascending direction
+ */
+
+interface ContributionProps {
+    cards: WorkshopCard[]
+    onlineUsers: OnlineUserInfo[]
+    boardSPI: WorkshopBoardSPI
+    drawerOpen: boolean;
+    toggleDrawer: () => void;
+}
+
+function contributionQty(contribution: { [p: string]: WorkshopCard[] }): (a: string, b: string) => number {
+    return (a: string, b: string) => {
+        return contribution[b].length - contribution[a].length
+    }
+}
+
+function positionOrder() {
+    return (a: WorkshopCard, b: WorkshopCard) => {
+        if (a.y - b.y !== 0) return a.y - b.y;
+        else if (a.x - b.x !== 0) return a.x - b.x;
+        else return 0;
+    }
+}
+
+const Contributions: React.FC<ContributionProps> = ({
+                                                        cards, onlineUsers, boardSPI
+                                                        , drawerOpen, toggleDrawer
+                                                    }) => {
+//group cards by created by
+    let contributions: { [p: string]: WorkshopCard[] } = cards.reduce((acc, card) => {
+        const creator = card.createdBy
+        if (acc[creator]) {
+            acc[creator].push(card)
+        } else {
+            acc[creator] = [card]
+        }
+        return acc
+    }, {} as { [key: string]: WorkshopCard[] })
+
+    const getUserName = (userId: string) => {
+        const user = onlineUsers.find(user => user.id === userId)
+        return user ? user.name : userId
+    }
+
+    const userWithoutContribution = onlineUsers
+        .filter(user => !Object.keys(contributions).includes(user.id))
+
+    contributions = userWithoutContribution.reduce((acc, user) => {
+        acc[user.id] = []
+        return acc
+    }, contributions)
+
+    return (<>
+        <div className="flex items-center w-full px-1.5">
+            <Drawer isOpen={drawerOpen} style={{marginRight: '10px'}} toggleDrawer={toggleDrawer}/>
+            <div className="sub-title sub-title-panel">Participants Contribution</div>
+        </div>
+        <div className="flex justify-between items-center w-full px-1.5">
+            {
+                drawerOpen && (
+                    <div>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th className="header header-panel">Name/Qty</th>
+                                <th className="header header-panel">Cards Contribution</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {
+                                contributions && Object.keys(contributions).sort(contributionQty(contributions)).map((key, index) => {
+                                    const cards = contributions[key]
+                                    cards.sort(positionOrder())
+                                    return (<tr key={key} className={index % 2 === 0 ? "even_row" : "odd_row"}>
+                                        <td className="clickable-label text-cell text-cell-panel text-center">{getUserName(key)}<br/>{cards.length}
+                                        </td>
+                                        <td>
+                                            <div>{
+                                                cards.map(card => (
+                                                    <div key={card.id} className="clickable-label text-cell text-cell-panel text-left"
+                                                         onClick={() => boardSPI.zoomToCard(card.id)}>{cleanHtmlTag(card.content)}</div>))
+                                            }</div>
+                                        </td>
+                                    </tr>)
+                                })
+                            }
+                            </tbody>
+                        </table>
+                    </div>)}
+        </div>
+    </>)
+}
+
+const Steps: React.FC = () => <>
+    <div className="flex flex-col w-full my-4 px-4 py-2 font-lato text-sm">
+        <b>Steps</b>
+        <li>Align Workshop Objectives</li>
+        <li>Event Storming Ramp Up
+            <ul style={{listStyleType: 'disc', paddingLeft: '30px'}}>
+                <li>Everyone's 1st shot</li>
+                <li>Quick Review</li>
+            </ul>
+        </li>
+        <li>Event Storming Fast Track</li>
+        <ul style={{listStyleType: 'disc', paddingLeft: '30px'}}>
+            <li>Fire at will</li>
+            <li>Deduplicate</li>
+            <li>Review</li>
+        </ul>
+    </div>
+</>;
 
 const EventSummaryTable: React.FC<EventSummaryTableProps> = ({
                                                                  boardSPI,
@@ -34,48 +157,13 @@ const EventSummaryTable: React.FC<EventSummaryTableProps> = ({
         prevItemsRef.current = items;
     }, [items]);
 
-    useEffect(() => {
-        let intervalId: NodeJS.Timeout;
-        if (autoRefresh) { // 当autoRefresh为真时，设置定时器
-            intervalId = setInterval(() => {
-                reloadEventSummary(boardSPI, setEventSummary);
-            }, 3000);
-        }
-
-        return () => {
-            if (intervalId) { // 在组件卸载时或autoRefresh变为假时，清除定时器
-                clearInterval(intervalId);
-            }
-        };
-    }, [boardSPI, setEventSummary, autoRefresh]);
 
     return <>
         <div className="flex items-center w-full px-1.5">
             <Drawer isOpen={drawerOpen} style={{marginRight: '10px'}} toggleDrawer={toggleDrawer}/>
             <div className="sub-title sub-title-panel">Events Summary</div>
         </div>
-        <div className="flex justify-between items-center w-full px-1.5">
-            {
-                drawerOpen && (
-                    <>
-                        <button className="btn btn-secondary btn-secondary-panel "
-                                onClick={() => {
-                                    reloadEventSummary(boardSPI, setEventSummary)
-                                }}>
-                            refresh
-                        </button>
-                        <div className="flex items-center">
-                            <label className="font-lato text-sm">Auto Refresh</label>
-                            <div className="mx-2 centered">
-                                <Switch checked={autoRefresh} onChange={setAutoRefresh} height={20} width={40}
-                                        onColor="#00ff00"
-                                        offColor="#ff0000"/>
-                            </div>
-                        </div>
-                    </>
-                )
-            }
-        </div>
+
         {drawerOpen && (
             <div className="w-full">
                 <table className="w-full">
@@ -263,7 +351,12 @@ const EventAnalysis: React.FC<{ boardSPI: WorkshopBoardSPI }> = ({boardSPI}) => 
                 }
                 }>Analysis by Copilot
                 </button>
-                {isLoading && <div className="spinner" style={{position: 'absolute', top: 'calc(100%)', left: '42%', transform: 'translateX(-50%)'}}></div>}
+                {isLoading && <div className="spinner" style={{
+                    position: 'absolute',
+                    top: 'calc(100%)',
+                    left: '42%',
+                    transform: 'translateX(-50%)'
+                }}></div>}
             </div>
             <div className="divider w-full"/>
             <div className="w-full">
@@ -275,23 +368,80 @@ const EventAnalysis: React.FC<{ boardSPI: WorkshopBoardSPI }> = ({boardSPI}) => 
     )
 }
 
+function reloadContribution(boardSPI: WorkshopBoardSPI, setCards: (value: (((prevState: WorkshopCard[]) => WorkshopCard[]) | WorkshopCard[])) => void, setOnlineUsers: (value: (((prevState: OnlineUserInfo[]) => OnlineUserInfo[]) | OnlineUserInfo[])) => void) {
+    boardSPI.fetchEventCards().then((cards) => {
+        setCards(cards)
+    })
+    boardSPI.fetchWorkshopUsers().then((users) => {
+        setOnlineUsers(users)
+    })
+}
+
 const EventSummary: React.FC<EventSummaryProps> = ({boardSPI, eventSummary, setEventSummary}) => {
-    const [drawerOpen, setDrawerOpen] = React.useState(true);
+    const [eventSummaryDrawerOpen, setEventSummaryDrawerOpen] = React.useState(true);
+    const [contributionDrawerOpen, setContributionDrawerOpen] = React.useState(true);
     const [autoRefresh, setAutoRefresh] = useState(true); // 新增一个状态来控制是否启用自动刷新
+    const [cards, setCards] = useState([] as WorkshopCard[])
+    const [onlineUsers, setOnlineUsers] = useState([] as OnlineUserInfo[])
 
-    const toggleDrawer = () => {
-        setDrawerOpen(!drawerOpen);
+    useEffect(() => {
+        reloadContribution(boardSPI, setCards, setOnlineUsers);
+    }, []);
+    useEffect(() => {
+        let intervalId: NodeJS.Timeout;
+        if (autoRefresh) { // 当autoRefresh为真时，设置定时器
+            intervalId = setInterval(() => {
+                reloadEventSummary(boardSPI, setEventSummary);
+                reloadContribution(boardSPI, setCards, setOnlineUsers);
+            }, 3000);
+        }
+
+        return () => {
+            if (intervalId) { // 在组件卸载时或autoRefresh变为假时，清除定时器
+                clearInterval(intervalId);
+            }
+        };
+    }, [boardSPI, setEventSummary, autoRefresh]);
+
+    const eventSummaryToggleDrawer = () => {
+        setEventSummaryDrawerOpen(!eventSummaryDrawerOpen);
     };
-
+    const contributionToggleDrawer = () => {
+        setContributionDrawerOpen(!contributionDrawerOpen);
+    };
     return (
         <div className="w-full flex justify-center flex-col items-center">
+            <Steps/>
+            <div className="divider w-full"/>
+            <div className="flex justify-between items-center w-full px-1.5">
+
+                <button className="btn btn-secondary btn-secondary-panel "
+                        onClick={() => {
+                            reloadEventSummary(boardSPI, setEventSummary)
+                            reloadContribution(boardSPI, setCards, setOnlineUsers);
+                        }}>
+                    refresh
+                </button>
+                <div className="flex items-center">
+                    <label className="font-lato text-sm">Auto Refresh</label>
+                    <div className="mx-2 centered">
+                        <Switch checked={autoRefresh} onChange={setAutoRefresh} height={20} width={40}
+                                onColor="#00ff00"
+                                offColor="#ff0000"/>
+                    </div>
+                </div>
+            </div>
+            <div className="divider w-full"/>
+
             <EventSummaryTable boardSPI={boardSPI} eventSummary={eventSummary} setEventSummary={setEventSummary}
-                               drawerOpen={drawerOpen}
-                               toggleDrawer={toggleDrawer}
+                               drawerOpen={eventSummaryDrawerOpen}
+                               toggleDrawer={eventSummaryToggleDrawer}
                                autoRefresh={autoRefresh}
                                setAutoRefresh={setAutoRefresh}
             />
             <div className="divider"/>
+            <Contributions cards={cards} onlineUsers={onlineUsers} boardSPI={boardSPI}
+                           drawerOpen={contributionDrawerOpen} toggleDrawer={contributionToggleDrawer}/>
             <EventAnalysis boardSPI={boardSPI}/>
         </div>
     );
