@@ -1,6 +1,7 @@
-import OpenAI from 'openai';
+import {OpenAIClient, AzureKeyCredential} from '@azure/openai';
 import {CompletionCreateParamsNonStreaming} from 'openai/resources';
 import {sleep} from "openai/core";
+import {Completions} from "@azure/openai/types/openai";
 
 export type TValidDomainEventCandidate = {
     name: string;
@@ -24,59 +25,57 @@ export type TValidateDomainEventResponse = {
 export class ValidateDomainEventService {
 // 设置你的 OpenAI API 密钥
     private apiKey: string = 'API_KEY';
-
+    private openai = new OpenAIClient(
+        "https://copilot-gpt-instance.openai.azure.com/", new AzureKeyCredential(this.apiKey));
+    private deploymentId = "copilot-gpt-35-turbo-instruct"
 // 创建 OpenAI 客户端实例
-    private openai: OpenAI = new OpenAI({apiKey: this.apiKey, dangerouslyAllowBrowser:true});
 
 // 定义函数进行 OpenAI API 调用
     private async openaiApiCall(cards: string[]): Promise<string> {
         // 构建输入文本
         const inputText = cards.join('\n');
-
-        // 调用 OpenAI API
-        const response = await this.openai.completions.create({
-            model: 'gpt-3.5-turbo-instruct', // 使用合适的引擎
-            prompt: PromptPrefix + inputText,
-            max_tokens: 150, // 设置生成文本的最大长度
-            n: 1, // 设置生成的样本数量
-            stop: null, // 设置停用词，如果有的话
-            stream: false, // 设置为 true 以流式传输响应
-        } as CompletionCreateParamsNonStreaming);
-
+        const result: Completions = await this.openai.getCompletions(this.deploymentId, [PromptPrefix + inputText], {
+            maxTokens: 1000,
+            temperature: 0.3
+        });
+        console.log(result.usage)
+        for (const choice of result.choices) {
+            console.log(choice.text);
+        }
         // 返回生成的文本
-        return response.choices[0].text.trim();
+        return result.choices[0].text.trim();
     }
 
     async perform(cards: string[]): Promise<TValidateDomainEventResponse> {
-        await sleep(3000);
-        this.openaiApiCall(cards)
-            .then(result => console.log(result))
-            .catch(error => console.error(error));
-
-        return Promise.resolve(JSON.parse(responseExample));
+        return this.openaiApiCall(cards)
+            .then(result => {
+                console.log(result);
+                return JSON.parse(result)
+            })
+            .catch(error => {
+                console.error(error);
+                return Promise.resolve(JSON.parse(responseExample))
+            })
     }
 }
 
-const PromptPrefix = `From event storming workshop training perspective, event storming in event storming, which of the following are not likely domain events of the workshop, response should ONLY follow the format below:
+const PromptPrefix = `From event storming workshop training perspective, event storming in event storming, which of the following are not likely domain events of the workshop, response should ONLY and STRICTLY follow the format below:
 { 
     "validDomainEvents": [
-       { 
-          "name": "Domain Event Candidate Renamed" , 
-          "comments" : " Indicates a change in the naming of an event during the workshop process."
-       }
+       "Domain Event Candidate Renamed"
      ], 
      
      "invalidDomainEvents" : [ 
        {
         "name" : "Domain Event Candidate Explained", 
-        "reason" : " Represents an action related to explaining or discussing a candidate event.",
+        "reason" : "",
         "fix" : {
           "action" : "drop"
         }
        },
        {
         "name" : "Domain Event Candidate Explained", 
-        "reason" : " Represents an action related to explaining or discussing a candidate event.",
+        "reason" : "",
         "fix" : {
           "action" : "rename"
           "name" : "Domain Event Candidate Aligned"
