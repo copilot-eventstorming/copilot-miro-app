@@ -9,9 +9,9 @@ export class SaveActionState {
     undoStack: any[] = [];
     redoStack: any[] = [];
 
-    constructor(boardId: string) {
+    constructor(boardId: string, setUndoQty: (qty: number) => void,setRedoQty: (qty: number) => void) {
         this.boardId = boardId;
-        this.loadFromLocalStorage();
+        this.loadFromLocalStorage(setUndoQty,setRedoQty);
     }
 
     stateHistoryKey(): string {
@@ -48,11 +48,13 @@ export class SaveActionState {
         });
     }
 
-    async loadFromLocalStorage(): Promise<void> {
+    async loadFromLocalStorage(setUndoQty: (qty: number) => void,setRedoQty: (qty: number) => void): Promise<void> {
         const savedState = await findLocally(this.stateHistoryKey());
         if (savedState && savedState.undoStack && savedState.redoStack) {
             this.undoStack = savedState.undoStack;
             this.redoStack = savedState.redoStack;
+            setUndoQty(this.undoStack.length);
+            setRedoQty(this.redoStack.length);
         }
     }
 

@@ -1,9 +1,9 @@
 import {WorkshopBoardSPI} from "../../../application/spi/WorkshopBoardSPI";
 import * as React from "react";
 import {Dispatch, SetStateAction} from "react";
-import {TClusterAnalysisResult} from "../panels/component/ExploreAnalysisResultTable";
 import {ProblematicCard} from "../../../application/service/graph/AffiliationDistinctionProblemDiagnoseService";
 import {SaveActions} from "../../../application/repository";
+import {TClusterAnalysisResult} from "./ExploreAnalysisResultTableTypes";
 
 export interface GraphOptimizerContextProps {
     boardSPI: WorkshopBoardSPI;
@@ -40,10 +40,6 @@ export interface GraphOptimizerContextProps {
     setStep: Dispatch<SetStateAction<number>>;
     saveActions: SaveActions | null;
     setSaveActions: Dispatch<SetStateAction<SaveActions | null>>;
-    undoDisabled: boolean;
-    setUndoDisabled: Dispatch<SetStateAction<boolean>>;
-    redoDisabled: boolean;
-    setRedoDisabled: Dispatch<SetStateAction<boolean>>;
     undoQty: number;
     setUndoQty: Dispatch<SetStateAction<number>>;
     redoQty: number;

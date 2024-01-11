@@ -73,6 +73,7 @@ const htmlEntities: { [key: string]: string } = {
     '&#xff0c;': ',',
     '&#39;': "'",
     "\\s+": " ",
+    "&#xff1f;":"?",
 };
 
 export function cleanHtmlTag(title: string | undefined): string {

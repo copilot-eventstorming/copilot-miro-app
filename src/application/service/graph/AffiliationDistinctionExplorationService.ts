@@ -1,6 +1,6 @@
-import {TClusterAnalysisResult} from "../../../features/eventSession/panels/component/ExploreAnalysisResultTable";
 import {calculateDistancesStatistics, CardDistanceStatistics, NestedGroupNode} from "../../../domain/graph";
 import {cleanHtmlTag} from "../utils/utils";
+import {TClusterAnalysisResult} from "../../../features/eventSession/types/ExploreAnalysisResultTableTypes";
 
 export class AffiliationDistinctionExplorationService {
 

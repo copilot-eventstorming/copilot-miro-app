@@ -6,8 +6,6 @@ import {sizeof} from "../service/utils/utils";
 
 export class SaveActions {
     boardId: string;
-    undoDisabledSetter: (disabled: boolean) => void;
-    redoDisabledSetter: (disabled: boolean) => void;
     setUndoQty: (qty: number) => void;
     setRedoQty: (qty: number) => void;
     consoleOutputSetter: (output: string) => void;
@@ -15,20 +13,16 @@ export class SaveActions {
     stateManager: SaveActionState;
 
     constructor(boardId: string,
-                undoDisabledSetter: (disabled: boolean) => void,
-                redoDisabledSetter: (disabled: boolean) => void,
                 setUndoQty: (qty: number) => void,
                 setRedoQty: (qty: number) => void,
                 consoleOutputSetter: (output: string) => void,
                 boardSpi: WorkshopBoardSPI) {
         this.boardId = boardId;
-        this.undoDisabledSetter = undoDisabledSetter;
-        this.redoDisabledSetter = redoDisabledSetter;
         this.setUndoQty = setUndoQty;
         this.setRedoQty = setRedoQty;
         this.consoleOutputSetter = consoleOutputSetter;
         this.boardSpi = boardSpi;
-        this.stateManager = new SaveActionState(boardId);
+        this.stateManager = new SaveActionState(boardId, setUndoQty, setRedoQty);
         this.invalidButtonState();
     }
 
@@ -111,8 +105,6 @@ export class SaveActions {
     }
 
     invalidButtonState(): void {
-        this.undoDisabledSetter(!this.stateManager.undoable());
-        this.redoDisabledSetter(!this.stateManager.redoable());
         this.setUndoQty(this.stateManager.undoStack.length);
         this.setRedoQty(this.stateManager.redoStack.length);
     }

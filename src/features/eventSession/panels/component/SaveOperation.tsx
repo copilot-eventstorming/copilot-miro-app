@@ -1,22 +1,26 @@
 import * as React from "react";
-import {useContext} from "react";
+import {Dispatch, SetStateAction, useContext} from "react";
 import {GraphOptimizerContext} from "../context/GraphOptimizerContext";
 import {mkUndoRedoConsoleOutput, openOperationLogsPage} from "../../utils/SaveOpUtils";
+import {SaveActions} from "../../../../application/repository";
 
+type SaveOperationProps = {
+    setConsoleOutput: Dispatch<SetStateAction<string>>,
+    saveActions: SaveActions | null;
+    undoQty: number;
+    redoQty: number;
+}
 
-const SaveOperation = () => {
-    const {
-        setConsoleOutput,
-        saveActions,
-        undoDisabled,
-        redoDisabled,
-        undoQty,
-        redoQty
-    } = useContext(GraphOptimizerContext)
+const SaveOperation: React.FC<SaveOperationProps> = ({
+                                                         setConsoleOutput,
+                                                         saveActions,
+                                                         undoQty,
+                                                         redoQty
+                                                     }) => {
     return <>
         <div>
             <div className="btn-container-panel">
-                <button disabled={undoDisabled} className="btn btn-secondary btn-secondary-panel"
+                <button disabled={undoQty <= 0} className="btn btn-secondary btn-secondary-panel"
                         onClick={() => {
                             if (saveActions) {
                                 saveActions.undo()
@@ -29,7 +33,7 @@ const SaveOperation = () => {
                         <span className="badge">{undoQty}</span>}
 
                 </button>
-                <button disabled={redoDisabled} className="btn btn-secondary btn-secondary-panel"
+                <button disabled={redoQty <= 0} className="btn btn-secondary btn-secondary-panel"
                         onClick={() => {
                             if (saveActions) {
                                 saveActions.redo().then(layoutResult => {
@@ -64,7 +68,6 @@ const SaveOperation = () => {
         </div>
     </>
 }
-
 
 
 export {SaveOperation};

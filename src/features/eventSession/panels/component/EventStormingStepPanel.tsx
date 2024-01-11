@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import {Drawer} from "../../../../component/drawer";
 import {mkItems, reloadEventSummary} from "../../utils/EventSummaryUtils";
-import {EventSummaryItem, EventSummaryProps, EventSummaryTableProps} from "../../types/EventSummaryTypes";
+import {EventSummaryItem, EventStormingStepProps, EventSummaryTableProps} from "../../types/EventSummaryTypes";
 import Switch from "react-switch"; // 引入Switch组件
 import {
     TInvalidDomainEventCandidate,
@@ -17,11 +17,20 @@ import {contentEquals} from "../../../../utils/WorkshopCardUtils";
 import {DropEventService} from "../../service/DropEventService";
 import '../../../../assets/LoadingSpinner.css'
 import {OnlineUserInfo} from "@mirohq/websdk-types";
+import {
+    GroupByDuplicationDomainEventService,
+    SimilarityGroup
+} from "../../service/GroupByDuplicationDomainEventService";
+import {SimilarEventsGroupLayoutService} from "../../service/SimilarEventsGroupLayoutService";
+import {SaveOperation} from "./SaveOperation";
+import {SaveActions} from "../../../../application/repository";
+import {OperationLogChannel} from "../../../operationLogs/types/OperationLogChannels";
+import {OperationLogDeleted, OperationLogRestore} from "../../../operationLogs/types/OperationLogEvent";
 
 /*
 Enhancement:
 - [x] Add Tables to show Contributions
-- [] Add Methods to recognize de-duplicate events, the duplication number indicates the importance/alignment of the event
+- [x] Add Methods to recognize de-duplicate events, the duplication number indicates the importance/alignment of the event
 - [] Add Modal to let everyone vote for others' events:
    - I think I know what it means. if yes, then
    - is it a valid event on the 4 characteristics: past tense, value and impact, specific meaning, and independent
@@ -45,18 +54,24 @@ function contributionQty(contribution: { [p: string]: WorkshopCard[] }): (a: str
 }
 
 function positionOrder() {
+    //TODO: might be sorted by incorrectness of past tense
     return (a: WorkshopCard, b: WorkshopCard) => {
+        return new Date(a.createdAt) > new Date(b.createdAt) ? 1 : -1
+        /*
         if (a.y - b.y !== 0) return a.y - b.y;
         else if (a.x - b.x !== 0) return a.x - b.x;
         else return 0;
+         */
     }
 }
 
-const Contributions: React.FC<ContributionProps> = ({
-                                                        cards, onlineUsers, boardSPI
-                                                        , drawerOpen, toggleDrawer
-                                                    }) => {
-//group cards by created by
+const ContributionByParticipant: React.FC<ContributionProps> = ({
+                                                                    cards, onlineUsers, boardSPI
+                                                                    , drawerOpen, toggleDrawer
+                                                                }) => {
+    const [showMore, setShowMore] = useState({} as { [key: string]: boolean })
+    const showQty = 5
+    //group cards by created by
     let contributions: { [p: string]: WorkshopCard[] } = cards.reduce((acc, card) => {
         const creator = card.createdBy
         if (acc[creator]) {
@@ -83,13 +98,13 @@ const Contributions: React.FC<ContributionProps> = ({
     return (<>
         <div className="flex items-center w-full px-1.5">
             <Drawer isOpen={drawerOpen} style={{marginRight: '10px'}} toggleDrawer={toggleDrawer}/>
-            <div className="sub-title sub-title-panel">Participants Contribution</div>
+            <div className="sub-title sub-title-panel text-sm">Contribution Status by Participants</div>
         </div>
         <div className="flex justify-between items-center w-full px-1.5">
             {
                 drawerOpen && (
-                    <div>
-                        <table>
+                    <div className="w-full">
+                        <table className="w-full">
                             <thead>
                             <tr>
                                 <th className="header header-panel">Name/Qty</th>
@@ -100,23 +115,36 @@ const Contributions: React.FC<ContributionProps> = ({
                             {
                                 contributions && Object.keys(contributions).sort(contributionQty(contributions)).map((key, index) => {
                                     const cards = contributions[key]
-                                    cards.sort(positionOrder())
+                                    const visibleCards = showMore[key] ? cards : cards.sort(positionOrder()).slice(0, showQty)
                                     return (<tr key={key} className={index % 2 === 0 ? "even_row" : "odd_row"}>
                                         <td className="clickable-label text-cell text-cell-panel text-center">{getUserName(key)}<br/>{cards.length}
                                         </td>
                                         <td>
-                                            <div>{
-                                                cards.map(card => (
-                                                    <div key={card.id} className="clickable-label text-cell text-cell-panel text-left"
-                                                         onClick={() => boardSPI.zoomToCard(card.id)}>{cleanHtmlTag(card.content)}</div>))
-                                            }</div>
+                                            <div>
+                                                {
+                                                    <div>{visibleCards.map(card => (
+                                                        <div key={card.id}
+                                                             className="clickable-label text-cell text-cell-panel text-left"
+                                                             onClick={() => boardSPI.zoomToCard(card.id)}>{cleanHtmlTag(card.content)}</div>
+                                                    ))}
+                                                    </div>
+                                                }
+                                                {
+                                                    cards.length > showQty &&
+                                                    <div className="clickable-label text-cell text-cell-panel text-right px-2"
+                                                         onClick={() => setShowMore({...showMore, [key]: !showMore[key]})}>
+                                                        {showMore[key] ? 'Show Less' : 'Show More'}
+                                                    </div>
+                                                }
+                                            </div>
                                         </td>
                                     </tr>)
                                 })
                             }
                             </tbody>
                         </table>
-                    </div>)}
+                    </div>)
+            }
         </div>
     </>)
 }
@@ -140,15 +168,15 @@ const Steps: React.FC = () => <>
     </div>
 </>;
 
-const EventSummaryTable: React.FC<EventSummaryTableProps> = ({
-                                                                 boardSPI,
-                                                                 eventSummary,
-                                                                 setEventSummary,
-                                                                 drawerOpen,
-                                                                 toggleDrawer,
-                                                                 autoRefresh, // 新增一个props来接收autoRefresh状态
-                                                                 setAutoRefresh // 新增一个props来接收setAutoRefresh函数
-                                                             }) => {
+const ContributionByContent: React.FC<EventSummaryTableProps> = ({
+                                                                     boardSPI,
+                                                                     eventSummary,
+                                                                     setEventSummary,
+                                                                     drawerOpen,
+                                                                     toggleDrawer,
+                                                                     autoRefresh, // 新增一个props来接收autoRefresh状态
+                                                                     setAutoRefresh // 新增一个props来接收setAutoRefresh函数
+                                                                 }) => {
     const items: EventSummaryItem[] = mkItems(eventSummary);
 
     const prevItemsRef = useRef(items);
@@ -161,7 +189,7 @@ const EventSummaryTable: React.FC<EventSummaryTableProps> = ({
     return <>
         <div className="flex items-center w-full px-1.5">
             <Drawer isOpen={drawerOpen} style={{marginRight: '10px'}} toggleDrawer={toggleDrawer}/>
-            <div className="sub-title sub-title-panel">Events Summary</div>
+            <div className="sub-title sub-title-panel text-sm">Contribution Status By Content</div>
         </div>
 
         {drawerOpen && (
@@ -225,11 +253,11 @@ const EventSummaryTable: React.FC<EventSummaryTableProps> = ({
 
 function analysisByCopilot(eventCards: WorkshopCard[], service: ValidateDomainEventService, setAnalysisResult: (value: (((prevState: TValidateDomainEventResponse) => TValidateDomainEventResponse) | TValidateDomainEventResponse)) => void): Promise<void> {
     const cardNames: string[] = eventCards.map((card) => cleanHtmlTag(card.content))
-
     return service.perform(cardNames).then(setAnalysisResult)
 }
 
-function dropEvent(eventCards: WorkshopCard[], event: TInvalidDomainEventCandidate, boardSPI: WorkshopBoardSPI) {
+function dropEvent(eventCards: WorkshopCard[], event: TInvalidDomainEventCandidate, boardSPI:
+    WorkshopBoardSPI) {
     const card = eventCards
         .find(card => contentEquals(card.content, event.name))
     if (card) {
@@ -244,13 +272,148 @@ function dropEvent(eventCards: WorkshopCard[], event: TInvalidDomainEventCandida
     }
 }
 
-function zoomToEvent(eventCards: WorkshopCard[], event: TInvalidDomainEventCandidate | TValidDomainEventCandidate, boardSPI: WorkshopBoardSPI) {
+type TEventDeduplicationProps = {
+    boardSPI: WorkshopBoardSPI;
+    cards: WorkshopCard[];
+    drawerOpen: boolean;
+    toggleDrawer: () => void;
+}
+const EventDeduplication: React.FC<TEventDeduplicationProps> = ({boardSPI, drawerOpen, toggleDrawer, cards}) => {
+    const groupingService = new GroupByDuplicationDomainEventService()
+    const layoutService: SimilarEventsGroupLayoutService = new SimilarEventsGroupLayoutService(boardSPI)
+    const [isLoading, setIsLoading] = useState(false) // 新增一个状态来跟踪异步操作是否正在进行
+    const [groupedCards, setGroupedCards] = useState([] as WorkshopCard[][]) // 新增一个状态来保存分组后的卡片
+    const [similarityGroups, setSimilarityGroups] = useState([] as SimilarityGroup[]) // 新增一个状态来保存分组后的卡片
+
+    const [consoleOutput, setConsoleOutput] = useState("");
+    const [saveActions, setSaveActions] = React.useState(null as SaveActions | null);
+    const [undoQty, setUndoQty] = React.useState(0);
+    const [redoQty, setRedoQty] = React.useState(0);
+
+    useEffect(() => {
+        const operationLogEventChannel = new BroadcastChannel(OperationLogChannel);
+
+        const handleEvent = async (event: MessageEvent) => {
+            console.log('GraphOptimizerButtonGroup: receiveMessage', event)
+            switch (event.data.type) {
+                case OperationLogDeleted:
+                    if (saveActions) {
+                        saveActions.deleteLogById(event.data.id)
+                    }
+                    break;
+                case OperationLogRestore:
+                    if (saveActions) {
+                        await saveActions.loadByLogId(event.data.id)
+                        await miro.board.ui.closeModal();
+                    }
+                    break;
+            }
+        };
+
+        operationLogEventChannel.addEventListener("message", handleEvent)
+
+        // 在 useEffect 的清理函数中移除事件监听器
+        return () => {
+            operationLogEventChannel.removeEventListener("message", handleEvent);
+            operationLogEventChannel.close();
+        };
+    }, [saveActions]);
+
+
+    useEffect(() => {
+            if (saveActions == null) {
+                boardSPI.fetchBoardInfo().then(board => {
+                    const actions = new SaveActions(board.id,
+                        setUndoQty,
+                        setRedoQty,
+                        setConsoleOutput,
+                        boardSPI);
+                    setSaveActions(actions);
+                })
+            }
+        }
+    )
+    return (<div className="w-full">
+
+        <div className="flex items-center w-full px-1.5">
+            <Drawer isOpen={drawerOpen} style={{marginRight: '10px'}} toggleDrawer={toggleDrawer}/>
+            <div className="sub-title sub-title-panel text-sm">Deduplicating Similar Events</div>
+        </div>
+
+        {drawerOpen && (
+            <div className="w-full">
+                <div className="w-full centered my-2 flex flex-row justify-center space-x-4 px-1.5">
+                    <button className="btn btn-primary btn-primary-panel px-2"
+                            disabled={isLoading}
+                            onClick={() => {
+                                groupingService.perform(cards)
+                                    .then(cardGroups => {
+                                        setSimilarityGroups(cardGroups)
+                                        return cardGroups.map(group => group.groupMembers)
+                                    })
+                                    .then(setGroupedCards)
+                                    .catch(reason => {
+                                        console.log("deduplication Failed", reason)
+                                    })
+                            }}>Similarity Analysis
+                    </button>
+                    <button className="btn btn-primary btn-primary-panel mx-1"
+                            onClick={() => {
+                                saveActions?.save('Auto-save before cluster similar events', 'Event Storming Session')
+                                    .then(async () => await layoutService.perform(similarityGroups))
+                                    .then(() => saveActions?.save('Auto-save after cluster similar events', 'Event Storming Session'))
+                            }}
+                            disabled={groupedCards.length === 0}>Cluster Similar Events
+                    </button>
+                </div>
+                <SaveOperation saveActions={saveActions} redoQty={redoQty} undoQty={undoQty}
+                               setConsoleOutput={setConsoleOutput}/>
+                <table className="w-full">
+                    <thead>
+                    <tr>
+                        <th className="head header-panel">Quantity</th>
+                        <th className="head header-panel">Similar Event Candidates</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {
+                        groupedCards.map((group, index) => (
+                            <tr key={index} className={index % 2 === 0 ? 'odd_row' : 'even_row'}>
+                                <td className="text-cell text-cell-panel text-center">{group.length}</td>
+                                <td>
+                                    <div>
+                                        {
+                                            <div>{group.map(card => (
+                                                <div key={card.id}
+                                                     className="clickable-label text-cell text-cell-panel text-left"
+                                                     onClick={() => boardSPI.zoomToCard(card.id)}
+                                                >{cleanHtmlTag(card.content)}</div>
+                                            ))}
+                                            </div>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        ))
+                    }
+                    </tbody>
+                </table>
+
+            </div>
+        )}
+    </div>)
+}
+
+function zoomToEvent(eventCards: WorkshopCard[], event: TInvalidDomainEventCandidate |
+    TValidDomainEventCandidate, boardSPI: WorkshopBoardSPI) {
     const card = eventCards
         .find(card => contentEquals(card.content, event.name))
     if (card) boardSPI.zoomToCard(card.id)
 }
 
-function AnalysisResult(analysisResult: TValidateDomainEventResponse, keptEvents: string[], eventCards: WorkshopCard[], boardSPI: WorkshopBoardSPI, setKeptEvents: (value: (((prevState: string[]) => string[]) | string[])) => void) {
+function AnalysisResult(analysisResult: TValidateDomainEventResponse, keptEvents: string[], eventCards:
+    WorkshopCard[], boardSPI: WorkshopBoardSPI, setKeptEvents: (value: (((prevState: string[]) => string[]) |
+    string[])) => void) {
     return <Tabs>
         <TabList>
             <Tab>
@@ -321,10 +484,13 @@ function AnalysisResult(analysisResult: TValidateDomainEventResponse, keptEvents
                 </tbody>
             </table>
         </TabPanel>
-    </Tabs>;
+    </Tabs>
+        ;
 }
 
-const EventAnalysis: React.FC<{ boardSPI: WorkshopBoardSPI }> = ({boardSPI}) => {
+const EventAnalysis: React.FC<{ boardSPI: WorkshopBoardSPI }> = ({
+                                                                     boardSPI
+                                                                 }) => {
     const service = new ValidateDomainEventService()
     const [eventCards, setEventCards] = useState([] as WorkshopCard[])
     const [analysisResult, setAnalysisResult] = useState({
@@ -358,7 +524,6 @@ const EventAnalysis: React.FC<{ boardSPI: WorkshopBoardSPI }> = ({boardSPI}) => 
                     transform: 'translateX(-50%)'
                 }}></div>}
             </div>
-            <div className="divider w-full"/>
             <div className="w-full">
                 {
                     !isLoading && (analysisResult.validDomainEvents.length > 0 || analysisResult.invalidDomainEvents.length > 0)
@@ -377,10 +542,12 @@ function reloadContribution(boardSPI: WorkshopBoardSPI, setCards: (value: (((pre
     })
 }
 
-const EventSummary: React.FC<EventSummaryProps> = ({boardSPI, eventSummary, setEventSummary}) => {
-    const [eventSummaryDrawerOpen, setEventSummaryDrawerOpen] = React.useState(true);
-    const [contributionDrawerOpen, setContributionDrawerOpen] = React.useState(true);
-    const [autoRefresh, setAutoRefresh] = useState(true); // 新增一个状态来控制是否启用自动刷新
+const EventStormingStepPanel: React.FC<EventStormingStepProps> = ({boardSPI, eventSummary, setEventSummary}) => {
+    const [contributionByContentDrawerOpen, setContributionByContentDrawerOpen] = React.useState(false);
+    const [contributionByParticipantDrawerOpen, setContributionByParticipantDrawerOpen] = React.useState(false);
+    const [deduplicationDrawerOpen, setDeduplicationDrawerOpen] = React.useState(false);
+
+    const [autoRefresh, setAutoRefresh] = useState(false); // 新增一个状态来控制是否启用自动刷新
     const [cards, setCards] = useState([] as WorkshopCard[])
     const [onlineUsers, setOnlineUsers] = useState([] as OnlineUserInfo[])
 
@@ -404,10 +571,14 @@ const EventSummary: React.FC<EventSummaryProps> = ({boardSPI, eventSummary, setE
     }, [boardSPI, setEventSummary, autoRefresh]);
 
     const eventSummaryToggleDrawer = () => {
-        setEventSummaryDrawerOpen(!eventSummaryDrawerOpen);
+        setContributionByContentDrawerOpen(!contributionByContentDrawerOpen);
     };
     const contributionToggleDrawer = () => {
-        setContributionDrawerOpen(!contributionDrawerOpen);
+        setContributionByParticipantDrawerOpen(!contributionByParticipantDrawerOpen);
+    };
+
+    const deduplicationToggleDrawer = () => {
+        setDeduplicationDrawerOpen(!deduplicationDrawerOpen);
     };
     return (
         <div className="w-full flex justify-center flex-col items-center">
@@ -433,19 +604,27 @@ const EventSummary: React.FC<EventSummaryProps> = ({boardSPI, eventSummary, setE
             </div>
             <div className="divider w-full"/>
 
-            <EventSummaryTable boardSPI={boardSPI} eventSummary={eventSummary} setEventSummary={setEventSummary}
-                               drawerOpen={eventSummaryDrawerOpen}
-                               toggleDrawer={eventSummaryToggleDrawer}
-                               autoRefresh={autoRefresh}
-                               setAutoRefresh={setAutoRefresh}
+            <ContributionByContent boardSPI={boardSPI} eventSummary={eventSummary} setEventSummary={setEventSummary}
+                                   drawerOpen={contributionByContentDrawerOpen}
+                                   toggleDrawer={eventSummaryToggleDrawer}
+                                   autoRefresh={autoRefresh}
+                                   setAutoRefresh={setAutoRefresh}
             />
-            <div className="divider"/>
-            <Contributions cards={cards} onlineUsers={onlineUsers} boardSPI={boardSPI}
-                           drawerOpen={contributionDrawerOpen} toggleDrawer={contributionToggleDrawer}/>
+            <div className="divider  w-full"/>
+            <ContributionByParticipant cards={cards} onlineUsers={onlineUsers} boardSPI={boardSPI}
+                                       drawerOpen={contributionByParticipantDrawerOpen}
+                                       toggleDrawer={contributionToggleDrawer}/>
+            <div className="divider  w-full"/>
+            <EventDeduplication boardSPI={boardSPI} cards={cards}
+                                drawerOpen={deduplicationDrawerOpen}
+                                toggleDrawer={deduplicationToggleDrawer}/>
             <EventAnalysis boardSPI={boardSPI}/>
         </div>
-    );
+    )
+        ;
 };
 
 
-export {EventSummary};
+export {
+    EventStormingStepPanel
+};

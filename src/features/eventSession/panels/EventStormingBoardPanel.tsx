@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from "react";
 import {TConsoleProps, TEventStormingBoardPanelProps} from "../types/EventStormingBoardPanelTypes";
-import {EventSummary} from "./component/EventSummary";
+import {EventStormingStepPanel} from "./component/EventStormingStepPanel";
 import {emptyEventSummary} from "../types/EventSummaryTypes";
 import {reloadEventSummary} from "../utils/EventSummaryUtils";
 import {GraphOptimizerButtonGroup} from "./component/GraphOptimizerButtonGroup";
-import {ConceptIntroductionPanel} from "./component/ConceptIntroductionPanel";
+import {ConceptIntroductionStepPanel} from "./component/ConceptIntroductionStepPanel";
 import {CopilotSession, copilotSession$} from "../../../application/CopilotSession";
 
 const Console: React.FC<TConsoleProps> = ({output}) => {
@@ -68,7 +68,7 @@ export const EventStormingBoardPanel: React.FC<TEventStormingBoardPanelProps> = 
                 currentStep={currentStep}
                 onClick={() => setCurrentStep(0)}
             >
-                <ConceptIntroductionPanel boardSPI={boardSPI} copilotSession={copilotSession}/>
+                <ConceptIntroductionStepPanel boardSPI={boardSPI} copilotSession={copilotSession}/>
             </AgendaItem>
             <AgendaItem
                 title="2. Event Storming"
@@ -77,7 +77,7 @@ export const EventStormingBoardPanel: React.FC<TEventStormingBoardPanelProps> = 
                 onClick={() => setCurrentStep(1)}
             >
                 {/* Storm the events content */}
-                <EventSummary boardSPI={boardSPI} eventSummary={eventSummary} setEventSummary={setEventSummary}/>
+                <EventStormingStepPanel boardSPI={boardSPI} eventSummary={eventSummary} setEventSummary={setEventSummary}/>
 
             </AgendaItem>
             <AgendaItem

@@ -113,7 +113,7 @@ export class MatrixBuilder {
         return (x1, l1, x2, l2) => {
             const minLength = Math.min(l1, l2);
             const overlapLength = Math.max(0, Math.min(x1 + l1 / 2, x2 + l2 / 2) - Math.max(x1 - l1 / 2, x2 - l2 / 2));
-            return overlapLength > overlapThreshold * minLength;
+            return overlapLength >= overlapThreshold * minLength;
         };
     }
 }

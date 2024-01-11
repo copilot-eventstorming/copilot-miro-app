@@ -38,8 +38,6 @@ export const GraphOptimizerButtonGroup: React.FC<GraphOptimizerButtonGroupProps>
     const [maybeProblems, setMaybeProblems] = useState([] as ProblematicCard[]); // 添加这一行
 
     const [saveActions, setSaveActions] = React.useState(null as SaveActions | null);
-    const [undoDisabled, setUndoDisabled] = React.useState(true);
-    const [redoDisabled, setRedoDisabled] = React.useState(true);
     const [undoQty, setUndoQty] = React.useState(0);
     const [redoQty, setRedoQty] = React.useState(0);
     const context = React.useContext(GraphOptimizerContext)
@@ -77,8 +75,6 @@ export const GraphOptimizerButtonGroup: React.FC<GraphOptimizerButtonGroupProps>
             if (saveActions == null) {
                 boardSPI.fetchBoardInfo().then(board => {
                     const actions = new SaveActions(board.id,
-                        setUndoDisabled,
-                        setRedoDisabled,
                         setUndoQty,
                         setRedoQty,
                         setConsoleOutput,
@@ -134,10 +130,6 @@ export const GraphOptimizerButtonGroup: React.FC<GraphOptimizerButtonGroupProps>
             setMaybeProblems,
             saveActions,
             setSaveActions,
-            undoDisabled,
-            setUndoDisabled,
-            redoDisabled,
-            setRedoDisabled,
             undoQty,
             setUndoQty,
             redoQty,
@@ -158,7 +150,8 @@ export const GraphOptimizerButtonGroup: React.FC<GraphOptimizerButtonGroupProps>
                 />
                 <OptimizeReadModel/>
                 <div className="divider"/>
-                <SaveOperation/>
+                <SaveOperation saveActions={saveActions} redoQty={redoQty}
+                               undoQty={undoQty} setConsoleOutput={setConsoleOutput}/>
             </div>
         </GraphOptimizerContext.Provider>
 

@@ -98,7 +98,7 @@ const FloatingWindow: React.FC<FlowingWindowProps> = ({quizAnswer, questions, st
         ;
 };
 
-export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> = ({
+export const ConceptIntroductionStepPanel: React.FC<TConceptIntroductionPanelProps> = ({
                                                                                        boardSPI,
                                                                                        copilotSession
                                                                                    }) => {
@@ -110,7 +110,7 @@ export const ConceptIntroductionPanel: React.FC<TConceptIntroductionPanelProps> 
     const [quizAnswers, setQuizAnswers] = useState<QuizAnswer[]>([])
     const [hoveredScoreIndex, setHoveredScoreIndex] = useState<number>(-1)
     const [questions, setQuestions] = useState([] as TQuestion[])
-    const [autoRefresh, setAutoRefresh] = useState(true); // 新增一个状态来控制是否启用自动刷新
+    const [autoRefresh, setAutoRefresh] = useState(false); // 新增一个状态来控制是否启用自动刷新
 
     useEffect(() => {
         const quizService = new LoadEventSessionQuizService()

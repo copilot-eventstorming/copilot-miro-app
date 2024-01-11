@@ -75,7 +75,7 @@ export const emptyEventSummary: EventSummaryTypes = {
 
 }
 
-export interface EventSummaryProps {
+export interface EventStormingStepProps {
     boardSPI: WorkshopBoardSPI;
     eventSummary: EventSummaryTypes;
     setEventSummary: React.Dispatch<React.SetStateAction<EventSummaryTypes>>;
