@@ -77,7 +77,8 @@ export const EventStormingBoardPanel: React.FC<TEventStormingBoardPanelProps> = 
                 onClick={() => setCurrentStep(1)}
             >
                 {/* Storm the events content */}
-                <EventStormingStepPanel boardSPI={boardSPI} eventSummary={eventSummary} setEventSummary={setEventSummary}/>
+                <EventStormingStepPanel boardSPI={boardSPI} eventSummary={eventSummary}
+                                        setEventSummary={setEventSummary} copilotSession={copilotSession}/>
 
             </AgendaItem>
             <AgendaItem

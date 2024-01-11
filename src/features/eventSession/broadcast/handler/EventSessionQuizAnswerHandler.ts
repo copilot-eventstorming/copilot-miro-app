@@ -6,8 +6,8 @@ export class EventSessionQuizAnswerHandler implements IMessageHandler<EventSessi
     release(): void {
     }
 
-    private quizRepository: EventSessionQuizRepository | null;
-    private callback: (quizAnswers: QuizAnswer[]) => void = (message) => {
+    private readonly quizRepository: EventSessionQuizRepository | null;
+    private readonly callback: (quizAnswers: QuizAnswer[]) => void = (message) => {
     }
 
     constructor(quizRepository: EventSessionQuizRepository | null, callback: (quizAnswers: QuizAnswer[]) => void) {

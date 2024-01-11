@@ -1,5 +1,6 @@
 import {WorkshopBoardSPI} from "../../../application/spi/WorkshopBoardSPI";
 import React from "react";
+import {CopilotSession} from "../../../application/CopilotSession";
 
 export interface EventSummaryTypes {
     eventCards: number;
@@ -79,7 +80,7 @@ export interface EventStormingStepProps {
     boardSPI: WorkshopBoardSPI;
     eventSummary: EventSummaryTypes;
     setEventSummary: React.Dispatch<React.SetStateAction<EventSummaryTypes>>;
-
+    copilotSession: CopilotSession
 }
 
 export interface EventSummaryTableProps {

@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import {Drawer} from "../../../../component/drawer";
 import {mkItems, reloadEventSummary} from "../../utils/EventSummaryUtils";
-import {EventSummaryItem, EventStormingStepProps, EventSummaryTableProps} from "../../types/EventSummaryTypes";
+import {EventStormingStepProps, EventSummaryItem, EventSummaryTableProps} from "../../types/EventSummaryTypes";
 import Switch from "react-switch"; // 引入Switch组件
 import {
     TInvalidDomainEventCandidate,
@@ -26,6 +26,12 @@ import {SaveOperation} from "./SaveOperation";
 import {SaveActions} from "../../../../application/repository";
 import {OperationLogChannel} from "../../../operationLogs/types/OperationLogChannels";
 import {OperationLogDeleted, OperationLogRestore} from "../../../operationLogs/types/OperationLogEvent";
+import {v4 as uuidv4} from "uuid";
+import {miroProxy} from "../../../../api/MiroProxy";
+import {CopilotSession} from "../../../../application/CopilotSession";
+import {Broadcaster} from "../../../../application/messaging/Broadcaster";
+import {StartEventSessionVote} from "../../broadcast/message/StartEventSessionVote";
+import {VoteItem} from "../../types/VoteItem";
 
 /*
 Enhancement:
@@ -488,6 +494,42 @@ function AnalysisResult(analysisResult: TValidateDomainEventResponse, keptEvents
         ;
 }
 
+type EventVoteProp = {
+    boardSPI: WorkshopBoardSPI
+    broadcaster: Broadcaster
+    copilotSession: CopilotSession
+}
+const EventVote: React.FC<EventVoteProp> = ({boardSPI, broadcaster, copilotSession}) => {
+    const [voteItems, setVoteItems] = useState([] as VoteItem[])
+    useEffect(() => {
+        boardSPI.fetchEventCards()
+            .then(cards => cards.map(card => new VoteItem(cleanHtmlTag(card.content))))
+            .then(setVoteItems)
+    }, [])
+
+    console.log(copilotSession?.miroUserId)
+    return (
+        <div className="w-full">
+            <div className="w-full centered">
+                <button className="btn btn-primary btn-primary-panel px-2"
+                        onClick={async () => {
+                            await broadcaster.broadcast(
+                                new StartEventSessionVote(
+                                    uuidv4(), null,
+                                    copilotSession?.miroUserId,
+                                    copilotSession?.miroUsername ?? "",
+                                    copilotSession?.miroUserId ?? null,
+                                    voteItems
+                                ))
+                            console.log(miroProxy.getApiCallsInLastMinute())
+                        }}
+                >Start Event Candidates Voting
+                </button>
+            </div>
+        </div>
+    )
+}
+
 const EventAnalysis: React.FC<{ boardSPI: WorkshopBoardSPI }> = ({
                                                                      boardSPI
                                                                  }) => {
@@ -542,10 +584,14 @@ function reloadContribution(boardSPI: WorkshopBoardSPI, setCards: (value: (((pre
     })
 }
 
-const EventStormingStepPanel: React.FC<EventStormingStepProps> = ({boardSPI, eventSummary, setEventSummary}) => {
+const EventStormingStepPanel: React.FC<EventStormingStepProps> = ({
+                                                                      boardSPI, eventSummary,
+                                                                      setEventSummary, copilotSession
+                                                                  }) => {
     const [contributionByContentDrawerOpen, setContributionByContentDrawerOpen] = React.useState(false);
     const [contributionByParticipantDrawerOpen, setContributionByParticipantDrawerOpen] = React.useState(false);
     const [deduplicationDrawerOpen, setDeduplicationDrawerOpen] = React.useState(false);
+    const broadcaster = new Broadcaster(miroProxy)
 
     const [autoRefresh, setAutoRefresh] = useState(false); // 新增一个状态来控制是否启用自动刷新
     const [cards, setCards] = useState([] as WorkshopCard[])
@@ -618,6 +664,9 @@ const EventStormingStepPanel: React.FC<EventStormingStepProps> = ({boardSPI, eve
             <EventDeduplication boardSPI={boardSPI} cards={cards}
                                 drawerOpen={deduplicationDrawerOpen}
                                 toggleDrawer={deduplicationToggleDrawer}/>
+            <div className="divider  w-full"/>
+            <EventVote boardSPI={boardSPI} copilotSession={copilotSession} broadcaster={broadcaster}/>
+
             <EventAnalysis boardSPI={boardSPI}/>
         </div>
     )
