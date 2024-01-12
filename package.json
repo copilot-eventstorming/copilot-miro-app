@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "license": "MIT",
   "scripts": {
+    "build:tailwind": "npx tailwindcss build src/assets/style.css -o dist/style.css",
     "start": "vite",
-    "build": "vite build",
+    "build": "npm run build:tailwind && vite build",
     "serve": "vite preview"
   },
   "dependencies": {
