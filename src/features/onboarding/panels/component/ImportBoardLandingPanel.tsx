@@ -1,4 +1,5 @@
 import * as React from "react";
+import eventstorming from '@/assets/eventstorming.png';
 
 const ImportBoardLandingPanel: React.FC = () => {
     return (
@@ -7,7 +8,7 @@ const ImportBoardLandingPanel: React.FC = () => {
                 <div className="w-full font-lato text-orange-500 px-0 text-2xl font-bold mb-2">
                     This might be an EventStorming Board!
                 </div>
-                <img className="my-6 shadow-md rounded-md" src="/src/assets/eventstorming.png" alt="eventstorming"/>
+                <img className="my-6 shadow-md rounded-md" src={eventstorming} alt="eventstorming"/>
             </div>
             <div className="bg-amber-600 my-10 px-4 py-8">
                 <div className="text-white  text-xl text-left font-lato">
