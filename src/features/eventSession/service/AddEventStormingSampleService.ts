@@ -1,6 +1,7 @@
 import {WorkshopBoardSPI} from "../../../application/spi/WorkshopBoardSPI";
 import {ShapeProps, StickyNoteProps} from "@mirohq/websdk-types";
-
+import events from '@/features/eventSession/resources/events.json';
+import hotspots from '@/features/eventSession/resources/hotspots.json';
 export class AddEventStormingSampleService {
     private boardSPI: WorkshopBoardSPI;
 
@@ -66,8 +67,9 @@ export class AddEventStormingSampleService {
     }
 
     private async loadExampleData(): Promise<StickyNoteProps[]> {
-        const response = await fetch('src/features/eventSession/resources/events.json');
-        return await response.json();
+        // const response = await fetch('src/features/eventSession/resources/events.json');
+        // return await response.json();
+        return Promise.resolve(events)
     }
 
 
@@ -76,7 +78,8 @@ export class AddEventStormingSampleService {
     }
 
     private async loadHotspots(): Promise<ShapeProps[]> {
-        const response = await fetch('src/features/eventSession/resources/hotspots.json');
-        return await response.json();
+        // const response = await fetch('src/features/eventSession/resources/hotspots.json');
+        // return await response.json();
+        return Promise.resolve(hotspots)
     }
 }

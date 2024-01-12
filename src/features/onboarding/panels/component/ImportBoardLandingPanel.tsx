@@ -1,4 +1,5 @@
 import * as React from "react";
+// @ts-ignore
 import eventstorming from '@/assets/eventstorming.png';
 
 const ImportBoardLandingPanel: React.FC = () => {
