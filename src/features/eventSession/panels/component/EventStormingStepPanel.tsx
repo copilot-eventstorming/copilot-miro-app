@@ -32,14 +32,27 @@ import {CopilotSession} from "../../../../application/CopilotSession";
 import {Broadcaster} from "../../../../application/messaging/Broadcaster";
 import {StartEventSessionVote} from "../../broadcast/message/StartEventSessionVote";
 import {VoteItem} from "../../types/VoteItem";
+import {messageRegistry} from "../../../../utils/MessagingBroadcastingInitializer";
+import {EventSessionVoteResult} from "../../broadcast/message/EventSessionVoteResult";
+import {EventSessionVoteResultHandler} from "../../broadcast/handler/EventSessionVoteResultHandler";
+import {
+    EventFeedback,
+    EventSessionVoteRepository, ItemFeedback,
+    ParticipantFeedback
+} from "../../repository/EventSessionVoteRepository";
+import {
+    EntropyCalculationRequest, EntropyCalculationResult,
+    EntropyCalculationService, KnowledgeReaction, Participant, ParticipantKnowledgeReaction, Reaction
+} from "../../../../domain/information/alignment/service/EntropyCalculationService";
 
 /*
 Enhancement:
 - [x] Add Tables to show Contributions
 - [x] Add Methods to recognize de-duplicate events, the duplication number indicates the importance/alignment of the event
-- [] Add Modal to let everyone vote for others' events:
+- [x] Add Modal to let everyone vote for others' events:
    - I think I know what it means. if yes, then
    - is it a valid event on the 4 characteristics: past tense, value and impact, specific meaning, and independent
+- [x] After Vote, facilitator can do alignment analysis and see the result in the panel.
 - [] After Vote, participants will see the vote statistics about their events from left hand side panel opened.
 - [] Add Table/Modal to show the vote statistics
    - List the deduplicated events order by 'familiarity percentage', and 'consensus' with ascending direction
@@ -495,36 +508,155 @@ function AnalysisResult(analysisResult: TValidateDomainEventResponse, keptEvents
 }
 
 type EventVoteProp = {
+    onlineUsers: OnlineUserInfo[]
+    cards: WorkshopCard[]
     boardSPI: WorkshopBoardSPI
     broadcaster: Broadcaster
     copilotSession: CopilotSession
 }
-const EventVote: React.FC<EventVoteProp> = ({boardSPI, broadcaster, copilotSession}) => {
+
+function mapReactions(items: ItemFeedback[]): Reaction[] {
+    return items.map(item => new Reaction(item.item, item.feedback));
+}
+
+function mapKnowledgeReactions(feedbacks: EventFeedback[]): KnowledgeReaction[] {
+    return feedbacks.map(feedback => {
+        return new KnowledgeReaction(feedback.eventName, mapReactions(feedback.items))
+    });
+}
+
+function mapParticipantFeedbacks(participantFeedbacks: ParticipantFeedback[]): ParticipantKnowledgeReaction[] {
+    return participantFeedbacks.map(feedback =>
+        new ParticipantKnowledgeReaction(
+            new Participant(feedback.participantId, feedback.participantName),
+            mapKnowledgeReactions(feedback.feedback)
+        ));
+}
+
+const EventVote: React.FC<EventVoteProp> = ({onlineUsers, cards, boardSPI, broadcaster, copilotSession}) => {
     const [voteItems, setVoteItems] = useState([] as VoteItem[])
+    const [participantFeedbacks, setParticipantFeedbacks] = useState([] as ParticipantFeedback[])
+    const voteRepository = copilotSession ? new EventSessionVoteRepository(copilotSession.miroBoardId) : null
+    const [entropyCalculationResult, setEntropyCalculationResult] = useState<EntropyCalculationResult | null>(null)
+    const callback = (feedbacks: ParticipantFeedback[]) => {
+        setParticipantFeedbacks(feedbacks)
+    }
+    const voteResultHandler = voteRepository ? new EventSessionVoteResultHandler(voteRepository, callback) : null
+
     useEffect(() => {
-        boardSPI.fetchEventCards()
-            .then(cards => cards.map(card => new VoteItem(cleanHtmlTag(card.content))))
-            .then(setVoteItems)
-    }, [])
+        if (!voteResultHandler) return
+
+        messageRegistry.registerHandler(EventSessionVoteResult.MESSAGE_TYPE,
+            voteResultHandler)
+
+        return () => {
+            messageRegistry.unregisterHandler(EventSessionVoteResult.MESSAGE_TYPE,
+                voteResultHandler)
+        }
+    }, []);
 
     console.log(copilotSession?.miroUserId)
+
+    const entropyCalculationService = new EntropyCalculationService()
+
     return (
         <div className="w-full">
-            <div className="w-full centered">
-                <button className="btn btn-primary btn-primary-panel px-2"
+            <div className="w-full centered my-2 flex flex-row justify-center space-x-4 px-1.5">
+                <button className="btn btn-primary btn-primary-panel px-2 mx-2"
                         onClick={async () => {
-                            await broadcaster.broadcast(
-                                new StartEventSessionVote(
-                                    uuidv4(), null,
-                                    copilotSession?.miroUserId,
-                                    copilotSession?.miroUsername ?? "",
-                                    copilotSession?.miroUserId ?? null,
-                                    voteItems
-                                ))
+                            boardSPI.fetchEventCards()
+                                .then(cards => cards.map(card => new VoteItem(cleanHtmlTag(card.content))))
+                                .then(voteItems => {
+                                    broadcaster.broadcast(
+                                        new StartEventSessionVote(
+                                            uuidv4(), null,
+                                            copilotSession?.miroUserId,
+                                            copilotSession?.miroUsername ?? "",
+                                            copilotSession?.miroUserId ?? null,
+                                            voteItems
+                                        ))
+                                })
                             console.log(miroProxy.getApiCallsInLastMinute())
                         }}
-                >Start Event Candidates Voting
+                >Start Voting
                 </button>
+
+                <button className="btn btn-primary btn-primary-panel px-2 mx-2"
+                        disabled={participantFeedbacks.length <= 0}
+                        onClick={() => {
+                            const result = entropyCalculationService.calculateEntropy(
+                                new EntropyCalculationRequest(
+                                    cards.map(card => cleanHtmlTag(card.content)),
+                                    ["Familiar", "PastTense", "Specific", "Independent", "Impact"],
+                                    mapParticipantFeedbacks(participantFeedbacks)
+                                ))
+                            setEntropyCalculationResult(result)
+                        }}
+                >
+                    Vote Analysis
+                </button>
+            </div>
+            <div className="w-full">
+                <div className="w-full sub-title sub-title-panel">Vote Records</div>
+                <table className="w-full">
+                    <thead>
+                    <tr>
+                        <th className="header header-panel">
+                            Participant Name
+                        </th>
+                        <th className="header header-panel">
+                            Voted
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {
+                        onlineUsers.map((user, index) => (
+                            <tr key={index} className={index % 2 === 0 ? 'odd_row' : 'even_row'}>
+                                <td className="text-cell text-cell-panel">
+                                    {user.name}
+                                </td>
+                                <td className="text-cell text-cell-panel">
+                                    {
+                                        participantFeedbacks.find(feedback => feedback.participantId === user.id) ?
+                                            "Yes" : "No"
+                                    }
+                                </td>
+                            </tr>
+                        ))
+                    }
+                    </tbody>
+                </table>
+            </div>
+            <div className="w-full divider"/>
+            <div className="w-full">
+                <div className="sub-title sub-title-panel">Alignment Entropy Analysis</div>
+                <table className="w-full">
+                    <thead>
+                    <tr>
+                        <th className="header header-panel">Event Name</th>
+                        <th className="header header-panel">Total</th>
+                        <th className="header header-panel">Familiarity</th>
+                        <th className="header header-panel">Past</th>
+                        <th className="header header-panel">Impact</th>
+                        <th className="header header-panel">Specific</th>
+                        <th className="header header-panel">Independent</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {entropyCalculationResult?.entropyPerKnowledge.map((item, index) => {
+                        return (<tr key={item.knowledge} className={`${index % 2 === 0 ? "even_row" : "odd_row"}`}>
+                            <td className="text-cell text-cell-panel">{item.knowledge}</td>
+                            <td className="number-cell number-cell-panel">{item.entropy.toFixed(2)}</td>
+                            <td className="number-cell number-cell-panel">{item.entropyPerKnowledgeItem.find(i => i.item === 'Familiar')?.entropy.toFixed(2)}</td>
+                            <td className="number-cell number-cell-panel">{item.entropyPerKnowledgeItem.find(i => i.item === 'PastTense')?.entropy.toFixed(2)}</td>
+                            <td className="number-cell number-cell-panel">{item.entropyPerKnowledgeItem.find(i => i.item === 'Impact')?.entropy.toFixed(2)}</td>
+                            <td className="number-cell number-cell-panel">{item.entropyPerKnowledgeItem.find(i => i.item === 'Specific')?.entropy.toFixed(2)}</td>
+                            <td className="number-cell number-cell-panel">{item.entropyPerKnowledgeItem.find(i => i.item === 'Independent')?.entropy.toFixed(2)}</td>
+                        </tr>)
+                    })}
+                    </tbody>
+                </table>
             </div>
         </div>
     )
@@ -631,7 +763,6 @@ const EventStormingStepPanel: React.FC<EventStormingStepProps> = ({
             <Steps/>
             <div className="divider w-full"/>
             <div className="flex justify-between items-center w-full px-1.5">
-
                 <button className="btn btn-secondary btn-secondary-panel "
                         onClick={() => {
                             reloadEventSummary(boardSPI, setEventSummary)
@@ -665,7 +796,8 @@ const EventStormingStepPanel: React.FC<EventStormingStepProps> = ({
                                 drawerOpen={deduplicationDrawerOpen}
                                 toggleDrawer={deduplicationToggleDrawer}/>
             <div className="divider  w-full"/>
-            <EventVote boardSPI={boardSPI} copilotSession={copilotSession} broadcaster={broadcaster}/>
+            <EventVote onlineUsers={onlineUsers} cards={cards} boardSPI={boardSPI} copilotSession={copilotSession}
+                       broadcaster={broadcaster}/>
 
             <EventAnalysis boardSPI={boardSPI}/>
         </div>

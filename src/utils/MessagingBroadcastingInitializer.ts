@@ -9,14 +9,12 @@ import {
 import {copilotSession$} from "../application/CopilotSession";
 import {StartEventSessionVoteHandler} from "../features/eventSession/broadcast/handler/StartEventSessionVoteHandler";
 import {StartEventSessionVote} from "../features/eventSession/broadcast/message/StartEventSessionVote";
-import {EventSessionVoteResult} from "../features/eventSession/broadcast/message/EventSessionVoteResult";
-import {EventSessionVoteResultHandler} from "../features/eventSession/broadcast/handler/EventSessionVoteResultHandler";
 
 export const messageRegistry = new MessageRegistry(MessageTopics)
 
 const startEventSessionConceptIntroductionQuizHandler = new StartEventSessionConceptIntroductionQuizHandler();
 const startEventSessionVoteHandler = new StartEventSessionVoteHandler();
-const eventSessionVoteResultHandler = new EventSessionVoteResultHandler();
+
 export function initializeMessaging() {
     copilotSession$.subscribe((copilotSession) => {
         if (copilotSession) {
@@ -38,10 +36,6 @@ export function initializeMessaging() {
         startEventSessionVoteHandler
     )
 
-    messageRegistry.registerHandler(
-        EventSessionVoteResult.MESSAGE_TYPE,
-        eventSessionVoteResultHandler
-    )
 
 }
 
