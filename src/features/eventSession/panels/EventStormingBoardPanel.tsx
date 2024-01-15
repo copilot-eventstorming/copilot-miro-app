@@ -6,6 +6,7 @@ import {reloadEventSummary} from "../utils/EventSummaryUtils";
 import {GraphOptimizerButtonGroup} from "./component/GraphOptimizerButtonGroup";
 import {ConceptIntroductionStepPanel} from "./component/ConceptIntroductionStepPanel";
 import {CopilotSession, copilotSession$} from "../../../application/CopilotSession";
+import {AgendaItem} from "../../../component/AgendaItem";
 
 const Console: React.FC<TConsoleProps> = ({output}) => {
     return (
@@ -15,32 +16,11 @@ const Console: React.FC<TConsoleProps> = ({output}) => {
         </div>
     );
 };
-type TPanelProps = {
-    title: string,
-    children: React.ReactNode,
-    index: number,
-    currentStep: number,
-    onClick: () => void
-}
-const AgendaItem: React.FC<TPanelProps> = ({title, children, index, currentStep, onClick}) => {
-    return (
-        <div className={`agenda-item ${index === currentStep ? 'agenda-item-open' : ''}`}>
-            <div className="w-full">
-                <input type="radio" id={`agenda-item-${index}`} className="hidden" checked={index === currentStep}
-                       onChange={() => {
-                       }}/>
-                <label className="agenda-item-btn" onClick={onClick} htmlFor={`agenda-item-${index}`}>
-                    {title}
-                </label>
-            </div>
-            {index === currentStep && <div>{children}</div>}
-        </div>
-    );
-};
 
 
 export const EventStormingBoardPanel: React.FC<TEventStormingBoardPanelProps> = ({boardSPI}) => {
     const [currentStep, setCurrentStep] = useState(0);
+    const [currentLevel, setCurrentLevel] = useState(0);
     const [eventSummary, setEventSummary] = useState(emptyEventSummary);
     const [consoleOutput, setConsoleOutput] = useState("");
     const [copilotSession, setCopilotSession] = useState(copilotSession$.value as CopilotSession);
@@ -61,31 +41,42 @@ export const EventStormingBoardPanel: React.FC<TEventStormingBoardPanelProps> = 
     return (
         <div className="agenda">
             <div className="title title-panel">Event Storming Agenda</div>
-
             <AgendaItem
                 title="1. Concepts Introduction"
                 index={0}
+                level={0}
                 currentStep={currentStep}
-                onClick={() => setCurrentStep(0)}
+                currentLevel={currentLevel}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
             >
                 <ConceptIntroductionStepPanel boardSPI={boardSPI} copilotSession={copilotSession}/>
             </AgendaItem>
             <AgendaItem
                 title="2. Event Storming"
                 index={1}
+                level={0}
+                currentLevel={currentLevel}
                 currentStep={currentStep}
-                onClick={() => setCurrentStep(1)}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
             >
                 {/* Storm the events content */}
-                <EventStormingStepPanel boardSPI={boardSPI} eventSummary={eventSummary}
-                                        setEventSummary={setEventSummary} copilotSession={copilotSession}/>
-
+                <EventStormingStepPanel boardSPI={boardSPI}
+                                        eventSummary={eventSummary}
+                                        setEventSummary={setEventSummary}
+                                        currentLevel={currentLevel}
+                                        setCurrentLevel={setCurrentLevel}
+                                        copilotSession={copilotSession}/>
             </AgendaItem>
             <AgendaItem
                 title="3. Event Explanation"
                 index={2}
+                level={0}
+                currentLevel={currentLevel}
                 currentStep={currentStep}
-                onClick={() => setCurrentStep(2)}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
             >
                 {/* Event Explanation content */}
                 <div>Event Explanation content goes here</div>
@@ -93,8 +84,11 @@ export const EventStormingBoardPanel: React.FC<TEventStormingBoardPanelProps> = 
             <AgendaItem
                 title="4. Normalizing"
                 index={3}
+                level={0}
+                currentLevel={currentLevel}
                 currentStep={currentStep}
-                onClick={() => setCurrentStep(3)}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
             >
                 {/* Normalizing content */}
                 <GraphOptimizerButtonGroup boardSPI={boardSPI} consoleOutput={consoleOutput}
@@ -105,8 +99,11 @@ export const EventStormingBoardPanel: React.FC<TEventStormingBoardPanelProps> = 
             <AgendaItem
                 title="5. Conclusion"
                 index={4}
+                level={0}
+                currentLevel={currentLevel}
                 currentStep={currentStep}
-                onClick={() => setCurrentStep(4)}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
             >
                 {/* Save Checkpoint & Prepare Next Session content */}
                 <div>Save Checkpoint & Prepare Next Session content goes here</div>

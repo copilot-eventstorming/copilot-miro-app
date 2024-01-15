@@ -80,7 +80,9 @@ export interface EventStormingStepProps {
     boardSPI: WorkshopBoardSPI;
     eventSummary: EventSummaryTypes;
     setEventSummary: React.Dispatch<React.SetStateAction<EventSummaryTypes>>;
-    copilotSession: CopilotSession
+    copilotSession: CopilotSession;
+    currentLevel: number;
+    setCurrentLevel: (level: number) => void;
 }
 
 export interface EventSummaryTableProps {

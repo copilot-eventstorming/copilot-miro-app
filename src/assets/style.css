@@ -99,11 +99,11 @@ tr:hover .hover-content {
 }
 
 .agenda {
-    @apply flex flex-col h-full w-full
+    @apply flex flex-col flex-grow w-full
 }
 
 .agenda-item {
-    @apply w-full duration-500 ease-in-out h-auto relative
+    @apply w-full duration-500 ease-in-out h-auto relative transition-all flex flex-col
 }
 
 .agenda-item-open {
@@ -112,12 +112,16 @@ tr:hover .hover-content {
 
 .agenda-item-btn {
     @apply flex px-2 py-1 rounded-md relative m-0.5
-    max-w-full text-left font-lato text-sm bg-orange-400 text-white
+    w-full text-left font-lato text-sm text-white
     hover:bg-orange-300 hover:-translate-y-0.5 transform transition
 }
 
 .agenda-item-btn::after {
-    @apply absolute right-10 content-[">"] transition-all duration-500 text-sm font-lato
+    @apply absolute right-10  transition-all duration-500 text-sm font-lato
+}
+
+.arrow-button {
+    /*margin-right: 10px; !* 调整这个值来改变箭头按钮的位置 *!*/
 }
 
 input:checked + .agenda-item-btn::after {

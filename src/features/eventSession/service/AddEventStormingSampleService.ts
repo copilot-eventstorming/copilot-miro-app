@@ -1,6 +1,8 @@
 import {WorkshopBoardSPI} from "../../../application/spi/WorkshopBoardSPI";
 import {ShapeProps, StickyNoteProps} from "@mirohq/websdk-types";
+// @ts-ignore
 import events from '@/features/eventSession/resources/events.json';
+// @ts-ignore
 import hotspots from '@/features/eventSession/resources/hotspots.json';
 export class AddEventStormingSampleService {
     private boardSPI: WorkshopBoardSPI;

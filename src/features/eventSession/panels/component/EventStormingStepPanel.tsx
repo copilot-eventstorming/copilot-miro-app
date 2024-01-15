@@ -1,7 +1,12 @@
 import React, {useEffect, useRef, useState} from "react";
 import {Drawer} from "../../../../component/drawer";
 import {mkItems, reloadEventSummary} from "../../utils/EventSummaryUtils";
-import {EventStormingStepProps, EventSummaryItem, EventSummaryTableProps} from "../../types/EventSummaryTypes";
+import {
+    EventStormingStepProps,
+    EventSummaryItem,
+    EventSummaryTableProps,
+    EventSummaryTypes
+} from "../../types/EventSummaryTypes";
 import Switch from "react-switch"; // 引入Switch组件
 import {
     TInvalidDomainEventCandidate,
@@ -44,16 +49,31 @@ import {
     EntropyCalculationRequest, EntropyCalculationResult,
     EntropyCalculationService, KnowledgeReaction, Participant, ParticipantKnowledgeReaction, Reaction
 } from "../../../../domain/information/alignment/service/EntropyCalculationService";
+import {AgendaItem} from "../../../../component/AgendaItem";
+import {ConceptIntroductionStepPanel} from "./ConceptIntroductionStepPanel";
 
 /*
 Enhancement:
 - [x] Add Tables to show Contributions
-- [x] Add Methods to recognize de-duplicate events, the duplication number indicates the importance/alignment of the event
+- [-] Add Methods to recognize de-duplicate events, the duplication number indicates the importance/alignment of the event
+  - [x] Clustering similar events
+  - [] separate the events into different cluster??? or just remove the duplicates by participants
 - [x] Add Modal to let everyone vote for others' events:
    - I think I know what it means. if yes, then
    - is it a valid event on the 4 characteristics: past tense, value and impact, specific meaning, and independent
+   - [] add interest level
 - [x] After Vote, facilitator can do alignment analysis and see the result in the panel.
+   - [] show and record total entropy
+- [] Reducing the entropy by removing the event cards
+   - [x] by similarity (GPT)
+   - [] by importance/impact/value
+   - [] by removing/replacing non-specific events (GPT)
+   - [] by correcting into past tense (GPT)
+   - [] by removing/replacing non-independent events (GPT)
+   - [] by summarizing the events
 - [] After Vote, participants will see the vote statistics about their events from left hand side panel opened.
+   - sort by interest, importance, familiarity
+   -
 - [] Add Table/Modal to show the vote statistics
    - List the deduplicated events order by 'familiarity percentage', and 'consensus' with ascending direction
  */
@@ -170,6 +190,7 @@ const ContributionByParticipant: React.FC<ContributionProps> = ({
 
 const Steps: React.FC = () => <>
     <div className="flex flex-col w-full my-4 px-4 py-2 font-lato text-sm">
+
         <b>Steps</b>
         <li>Align Workshop Objectives</li>
         <li>Event Storming Ramp Up
@@ -178,12 +199,22 @@ const Steps: React.FC = () => <>
                 <li>Quick Review</li>
             </ul>
         </li>
-        <li>Event Storming Fast Track</li>
-        <ul style={{listStyleType: 'disc', paddingLeft: '30px'}}>
-            <li>Fire at will</li>
-            <li>Deduplicate</li>
-            <li>Review</li>
-        </ul>
+        <li>Event Storming Fast Track
+            <ul style={{listStyleType: 'disc', paddingLeft: '30px'}}>
+                <li>Fire at will</li>
+                <li>Review
+                    <ul style={{listStyleType: 'disc', paddingLeft: '15px'}}>
+                        <li>Remove duplicates</li>
+                        <li>Collect feedbacks</li>
+                        <li>Ignore Low-value cards</li>
+                        <li>Fix non-past tense cards</li>
+                        <li>Fix unclear semantics cards</li>
+                        <li>Split non-independent events</li>
+                        <li>Merge cards with too fine granularity</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
     </div>
 </>;
 
@@ -716,14 +747,200 @@ function reloadContribution(boardSPI: WorkshopBoardSPI, setCards: (value: (((pre
     })
 }
 
-const EventStormingStepPanel: React.FC<EventStormingStepProps> = ({
-                                                                      boardSPI, eventSummary,
-                                                                      setEventSummary, copilotSession
-                                                                  }) => {
-    const [contributionByContentDrawerOpen, setContributionByContentDrawerOpen] = React.useState(false);
-    const [contributionByParticipantDrawerOpen, setContributionByParticipantDrawerOpen] = React.useState(false);
-    const [deduplicationDrawerOpen, setDeduplicationDrawerOpen] = React.useState(false);
+const ReviewStep: React.FC<EventStormingStepProps> = ({
+                                                          boardSPI, eventSummary,
+                                                          setEventSummary, copilotSession,
+                                                          currentLevel, setCurrentLevel
+                                                      }) => {
+    const [cards, setCards] = useState([] as WorkshopCard[])
+    const [deduplicationDrawerOpen, setDeduplicationDrawerOpen] = React.useState(true);
+    const [currentStep, setCurrentStep] = useState(0)
+    const [onlineUsers, setOnlineUsers] = useState([] as OnlineUserInfo[])
     const broadcaster = new Broadcaster(miroProxy)
+
+    useEffect(() => {
+        setCurrentLevel(3)
+    }, [])
+    const deduplicationToggleDrawer = () => {
+        setDeduplicationDrawerOpen(!deduplicationDrawerOpen);
+    };
+    return (
+        <div className="agenda">
+            <AgendaItem
+                title="Remove duplicates"
+                index={0}
+                level={3}
+                currentLevel={currentLevel}
+                currentStep={currentStep}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
+            >
+                <EventDeduplication boardSPI={boardSPI} cards={cards}
+                                    drawerOpen={deduplicationDrawerOpen}
+                                    toggleDrawer={deduplicationToggleDrawer}/>
+            </AgendaItem>
+            <AgendaItem
+                title="Collect feedbacks"
+                index={1}
+                level={3}
+                currentLevel={currentLevel}
+                currentStep={currentStep}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
+            >
+                <EventVote onlineUsers={onlineUsers} cards={cards} boardSPI={boardSPI} copilotSession={copilotSession}
+                           broadcaster={broadcaster}/>
+
+            </AgendaItem>
+            <AgendaItem
+                title="Ignore Low-value cards"
+                index={2}
+                level={3}
+                currentLevel={currentLevel}
+                currentStep={currentStep}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
+            >
+                <div/>
+            </AgendaItem>
+            <AgendaItem
+                title="Fix non-past tense cards"
+                index={3}
+                level={3}
+                currentLevel={currentLevel}
+                currentStep={currentStep}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
+            >
+                <div/>
+            </AgendaItem>
+            <AgendaItem
+                title="Fix unclear semantics cards"
+                index={4}
+                level={3}
+                currentLevel={currentLevel}
+                currentStep={currentStep}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
+            >
+                <div/>
+            </AgendaItem>
+            <AgendaItem
+                title="Split non-independent events"
+                index={5}
+                level={3}
+                currentLevel={currentLevel}
+                currentStep={currentStep}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
+            >
+                <div/>
+            </AgendaItem>
+            <AgendaItem
+                title="Merge cards with too fine granularity"
+                index={6}
+                level={3}
+                currentLevel={currentLevel}
+                currentStep={currentStep}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
+            >
+                <div/>
+            </AgendaItem>
+        </div>
+    )
+}
+
+
+const RampUpStepPanel: React.FC<EventStormingStepProps> = ({
+                                                               boardSPI, eventSummary,
+                                                               setEventSummary, copilotSession,
+                                                               currentLevel, setCurrentLevel
+                                                           }) => {
+    const [currentStep, setCurrentStep] = useState(0)
+
+    useEffect(() => {
+        setCurrentLevel(2)
+    }, [])
+    return (
+        <div className="agenda">
+            <AgendaItem
+                title="2.2.1 Everyone's 1st shot"
+                index={0}
+                level={2}
+                currentLevel={currentLevel}
+                currentStep={currentStep}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
+            >
+                <CreatingEvents setEventSummary={setEventSummary} eventSummary={eventSummary} boardSPI={boardSPI}/>
+            </AgendaItem>
+            <AgendaItem
+                title="2.2.2 Quick Review"
+                index={1}
+                level={2}
+                currentLevel={currentLevel}
+                currentStep={currentStep}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
+            >
+                <ReviewStep setEventSummary={setEventSummary} eventSummary={eventSummary} boardSPI={boardSPI}
+                            currentLevel={currentLevel} setCurrentLevel={setCurrentLevel}
+                            copilotSession={copilotSession}/>
+            </AgendaItem>
+        </div>
+    )
+}
+
+
+const FastTrackStepPanel: React.FC<EventStormingStepProps> = ({
+                                                                  boardSPI, eventSummary,
+                                                                  setEventSummary, copilotSession,
+                                                                  currentLevel, setCurrentLevel
+                                                              }) => {
+    const [currentStep, setCurrentStep] = useState(0)
+    return (
+        <div className="agenda">
+            <AgendaItem
+                title="2.3.1 Fire at will"
+                index={0}
+                level={2}
+                currentLevel={currentLevel}
+                currentStep={currentStep}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
+            >
+                <CreatingEvents setEventSummary={setEventSummary} eventSummary={eventSummary} boardSPI={boardSPI}/>
+            </AgendaItem>
+            <AgendaItem
+                title="2.3.2 Review"
+                index={1}
+                level={2}
+                currentLevel={currentLevel}
+                currentStep={currentStep}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
+            >
+                <ReviewStep setEventSummary={setEventSummary} eventSummary={eventSummary} boardSPI={boardSPI}
+                            currentLevel={currentLevel} setCurrentLevel={setCurrentLevel}
+                            copilotSession={copilotSession}/>
+            </AgendaItem>
+        </div>
+    )
+}
+
+export interface CreatingEventsProps {
+    boardSPI: WorkshopBoardSPI;
+    eventSummary: EventSummaryTypes;
+    setEventSummary: React.Dispatch<React.SetStateAction<EventSummaryTypes>>;
+}
+
+const CreatingEvents: React.FC<CreatingEventsProps> = ({
+                                                           boardSPI, eventSummary,
+                                                           setEventSummary
+                                                       }) => {
+    const [contributionByContentDrawerOpen, setContributionByContentDrawerOpen] = React.useState(true);
+    const [contributionByParticipantDrawerOpen, setContributionByParticipantDrawerOpen] = React.useState(true);
 
     const [autoRefresh, setAutoRefresh] = useState(false); // 新增一个状态来控制是否启用自动刷新
     const [cards, setCards] = useState([] as WorkshopCard[])
@@ -755,57 +972,215 @@ const EventStormingStepPanel: React.FC<EventStormingStepProps> = ({
         setContributionByParticipantDrawerOpen(!contributionByParticipantDrawerOpen);
     };
 
+    return <>
+        <div className="divider w-full"/>
+        <div className="flex justify-between items-center w-full px-1.5">
+            <button className="btn btn-secondary btn-secondary-panel "
+                    onClick={() => {
+                        reloadEventSummary(boardSPI, setEventSummary)
+                        reloadContribution(boardSPI, setCards, setOnlineUsers);
+                    }}>
+                refresh
+            </button>
+            <div className="flex items-center">
+                <label className="font-lato text-sm">Auto Refresh</label>
+                <div className="mx-2 centered">
+                    <Switch checked={autoRefresh} onChange={setAutoRefresh} height={20} width={40}
+                            onColor="#00ff00"
+                            offColor="#ff0000"/>
+                </div>
+            </div>
+        </div>
+        <div className="divider w-full"/>
+
+        <ContributionByContent boardSPI={boardSPI} eventSummary={eventSummary} setEventSummary={setEventSummary}
+                               drawerOpen={contributionByContentDrawerOpen}
+                               toggleDrawer={eventSummaryToggleDrawer}
+                               autoRefresh={autoRefresh}
+                               setAutoRefresh={setAutoRefresh}
+        />
+        <div className="divider  w-full"/>
+        <ContributionByParticipant cards={cards} onlineUsers={onlineUsers} boardSPI={boardSPI}
+                                   drawerOpen={contributionByParticipantDrawerOpen}
+                                   toggleDrawer={contributionToggleDrawer}/>
+    </>
+}
+
+const EventStormingStepPanel: React.FC<EventStormingStepProps> = ({
+                                                                      boardSPI, eventSummary,
+                                                                      setEventSummary, copilotSession,
+                                                                      currentLevel, setCurrentLevel
+                                                                  }) => {
+    const [contributionByContentDrawerOpen, setContributionByContentDrawerOpen] = React.useState(false);
+    const [contributionByParticipantDrawerOpen, setContributionByParticipantDrawerOpen] = React.useState(false);
+    const [deduplicationDrawerOpen, setDeduplicationDrawerOpen] = React.useState(false);
+    const broadcaster = new Broadcaster(miroProxy)
+
+    const [autoRefresh, setAutoRefresh] = useState(false); // 新增一个状态来控制是否启用自动刷新
+    const [cards, setCards] = useState([] as WorkshopCard[])
+    const [onlineUsers, setOnlineUsers] = useState([] as OnlineUserInfo[])
+    const [currentStep, setCurrentStep] = useState(0)
+    useEffect(() => {
+        reloadContribution(boardSPI, setCards, setOnlineUsers);
+    }, []);
+    useEffect(() => {
+        let intervalId: NodeJS.Timeout;
+        if (autoRefresh) { // 当autoRefresh为真时，设置定时器
+            intervalId = setInterval(() => {
+                reloadEventSummary(boardSPI, setEventSummary);
+                reloadContribution(boardSPI, setCards, setOnlineUsers);
+            }, 3000);
+        }
+
+        return () => {
+            if (intervalId) { // 在组件卸载时或autoRefresh变为假时，清除定时器
+                clearInterval(intervalId);
+            }
+        };
+    }, [boardSPI, setEventSummary, autoRefresh]);
+
+    useEffect(() => {
+        setCurrentLevel(1)
+    }, [])
+    const eventSummaryToggleDrawer = () => {
+        setContributionByContentDrawerOpen(!contributionByContentDrawerOpen);
+    };
+    const contributionToggleDrawer = () => {
+        setContributionByParticipantDrawerOpen(!contributionByParticipantDrawerOpen);
+    };
+
     const deduplicationToggleDrawer = () => {
         setDeduplicationDrawerOpen(!deduplicationDrawerOpen);
     };
     return (
-        <div className="w-full flex justify-center flex-col items-center">
-            <Steps/>
-            <div className="divider w-full"/>
-            <div className="flex justify-between items-center w-full px-1.5">
-                <button className="btn btn-secondary btn-secondary-panel "
-                        onClick={() => {
-                            reloadEventSummary(boardSPI, setEventSummary)
-                            reloadContribution(boardSPI, setCards, setOnlineUsers);
-                        }}>
-                    refresh
-                </button>
-                <div className="flex items-center">
-                    <label className="font-lato text-sm">Auto Refresh</label>
-                    <div className="mx-2 centered">
-                        <Switch checked={autoRefresh} onChange={setAutoRefresh} height={20} width={40}
-                                onColor="#00ff00"
-                                offColor="#ff0000"/>
-                    </div>
-                </div>
-            </div>
-            <div className="divider w-full"/>
-
-            <ContributionByContent boardSPI={boardSPI} eventSummary={eventSummary} setEventSummary={setEventSummary}
-                                   drawerOpen={contributionByContentDrawerOpen}
-                                   toggleDrawer={eventSummaryToggleDrawer}
-                                   autoRefresh={autoRefresh}
-                                   setAutoRefresh={setAutoRefresh}
-            />
-            <div className="divider  w-full"/>
-            <ContributionByParticipant cards={cards} onlineUsers={onlineUsers} boardSPI={boardSPI}
-                                       drawerOpen={contributionByParticipantDrawerOpen}
-                                       toggleDrawer={contributionToggleDrawer}/>
-            <div className="divider  w-full"/>
-            <EventDeduplication boardSPI={boardSPI} cards={cards}
-                                drawerOpen={deduplicationDrawerOpen}
-                                toggleDrawer={deduplicationToggleDrawer}/>
-            <div className="divider  w-full"/>
-            <EventVote onlineUsers={onlineUsers} cards={cards} boardSPI={boardSPI} copilotSession={copilotSession}
-                       broadcaster={broadcaster}/>
-
-            <EventAnalysis boardSPI={boardSPI}/>
+        <div className="agenda">
+            <AgendaItem
+                title="2.1. Align Workshop Objectives"
+                index={0}
+                level={1}
+                currentLevel={currentLevel}
+                currentStep={currentStep}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
+            >
+                <Steps/>
+            </AgendaItem>
+            <AgendaItem
+                title="2.2. Event Storming Ramp Up"
+                index={1}
+                level={1}
+                currentLevel={currentLevel}
+                currentStep={currentStep}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
+            >
+                <RampUpStepPanel boardSPI={boardSPI}
+                                 eventSummary={eventSummary} setEventSummary={setEventSummary}
+                                 currentLevel={currentLevel} setCurrentLevel={setCurrentLevel}
+                                 copilotSession={copilotSession}/>
+            </AgendaItem>
+            <AgendaItem
+                title="2.3. Event Storming Fast Track"
+                index={2}
+                level={1}
+                currentLevel={currentLevel}
+                currentStep={currentStep}
+                setCurrentLevel={setCurrentLevel}
+                setCurrentStep={setCurrentStep}
+            >
+                <FastTrackStepPanel boardSPI={boardSPI}
+                                    eventSummary={eventSummary} setEventSummary={setEventSummary}
+                                    currentLevel={currentLevel} setCurrentLevel={setCurrentLevel}
+                                    copilotSession={copilotSession}/>
+            </AgendaItem>
         </div>
-    )
-        ;
+    );
 };
 
+const Other: React.FC<EventStormingStepProps> = ({
+                                                     boardSPI, eventSummary,
+                                                     setEventSummary, copilotSession
+                                                 }) => {
+    const [contributionByContentDrawerOpen, setContributionByContentDrawerOpen] = React.useState(false);
+    const [contributionByParticipantDrawerOpen, setContributionByParticipantDrawerOpen] = React.useState(false);
+    const [deduplicationDrawerOpen, setDeduplicationDrawerOpen] = React.useState(false);
+    const broadcaster = new Broadcaster(miroProxy)
 
+    const [autoRefresh, setAutoRefresh] = useState(false); // 新增一个状态来控制是否启用自动刷新
+    const [cards, setCards] = useState([] as WorkshopCard[])
+    const [onlineUsers, setOnlineUsers] = useState([] as OnlineUserInfo[])
+    const [currentStep, setCurrentStep] = useState(0)
+    useEffect(() => {
+        reloadContribution(boardSPI, setCards, setOnlineUsers);
+    }, []);
+    useEffect(() => {
+        let intervalId: NodeJS.Timeout;
+        if (autoRefresh) { // 当autoRefresh为真时，设置定时器
+            intervalId = setInterval(() => {
+                reloadEventSummary(boardSPI, setEventSummary);
+                reloadContribution(boardSPI, setCards, setOnlineUsers);
+            }, 3000);
+        }
+
+        return () => {
+            if (intervalId) { // 在组件卸载时或autoRefresh变为假时，清除定时器
+                clearInterval(intervalId);
+            }
+        };
+    }, [boardSPI, setEventSummary, autoRefresh]);
+
+    const eventSummaryToggleDrawer = () => {
+        setContributionByContentDrawerOpen(!contributionByContentDrawerOpen);
+    };
+    const contributionToggleDrawer = () => {
+        setContributionByParticipantDrawerOpen(!contributionByParticipantDrawerOpen);
+    };
+
+    const deduplicationToggleDrawer = () => {
+        setDeduplicationDrawerOpen(!deduplicationDrawerOpen);
+    };
+    return <>
+        <div className="divider w-full"/>
+        <div className="flex justify-between items-center w-full px-1.5">
+            <button className="btn btn-secondary btn-secondary-panel "
+                    onClick={() => {
+                        reloadEventSummary(boardSPI, setEventSummary)
+                        reloadContribution(boardSPI, setCards, setOnlineUsers);
+                    }}>
+                refresh
+            </button>
+            <div className="flex items-center">
+                <label className="font-lato text-sm">Auto Refresh</label>
+                <div className="mx-2 centered">
+                    <Switch checked={autoRefresh} onChange={setAutoRefresh} height={20} width={40}
+                            onColor="#00ff00"
+                            offColor="#ff0000"/>
+                </div>
+            </div>
+        </div>
+        <div className="divider w-full"/>
+
+        <ContributionByContent boardSPI={boardSPI} eventSummary={eventSummary} setEventSummary={setEventSummary}
+                               drawerOpen={contributionByContentDrawerOpen}
+                               toggleDrawer={eventSummaryToggleDrawer}
+                               autoRefresh={autoRefresh}
+                               setAutoRefresh={setAutoRefresh}
+        />
+        <div className="divider  w-full"/>
+        <ContributionByParticipant cards={cards} onlineUsers={onlineUsers} boardSPI={boardSPI}
+                                   drawerOpen={contributionByParticipantDrawerOpen}
+                                   toggleDrawer={contributionToggleDrawer}/>
+        <div className="divider  w-full"/>
+        <EventDeduplication boardSPI={boardSPI} cards={cards}
+                            drawerOpen={deduplicationDrawerOpen}
+                            toggleDrawer={deduplicationToggleDrawer}/>
+        <div className="divider  w-full"/>
+        <EventVote onlineUsers={onlineUsers} cards={cards} boardSPI={boardSPI} copilotSession={copilotSession}
+                   broadcaster={broadcaster}/>
+
+        <EventAnalysis boardSPI={boardSPI}/>
+    </>
+}
 export {
     EventStormingStepPanel
 };
