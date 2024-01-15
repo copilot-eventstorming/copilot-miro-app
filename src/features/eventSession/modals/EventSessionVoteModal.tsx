@@ -117,7 +117,7 @@ const EventSessionVoteModal: React.FC = () => {
                     {voteItems.map((voteItem: VoteItem, row: number) => {
                         return (
                             <tr key={row} className={`${row % 2 === 0 ? "even_row" : "odd_row"} w-full `}>
-                                <td className="text-cell text-cell-modal text-sm">{voteItem.eventName}</td>
+                                <td className="text-cell text-cell-modal text-sm font-bold"><span className="px-1">{voteItem.eventName}</span></td>
                                 <td>
                                     <div className="flex flex-row justify-between  space-x-4  mx-2 my-1 py-1">
                                         {[0, 1, 2, 3].map((value, col) => (
