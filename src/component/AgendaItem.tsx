@@ -25,7 +25,7 @@ export const AgendaItem: React.FC<TPanelProps> = ({
     const [expanded, setExpanded] = React.useState(true);
     const marginLeft = `${Math.abs(level) * 0.5}rem`;
     // const marginLeft = `${currentLevel === 0 ? 0 : level === currentLevel - 1 ? 0 : 1}rem`;
-    console.log("currentLevel", currentLevel, "level", level, "currentStep", currentStep, "step", index, "expand", expanded)
+    // console.log("currentLevel", currentLevel, "level", level, "currentStep", currentStep, "step", index, "expand", expanded)
     return (
         (level === currentLevel || level === currentLevel + 1 || index === currentStep) &&
         <div className={`agenda-item ${index === currentStep ? 'agenda-item-open' : ''}`}>

@@ -27,7 +27,7 @@ export class SimilarEventsGroupLayoutService {
                 }
             )
 
-        this.layoutService.perform([groupSequence], 0.1, 0, 2, 0)
+        this.layoutService.perform([groupSequence], 0.3, 0, 2, 0)
             .then(() => console.log('layout done'))
             .catch((e) => console.log('layout error', e))
     }

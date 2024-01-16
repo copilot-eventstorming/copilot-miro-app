@@ -5,6 +5,7 @@ import {Completions} from "@azure/openai/types/openai";
 import {WorkshopCard} from "../../../application/spi/WorkshopBoardSPI";
 import {cleanHtmlTag} from "../../../application/service/utils/utils";
 import {contentWithoutSpace} from "../../../utils/WorkshopCardUtils";
+import {AzureOpenAIConfiguration, GPTConfiguration} from "../../../application/CopilotSession";
 
 export type DynamicObject = {
     [key: string]: string[];
@@ -16,59 +17,80 @@ export type SimilarityGroup = {
 }
 
 export class GroupByDuplicationDomainEventService {
-// 设置你的 OpenAI API 密钥
-    private apiKey: string = 'API KEY';
-    private openai = new OpenAIClient(
-        "https://copilot-gpt-instance.openai.azure.com/", new AzureKeyCredential(this.apiKey));
-    private deploymentId = "copilot-gpt-35-turbo-instruct"
-// 创建 OpenAI 客户端实例
 
-// 定义函数进行 OpenAI API 调用
-    private async openaiApiCall(cards: string[]): Promise<string> {
+    private async openaiApiCall(gptConfiguration: GPTConfiguration, cards: string[]): Promise<string> {
+        const openai = new OpenAIClient(
+            gptConfiguration.endpoint, new AzureKeyCredential(gptConfiguration.apiKey));
         // 构建输入文本
         const inputText = cards.join('\n');
-        console.log(inputText)
-        const result: Completions = await this.openai.getCompletions(this.deploymentId, [PromptPrefix + inputText], {
-            maxTokens: 1000,
-            temperature: 0.3
-        });
-        console.log(result.usage)
-        for (const choice of result.choices) {
-            console.log(choice.text);
+        const prompt = this.generatePrompt(cards);
+        console.log(prompt)
+        if (gptConfiguration.provider === AzureOpenAIConfiguration.Provider) {
+            const result: Completions = await openai.getCompletions(
+                (gptConfiguration as AzureOpenAIConfiguration).deploymentId,
+                [prompt], {
+                    maxTokens: 1000,
+                    temperature: 0.3
+                });
+            console.log(result.usage)
+            for (const choice of result.choices) {
+                console.log(choice.text);
+            }
+            // 返回生成的文本
+            return result.choices[0].text.trim();
+        } else {
+            throw new Error("not supported provider")
         }
-        // 返回生成的文本
-        return result.choices[0].text.trim();
     }
 
-    async perform(cards: WorkshopCard[]): Promise<SimilarityGroup[]> {
+    async perform(cards: WorkshopCard[], gptConfiguration: GPTConfiguration): Promise<SimilarityGroup[]> {
         console.log(cards.map(card => card.content))
-        return this.openaiApiCall(cards.map(card => cleanHtmlTag(card.content)))
+        return this.openaiApiCall(gptConfiguration, cards.map(card => cleanHtmlTag(card.content)))
             .then(result => {
-                console.log(result);
-                return JSON.parse(result)
+                return this.parseResponse(cards, result)
             })
             .catch(error => {
                 console.error(error);
-                return Promise.resolve(JSON.parse(responseExample))
-            }).then((result: DynamicObject) =>
-                Object.keys(result).map(key => {
-                    const groupName = key
-                    const groupMemberNames = result[groupName];
-                    const groupMembers = cards
-                        .filter(card => groupMemberNames.map(contentWithoutSpace)
-                            .includes(contentWithoutSpace(card.content)));
-                    return {groupName, groupMembers};
-                })
-            )
+                miro.board.notifications.showError(error)
+                return []
+            })
+
+    }
+
+    generatePrompt(cards: string[]): string {
+        const inputText = cards.join('\n');
+        return PromptPrefix + inputText + PromptPostfix;
+    }
+
+    parseResponse(cards: WorkshopCard[], response: string): SimilarityGroup[] {
+        try {
+            let result = JSON.parse(cleanHtmlTag(response));
+            return Object.keys(result).map(key => {
+                const groupName = key;
+                const groupMemberNames = result[groupName];
+                const groupMembers = cards
+                    .filter(card => groupMemberNames.map(contentWithoutSpace)
+                        .includes(contentWithoutSpace(card.content)));
+                return {groupName, groupMembers};
+            })
+        } catch (error) {
+            console.log(error)
+            miro.board.notifications.showInfo("Failed to parse JSON" + JSON.stringify(error))
+            throw error
+        }
     }
 }
 
-const PromptPrefix = `Domain Event Duplication Detection: Cluster the following domain event candidates into groups by the similarity of their meaning, if you think they are duplicated events, then group them together, naming the cluster with any event candidate in the group, response should ONLY and STRICTLY follow the format below:
+const PromptPrefix = `Domain Event Duplication Detection: Cluster the following domain event candidates into groups by the identity of their meaning, if you think they are duplicated events, then group them together, naming the cluster with any event candidate full name in the group, response should ONLY and STRICTLY follow the JSON format below:
 {
-   "domainEventCandidateName1" : [domainEventCandidateName1, domainEventCandidateName2, domainEventCandidateName3],
-   "domainEventCandidateNameA" : [domainEventCandidateNameA, domainEventCandidateNameB, domainEventCandidateNameC],
+   "domainEventCandidateName1" : ["domainEventCandidateName1", "domainEventCandidateName2", "domainEventCandidateName3"],
+   "domainEventCandidateNameA" : ["domainEventCandidateNameA", "domainEventCandidateNameB", "domainEventCandidateNameC"],
 }
-Input Event Names List as following:`
+Input Event Names List as following:
+`
+
+const PromptPostfix = `
+The JSON Response is:`
 
 const responseExample = `{
    "Workshop Concepts Introduced": ["Workshop Concepts Introduced", "工作坊概念介绍", "工作坊理念呈现", "工作坊思想展示", "工作坊观念说明"],

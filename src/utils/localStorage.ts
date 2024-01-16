@@ -13,21 +13,41 @@ export class SaveResult {
     }
 }
 
+// export async function saveLocally(id: string, object: any): Promise<SaveResult> {
+//     try {
+//         await set(id, object);
+//         return new SaveResult(true, null, sizeof(object))
+//     } catch (e) {
+//         console.log(e);
+//         return new SaveResult(false, e, sizeof(object));
+//     }
+// }
+//
+// export async function findLocally(id: string): Promise<any> {
+//     try {
+//         return await get(id);
+//     } catch (e) {
+//         console.log(e);
+//         return null;
+//     }
+// }
+
+
 export async function saveLocally(id: string, object: any): Promise<SaveResult> {
     try {
-        await set(id, object);
-        return new SaveResult(true, null, sizeof(object))
+        localStorage.setItem(id, JSON.stringify(object));
+        return Promise.resolve(new SaveResult(true, null, sizeof(object)));
     } catch (e) {
         console.log(e);
-        return new SaveResult(false, e, sizeof(object));
+        return Promise.resolve(new SaveResult(false, e, sizeof(object)));
     }
 }
 
 export async function findLocally(id: string): Promise<any> {
-    try {
-        return await get(id);
-    } catch (e) {
-        console.log(e);
-        return null;
-    }
+    const str = localStorage.getItem(id);
+    return Promise.resolve(JSON.parse(str || 'null'));
+}
+
+export async function removeLocally(id: string) {
+    return localStorage.removeItem(id)
 }

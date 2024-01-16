@@ -105,7 +105,8 @@ const ReviewStep: React.FC<EventStormingStepProps> = ({
                 setCurrentLevel={setCurrentLevel}
                 setCurrentStep={setCurrentStep}
             >
-                <RemoveDuplicates boardSPI={boardSPI} cards={cards}
+                <RemoveDuplicates boardSPI={boardSPI} cards={cards} setCards={setCards}
+                                  copilotSession={copilotSession}
                                   drawerOpen={deduplicationDrawerOpen}
                                   toggleDrawer={deduplicationToggleDrawer}/>
             </AgendaItem>
