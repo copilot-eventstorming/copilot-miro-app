@@ -1,6 +1,4 @@
-import {OpenAIClient, AzureKeyCredential} from '@azure/openai';
-import {CompletionCreateParamsNonStreaming} from 'openai/resources';
-import {sleep} from "openai/core";
+import {AzureKeyCredential, OpenAIClient} from '@azure/openai';
 import {Completions} from "@azure/openai/types/openai";
 import {WorkshopCard} from "../../../application/spi/WorkshopBoardSPI";
 import {cleanHtmlTag} from "../../../application/service/utils/utils";
