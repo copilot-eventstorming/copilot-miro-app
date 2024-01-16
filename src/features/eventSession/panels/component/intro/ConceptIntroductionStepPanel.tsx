@@ -1,22 +1,22 @@
 import React, {useEffect, useState} from "react"
-import {AddEventStormingSampleService} from "../../service/AddEventStormingSampleService";
-import {WorkshopBoardSPI} from "../../../../application/spi/WorkshopBoardSPI";
-import {Hotspot} from "../../types/Hotspot";
-import {FetchHotspotsService} from "../../service/FetchHotspotsService";
+import {AddEventStormingSampleService} from "../../../service/AddEventStormingSampleService";
+import {WorkshopBoardSPI} from "../../../../../application/spi/WorkshopBoardSPI";
+import {Hotspot} from "../../../types/Hotspot";
+import {FetchHotspotsService} from "../../../service/FetchHotspotsService";
 import {Shape} from "@mirohq/websdk-types";
-import {Broadcaster} from "../../../../application/messaging/Broadcaster";
-import {miroProxy} from "../../../../api/MiroProxy";
+import {Broadcaster} from "../../../../../application/messaging/Broadcaster";
+import {miroProxy} from "../../../../../api/MiroProxy";
 import {
     StartEventSessionConceptIntroductionQuiz
-} from "../../broadcast/message/StartEventSessionConceptIntroductionQuiz";
-import {EventSessionQuizAnswerHandler} from "../../broadcast/handler/EventSessionQuizAnswerHandler";
-import {Answer, EventSessionQuizAnswer} from "../../broadcast/message/EventSessionQuizAnswer";
-import {CopilotSession} from "../../../../application/CopilotSession";
+} from "../../../broadcast/message/StartEventSessionConceptIntroductionQuiz";
+import {EventSessionQuizAnswerHandler} from "../../../broadcast/handler/EventSessionQuizAnswerHandler";
+import {Answer, EventSessionQuizAnswer} from "../../../broadcast/message/EventSessionQuizAnswer";
+import {CopilotSession} from "../../../../../application/CopilotSession";
 import {v4 as uuidv4} from 'uuid';
-import {messageRegistry} from "../../../../utils/MessagingBroadcastingInitializer";
-import {EventSessionQuizRepository, QuizAnswer} from "../../repository/EventSessionQuizRepository";
-import {LoadEventSessionQuizService} from "../../service/LoadEventSessionQuizService";
-import {TQuestion} from "../../types/QuizTypes";
+import {messageRegistry} from "../../../../../utils/MessagingBroadcastingInitializer";
+import {EventSessionQuizRepository, QuizAnswer} from "../../../repository/EventSessionQuizRepository";
+import {LoadEventSessionQuizService} from "../../../service/LoadEventSessionQuizService";
+import {TQuestion} from "../../../types/QuizTypes";
 import Switch from "react-switch";
 
 

@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from "react";
 import {TConsoleProps, TEventStormingBoardPanelProps} from "../types/EventStormingBoardPanelTypes";
-import {EventStormingStepPanel} from "./component/EventStormingStepPanel";
+import {EventStormingStepPanel} from "./component/storming/EventStormingStepPanel";
 import {emptyEventSummary} from "../types/EventSummaryTypes";
 import {reloadEventSummary} from "../utils/EventSummaryUtils";
 import {GraphOptimizerButtonGroup} from "./component/GraphOptimizerButtonGroup";
-import {ConceptIntroductionStepPanel} from "./component/ConceptIntroductionStepPanel";
+import {ConceptIntroductionStepPanel} from "./component/intro/ConceptIntroductionStepPanel";
 import {CopilotSession, copilotSession$} from "../../../application/CopilotSession";
 import {AgendaItem} from "../../../component/AgendaItem";
 

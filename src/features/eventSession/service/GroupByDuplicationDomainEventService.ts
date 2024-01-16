@@ -17,7 +17,7 @@ export type SimilarityGroup = {
 
 export class GroupByDuplicationDomainEventService {
 // 设置你的 OpenAI API 密钥
-    private apiKey: string = 'API_KEY';
+    private apiKey: string = 'API KEY';
     private openai = new OpenAIClient(
         "https://copilot-gpt-instance.openai.azure.com/", new AzureKeyCredential(this.apiKey));
     private deploymentId = "copilot-gpt-35-turbo-instruct"
@@ -27,6 +27,7 @@ export class GroupByDuplicationDomainEventService {
     private async openaiApiCall(cards: string[]): Promise<string> {
         // 构建输入文本
         const inputText = cards.join('\n');
+        console.log(inputText)
         const result: Completions = await this.openai.getCompletions(this.deploymentId, [PromptPrefix + inputText], {
             maxTokens: 1000,
             temperature: 0.3
@@ -40,6 +41,7 @@ export class GroupByDuplicationDomainEventService {
     }
 
     async perform(cards: WorkshopCard[]): Promise<SimilarityGroup[]> {
+        console.log(cards.map(card => card.content))
         return this.openaiApiCall(cards.map(card => cleanHtmlTag(card.content)))
             .then(result => {
                 console.log(result);
