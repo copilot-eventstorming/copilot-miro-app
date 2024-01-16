@@ -39,7 +39,7 @@ export const AgendaItem: React.FC<TPanelProps> = ({
                                onChange={() => {
                                }}/>
                         <label className={`agenda-item-btn flex-row justify-between 
-                        ${index === currentStep ? 'bg-orange-500' : 'bg-orange-400 '}`} onClick={() => {
+                        ${index !== currentStep ? 'bg-blue-700 hover:bg-blue-300' : 'bg-orange-400 hover:bg-orange-300'}`} onClick={() => {
                             setCurrentStep(index)
                             setCurrentLevel(level)
                         }} htmlFor={`agenda-item-${index}`}>
@@ -49,7 +49,7 @@ export const AgendaItem: React.FC<TPanelProps> = ({
                                     <FontAwesomeIcon onClick={(event) => {
                                         event.stopPropagation();
                                         if (level > 0) setCurrentLevel(currentLevel - 1)
-                                    }} icon={faArrowUp} className="mx-1 px-1 hover:cursor-pointer text-blue-600"/>
+                                    }} icon={faArrowUp} className="mx-1 px-1 hover:cursor-pointer"/>
                                 ) : (<span> </span>)}
                                 {
                                     <FontAwesomeIcon
