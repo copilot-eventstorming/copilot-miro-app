@@ -281,6 +281,7 @@ const ManuallyCopyPastePrompt: React.FC<ManuallyCopyPastePromptProps> = ({
                               setSimilarityGroups(cardGroups)
                               const grouped = cardGroups
                                   .map(group => group.groupMembers)
+                                  .filter(group => group.length > 1)
                                   .sort((a, b) => b.length - a.length)
                               setGroupedCards(grouped)
                           } catch (e) {
@@ -429,24 +430,58 @@ const MainButtons: React.FC<TMainButtonsProps> = ({
                                                       setSimilarityGroups,
                                                       setGroupedCards
                                                   }) => {
-    return <div className="w-full centered my-2 flex flex-row justify-center space-x-4">
-        <button className="btn btn-primary btn-primary-panel px-2"
-                onClick={() => {
-                    setShowGptConfiguration(!showGptConfiguration)
-                }}
-        >Configure GPT
-        </button>
-        <button className="btn btn-primary btn-primary-panel px-2"
-                disabled={isLoading || showPrompt || copilotSession.gptConfiguration.provider === ManuallyAskGPTConfiguration.Provider}
-                onClick={() => {
-                    if (copilotSession && copilotSession.gptConfiguration.provider !== ManuallyAskGPTConfiguration.Provider) {
-                        setIsLoading(true)
-                        analyzeSimilarityByGPT(boardSPI, groupingService, copilotSession, setSimilarityGroups, setGroupedCards)
-                            .then(() => setIsLoading(false))
-                    }
-                }}>Similarity Analysis
-        </button>
-    </div>;
+    const [maxTokens, setMaxTokens] = React.useState(1000);
+    const [temperature, setTemperature] = React.useState(0.3);
+    return (
+        <div className="w-full flex flex-col">
+            <div className="w-full centered my-2 flex flex-row justify-center space-x-4">
+                <button className="btn btn-primary btn-primary-panel px-2"
+                        onClick={() => {
+                            setShowGptConfiguration(!showGptConfiguration)
+                        }}
+                >Configure GPT
+                </button>
+                <button className="btn btn-primary btn-primary-panel px-2"
+                        disabled={isLoading || showPrompt || copilotSession.gptConfiguration.provider === ManuallyAskGPTConfiguration.Provider}
+                        onClick={() => {
+                            if (copilotSession && copilotSession.gptConfiguration.provider !== ManuallyAskGPTConfiguration.Provider) {
+                                setIsLoading(true)
+                                analyzeSimilarityByGPT(boardSPI, groupingService, copilotSession, setSimilarityGroups, setGroupedCards, {maxTokens, temperature})
+                                    .then(() => setIsLoading(false))
+                            }
+                        }}>Similarity Analysis
+                </button>
+            </div>
+            {
+                copilotSession.gptConfiguration.provider !== ManuallyAskGPTConfiguration.Provider &&
+                <div className="w-full flex flex-col">
+                    <div className="flex justify-between items-center py-1 odd_row">
+                        <label className="text-left text-gray-900 text-xs pr-2 mr-5" htmlFor="maxTokens">Max Tokens</label>
+                        <div className="w-full pl-10 pr-3">
+                            <input id="maxTokens" type="range" min="0" max="5000" step="1" value={maxTokens}
+                                   className="slider bg-amber-500 flex-grow"
+                                   // style={{"width": "100%"}}
+                                   onChange={event => {
+                                       setMaxTokens(parseInt(event.target.value))
+                                   }}/>
+                        </div>
+                        <label className="text-left text-gray-900 text-xs mr-2">{maxTokens}</label>
+                    </div>
+                    <div className="flex justify-between items-center py-1 even_row">
+                        <label className="text-left text-gray-900 text-xs" htmlFor="temperature">Temperature</label>
+                        <div className="w-full pl-10 pr-3">
+                            <input id="temperature" type="range" min="0" max="1" step="0.01" value={temperature}
+                                   className="slider bg-amber-500"
+                                   // style={{"width": "100%"}}
+                                   onChange={event => {
+                                       setTemperature(parseFloat(event.target.value))
+                                   }}/>
+                        </div>
+                        <label className="text-left text-gray-900 text-xs mr-2">{temperature}</label>
+                    </div>
+                </div>
+            }
+        </div>)
 }
 
 export const RemoveDuplicates: React.FC<TEventDeduplicationProps> = ({

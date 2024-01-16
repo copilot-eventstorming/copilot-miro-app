@@ -16,9 +16,14 @@ export type SimilarityGroup = {
     groupMembers: WorkshopCard[];
 }
 
+export type TGPTOptions = {
+    maxTokens: number,
+    temperature: number,
+}
+
 export class GroupByDuplicationDomainEventService {
 
-    private async openaiApiCall(gptConfiguration: GPTConfiguration, cards: string[]): Promise<string> {
+    private async openaiApiCall(gptConfiguration: GPTConfiguration, cards: string[], gptOptions: TGPTOptions): Promise<string> {
         const openai = new OpenAIClient(
             gptConfiguration.endpoint, new AzureKeyCredential(gptConfiguration.apiKey));
         // 构建输入文本
@@ -29,8 +34,8 @@ export class GroupByDuplicationDomainEventService {
             const result: Completions = await openai.getCompletions(
                 (gptConfiguration as AzureOpenAIConfiguration).deploymentId,
                 [prompt], {
-                    maxTokens: 1000,
-                    temperature: 0.3
+                    maxTokens: gptOptions.maxTokens,
+                    temperature: gptOptions.temperature,
                 });
             console.log(result.usage)
             for (const choice of result.choices) {
@@ -43,9 +48,9 @@ export class GroupByDuplicationDomainEventService {
         }
     }
 
-    async perform(cards: WorkshopCard[], gptConfiguration: GPTConfiguration): Promise<SimilarityGroup[]> {
+    async perform(cards: WorkshopCard[], gptConfiguration: GPTConfiguration, gptOptions: TGPTOptions): Promise<SimilarityGroup[]> {
         console.log(cards.map(card => card.content))
-        return this.openaiApiCall(gptConfiguration, cards.map(card => cleanHtmlTag(card.content)))
+        return this.openaiApiCall(gptConfiguration, cards.map(card => cleanHtmlTag(card.content)), gptOptions)
             .then(result => {
                 return this.parseResponse(cards, result)
             })
