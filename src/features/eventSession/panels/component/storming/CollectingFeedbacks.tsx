@@ -81,7 +81,7 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({onlineUsers, 
 
     return (
         <div className="w-full">
-            <div className="w-full centered my-2 flex flex-row justify-center space-x-4 px-1.5">
+            <div className="w-full justify-center my-2 flex flex-row justify-center space-x-4 px-1.5">
                 <button className="btn btn-primary btn-primary-panel px-2 mx-2"
                         onClick={async () => {
                             boardSPI.fetchEventCards()

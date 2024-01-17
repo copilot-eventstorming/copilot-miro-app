@@ -38,9 +38,6 @@ Enhancement:
  */
 
 
-
-
-
 const Steps: React.FC = () => <>
     <div className="flex flex-col w-full my-4 px-4 py-2 font-lato text-sm">
 
@@ -87,9 +84,8 @@ const ReviewStep: React.FC<EventStormingStepProps> = ({
         setCurrentLevel(3)
     }, [])
     useEffect(() => {
-        boardSPI.fetchEventCards().then(cards => {
-            setCards(cards)
-        })
+        boardSPI.fetchEventCards().then(setCards)
+        boardSPI.fetchWorkshopUsers().then(setOnlineUsers)
     }, []);
     const deduplicationToggleDrawer = () => {
         setDeduplicationDrawerOpen(!deduplicationDrawerOpen);
@@ -119,7 +115,8 @@ const ReviewStep: React.FC<EventStormingStepProps> = ({
                 setCurrentLevel={setCurrentLevel}
                 setCurrentStep={setCurrentStep}
             >
-                <CollectingEventFeedbacks onlineUsers={onlineUsers} cards={cards} boardSPI={boardSPI} copilotSession={copilotSession}
+                <CollectingEventFeedbacks onlineUsers={onlineUsers} cards={cards} boardSPI={boardSPI}
+                                          copilotSession={copilotSession}
                                           broadcaster={broadcaster}/>
 
             </AgendaItem>

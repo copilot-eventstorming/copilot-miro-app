@@ -182,7 +182,7 @@ export const ConceptIntroductionStepPanel: React.FC<TConceptIntroductionPanelPro
             <li>Resolve Hotspot</li>
             <li>Vote for Domain Event Acceptance</li>
         </div>
-        <div className="flex flex-row w-full centered">
+        <div className="flex flex-row w-full justify-center">
             <div className="px-2 py-2">
                 <button className="btn btn-primary btn-primary-panel px-2" onClick={async () => {
                     await sampleService.addSample()
@@ -201,8 +201,8 @@ export const ConceptIntroductionStepPanel: React.FC<TConceptIntroductionPanelPro
         <div className="flex justify-between items-center w-full px-1.5">
             <div className="sub-title sub-title-panel">Hotspot List</div>
             <div className="flex items-center">
-                <label className="font-lato text-sm">Auto Refresh</label>
-                <div className="mx-2 centered">
+                <label className="font-lato text-sm text-blue-800">Auto Refresh</label>
+                <div className="mx-2 justify-center">
                     <Switch checked={autoRefresh} onChange={setAutoRefresh} height={20} width={40}
                             onColor="#00ff00"
                             offColor="#ff0000"/>
@@ -224,7 +224,7 @@ export const ConceptIntroductionStepPanel: React.FC<TConceptIntroductionPanelPro
                         onClick={() => boardSPI.zoomToCard(item.id)}
                         title={item.content}>{truncateString(item.content, 30)}</td>
                     <td className="text-cell text-cell-panel">{item.createdBy}</td>
-                    <td className="text-cell text-cell-panel centered">
+                    <td className="text-cell text-cell-panel justify-center">
                         <input type='checkbox'
                                checked={item.resolved}
                                onChange={() => {
@@ -303,7 +303,7 @@ export const ConceptIntroductionStepPanel: React.FC<TConceptIntroductionPanelPro
             </div>
         </div>
         <div className="w-full">
-            <div className="sub-title sub-title-panel w-full centered">Answers By Participants</div>
+            <div className="sub-title sub-title-panel w-full justify-center">Answers By Participants</div>
             <Answers/>
         </div>
     </>;
