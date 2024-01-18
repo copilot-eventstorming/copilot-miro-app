@@ -177,7 +177,7 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                             Participant Name
                         </th>
                         <th className="header header-panel">
-                            Voted
+                            Finished
                         </th>
                     </tr>
                     </thead>
