@@ -40,3 +40,31 @@ export function prepareDataByProperty(testData: ParticipantFeedback[], propertyN
 
     return [minProperty, avgProperty, maxProperty]
 }
+
+export function prepareDataByParticipant(testData: ParticipantFeedback[], propertyName: string): RadarData[][] {
+    const groupedByParticipant = testData.reduce((acc, curr) => {
+        acc[curr.participantId] = [...(acc[curr.participantId] || []), ...curr.feedback.map(feedback =>
+            feedback.items.find(item => item.item === propertyName)?.feedback)];
+        return acc;
+    }, {} as Record<string, (string | undefined)[]>);
+
+    const minProperty: RadarData[] = Object.entries(groupedByParticipant)
+        .map(([participantId, properties]) => ({
+            axis: participantId,
+            value: Math.min(...properties.map(property => property === 'true' ? 1 : property === 'false' ? 0 : parseFloat(property || '0')))
+        }));
+
+    const avgProperty: RadarData[] = Object.entries(groupedByParticipant)
+        .map(([participantId, properties]) => ({
+            axis: participantId,
+            value: properties.reduce((acc, curr) => acc + (curr === 'true' ? 1 : curr === 'false' ? 0 : parseFloat(curr || '0')), 0) / properties.length
+        }));
+
+    const maxProperty: RadarData[] = Object.entries(groupedByParticipant)
+        .map(([participantId, properties]) => ({
+            axis: participantId,
+            value: Math.max(...properties.map(property => property === 'true' ? 1 : property === 'false' ? 0 : parseFloat(property || '0')))
+        }));
+
+    return [minProperty, avgProperty, maxProperty]
+}

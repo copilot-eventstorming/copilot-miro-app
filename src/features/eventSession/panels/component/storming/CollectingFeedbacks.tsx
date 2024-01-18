@@ -29,7 +29,7 @@ import {miroProxy} from "../../../../../api/MiroProxy";
 import {Tab, TabList, TabPanel, Tabs} from "react-tabs";
 import {RadarData} from "../../../../../component/RadarChart";
 import {Radar} from "../../../../../component/RadarChartComponent";
-import {prepareDataByProperty} from "../../../../../utils/RadarDataFactory";
+import {prepareDataByParticipant, prepareDataByProperty} from "../../../../../utils/RadarDataFactory";
 
 type EventVoteProp = {
     onlineUsers: OnlineUserInfo[]
@@ -214,7 +214,7 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                 </TabList>
                 <TabPanel>
                     <Radar id="radar-chart-container"
-                           title="Event Familiarity"
+                           title="Event Familiarity Radar Chart"
                            data={prepareDataByProperty(participantFeedbacks, 'Familiar')}
                            maxValue={3}
                            levels={4}
@@ -228,8 +228,37 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                                }
                            }}
                     />
-                    <Radar id="radar-chart-container2" title="Event Impact"
+                    <Radar id="radar-chart-container3"
+                           title="Participant Familiarity Radar Chart"
+                           data={prepareDataByParticipant(participantFeedbacks, 'Familiar')}
+                           maxValue={3}
+                           levels={4}
+                           valueLabelF={value => {
+                               switch(value) {
+                                   case 0: return 'Never heard of it';
+                                   case 1: return 'Heard of it, but don\'t know what it is';
+                                   case 2: return 'Know what it is, but never used it';
+                                   case 3: return 'Used it, and know it well';
+                                   default: return '';
+                               }
+                           }}
+                    />
+                    <Radar id="radar-chart-container2" title="Event Impact Radar Chart"
                            data={prepareDataByProperty(participantFeedbacks, 'Impact')}
+                           levels={4}
+                           maxValue={3}
+                           valueLabelF={value => {
+                               switch(value) {
+                                   case 0: return 'No impact or value';
+                                   case 1: return 'Low impact or value';
+                                   case 2: return 'Medium impact or value';
+                                   case 3: return 'High impact or value';
+                                   default: return '';
+                               }
+                           }}
+                    ></Radar>
+                    <Radar id="radar-chart-container4" title="Participant Impact Radar Chart"
+                           data={prepareDataByParticipant(participantFeedbacks, 'Impact')}
                            levels={4}
                            maxValue={3}
                            valueLabelF={value => {
