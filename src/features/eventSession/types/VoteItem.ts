@@ -6,6 +6,7 @@ export class VoteItem {
         public specific: boolean | null = null,
         public independent: boolean | null = null,
         public impact: number | null = null,
+        public interest: number | null = null,
     ) {
     }
 }

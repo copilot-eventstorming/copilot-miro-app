@@ -240,7 +240,7 @@ export const CreatingEvents: React.FC<CreatingEventsProps> = ({
                 <div className="mx-2 centered">
                     <Switch checked={autoRefresh} onChange={setAutoRefresh} height={20} width={40}
                             onColor="#00ff00"
-                            offColor="#ff0000"/>
+                            offColor="#888888"/>
                 </div>
             </div>
         </div>

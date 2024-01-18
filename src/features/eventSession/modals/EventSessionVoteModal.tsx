@@ -90,7 +90,7 @@ const EventSessionVoteModal: React.FC = () => {
                     <li>0: Never heard of it</li>
                     <li>1: Heard of it, but don't know what it is</li>
                     <li>2: Know what it is, but never used it</li>
-                    <li>3: Used it</li>
+                    <li>3: Used it, and know it well</li>
                 </div>
                 <div className="header header-modal text-sm px-2">
                     <span className="text-cell text-sm font-bold">Valuable</span>
