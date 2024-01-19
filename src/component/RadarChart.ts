@@ -62,7 +62,7 @@ function RadarChart(id: string, data: RadarData[][], options: RadarOptions) {
             new Set((data[0].concat(data[1]).concat(data[2]).map((i, j) => i.axis))),
         total = allAxis.size,
         radius = Math.min(cfg.w / 2, cfg.h / 2),
-        Format = d3.format('.0'),
+        Format = d3.format('.02'),
         angleSlice = Math.PI * 2 / total;
 
     //Scale for the radius
