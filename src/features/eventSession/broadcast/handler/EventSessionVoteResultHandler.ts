@@ -7,6 +7,7 @@ import {
     ParticipantFeedback
 } from "../../repository/EventSessionVoteRepository";
 import {VoteItem} from "../../types/VoteItem";
+import {Familiarity, Impact, Independent, PastTense, Specific} from "../../types/EventFeedbackMetricNames";
 
 export class EventSessionVoteResultHandler implements IMessageHandler<EventSessionVoteResult> {
     private voteRepository: EventSessionVoteRepository;
@@ -19,11 +20,11 @@ export class EventSessionVoteResultHandler implements IMessageHandler<EventSessi
 
     private mapItemFeedback(voteItem: VoteItem): ItemFeedback[] {
         return [
-            new ItemFeedback('Familiar', voteItem.familiar?.toString() ?? ''),
-            new ItemFeedback('PastTense', voteItem.pastTense?.toString() ?? ''),
-            new ItemFeedback('Specific', voteItem.specific?.toString() ?? ''),
-            new ItemFeedback('Independent', voteItem.independent?.toString() ?? ''),
-            new ItemFeedback('Impact', voteItem.impact?.toString() ?? ''),
+            new ItemFeedback(Familiarity, voteItem.familiar?.toString() ?? ''),
+            new ItemFeedback(PastTense, voteItem.pastTense?.toString() ?? ''),
+            new ItemFeedback(Specific, voteItem.specific?.toString() ?? ''),
+            new ItemFeedback(Independent, voteItem.independent?.toString() ?? ''),
+            new ItemFeedback(Impact, voteItem.impact?.toString() ?? ''),
         ]
     }
 

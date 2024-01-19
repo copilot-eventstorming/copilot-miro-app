@@ -30,6 +30,7 @@ import {Tab, TabList, TabPanel, Tabs} from "react-tabs";
 import {RadarData} from "../../../../../component/RadarChart";
 import {Radar} from "../../../../../component/RadarChartComponent";
 import {prepareDataByParticipant, prepareDataByProperty} from "../../../../../utils/RadarDataFactory";
+import {Familiarity, Impact, Independent, Interest, PastTense, Specific} from "../../../types/EventFeedbackMetricNames";
 
 type EventVoteProp = {
     onlineUsers: OnlineUserInfo[]
@@ -79,12 +80,12 @@ const generateTestData = (): ParticipantFeedback[] => {
             const impact = Math.floor(Math.random() * 4);
             const interest = Math.floor(Math.random() * 4);
 
-            items.push(new ItemFeedback('Familiar', familiar.toString()));
-            items.push(new ItemFeedback('PastTense', pastTense.toString()));
-            items.push(new ItemFeedback('Specific', specific.toString()));
-            items.push(new ItemFeedback('Independent', independent.toString()));
-            items.push(new ItemFeedback('Impact', impact.toString()));
-            items.push(new ItemFeedback('Interest', interest.toString()));
+            items.push(new ItemFeedback(Familiarity, familiar.toString()));
+            items.push(new ItemFeedback(PastTense, pastTense.toString()));
+            items.push(new ItemFeedback(Specific, specific.toString()));
+            items.push(new ItemFeedback(Independent, independent.toString()));
+            items.push(new ItemFeedback(Impact, impact.toString()));
+            items.push(new ItemFeedback(Interest, interest.toString()));
 
             feedback.push(new EventFeedback(eventName, items));
         }
@@ -102,7 +103,6 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                                                                       broadcaster,
                                                                       copilotSession
                                                                   }) => {
-    const [voteItems, setVoteItems] = useState([] as VoteItem[])
     const [participantFeedbacks, setParticipantFeedbacks] = useState([] as ParticipantFeedback[])
     const voteRepository = copilotSession ? new EventSessionVoteRepository(copilotSession.miroBoardId) : null
     const [entropyCalculationResult, setEntropyCalculationResult] = useState<EntropyCalculationResult | null>(null)
@@ -156,13 +156,6 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                         //disabled={participantFeedbacks.length <= 0}
                         onClick={() => {
                             setParticipantFeedbacks(generateTestData())
-                            // const result = entropyCalculationService.calculateEntropy(
-                            //     new EntropyCalculationRequest(
-                            //         cards.map(card => cleanHtmlTag(card.content)),
-                            //         ["Familiar", "PastTense", "Specific", "Independent", "Impact"],
-                            //         mapParticipantFeedbacks(participantFeedbacks)
-                            //     ))
-                            // setEntropyCalculationResult(result)
                         }}
                 >
                     Mock Feedbacks
@@ -215,7 +208,7 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                 <TabPanel>
                     <Radar id="radar-chart-container"
                            title="Event Familiarity Radar Chart"
-                           data={prepareDataByProperty(participantFeedbacks, 'Familiar')}
+                           data={prepareDataByProperty(participantFeedbacks, Familiarity)}
                            maxValue={3}
                            levels={4}
                            valueLabelF={value => {
@@ -230,7 +223,7 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                     />
                     <Radar id="radar-chart-container3"
                            title="Participant Familiarity Radar Chart"
-                           data={prepareDataByParticipant(participantFeedbacks, 'Familiar')}
+                           data={prepareDataByParticipant(participantFeedbacks, Familiarity)}
                            maxValue={3}
                            levels={4}
                            valueLabelF={value => {
@@ -244,7 +237,7 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                            }}
                     />
                     <Radar id="radar-chart-container2" title="Event Impact Radar Chart"
-                           data={prepareDataByProperty(participantFeedbacks, 'Impact')}
+                           data={prepareDataByProperty(participantFeedbacks, Impact)}
                            levels={4}
                            maxValue={3}
                            valueLabelF={value => {
@@ -258,7 +251,7 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                            }}
                     ></Radar>
                     <Radar id="radar-chart-container4" title="Participant Impact Radar Chart"
-                           data={prepareDataByParticipant(participantFeedbacks, 'Impact')}
+                           data={prepareDataByParticipant(participantFeedbacks, Impact)}
                            levels={4}
                            maxValue={3}
                            valueLabelF={value => {
@@ -275,7 +268,7 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                 <TabPanel>
                     <Radar id="radar-chart-container3" title="Past Tense" showAverage={true} showMaximum={false}
                            showMinimum={false}
-                           data={prepareDataByProperty(participantFeedbacks, 'PastTense')} levels={2}
+                           data={prepareDataByProperty(participantFeedbacks, PastTense)} levels={2}
                            maxValue={1}
                            valueLabelF={value => {
                                switch(value) {
@@ -287,7 +280,7 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                     ></Radar>
                     <Radar id="radar-chart-container4" title="Specific Meaning" showAverage={true} showMaximum={false}
                            showMinimum={false}
-                           data={prepareDataByProperty(participantFeedbacks, 'Specific')} levels={2}
+                           data={prepareDataByProperty(participantFeedbacks, Specific)} levels={2}
                            maxValue={1}
                            valueLabelF={value => {
                                switch(value) {
@@ -299,7 +292,7 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                     ></Radar>
                     <Radar id="radar-chart-container5" title="Independent" showAverage={true} showMaximum={false}
                            showMinimum={false}
-                           data={prepareDataByProperty(participantFeedbacks, 'Independent')} levels={2}
+                           data={prepareDataByProperty(participantFeedbacks, Independent)} levels={2}
                            maxValue={1}
                            valueLabelF={value => {
                                switch(value) {
