@@ -94,10 +94,10 @@ const EventSessionVoteModal: React.FC = () => {
                 </div>
                 <div className="header header-modal text-sm px-2">
                     <span className="text-cell text-sm font-bold">Valuable</span>
-                    <li>0: No impact or value.</li>
-                    <li>1: Low impact or value.</li>
-                    <li>2: Medium impact or value.</li>
-                    <li>3: High impact or value</li>
+                    <li>0: No impact or value or irrelevant for/with workshop goal.</li>
+                    <li>1: Low impact or value for workshop goal.</li>
+                    <li>2: Medium impact or value for workshop goal.</li>
+                    <li>3: High impact or value for workshop goal.</li>
                 </div>
                 <div/>
             </div>

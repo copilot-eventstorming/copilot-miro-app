@@ -10,6 +10,11 @@ import {AgendaItem} from "../../../../../component/AgendaItem";
 import {CreatingEvents} from "./ContributionStatistic";
 import {RemoveDuplicates} from "./RemoveDuplicates";
 import {CollectingEventFeedbacks} from "./CollectingFeedbacks";
+import {IgnoreLowValueCards} from "./IgnoreLowValueCards";
+import {EventSessionVoteRepository, ParticipantFeedback} from "../../../repository/EventSessionVoteRepository";
+import {EventSessionVoteResultHandler} from "../../../broadcast/handler/EventSessionVoteResultHandler";
+import {messageRegistry} from "../../../../../utils/MessagingBroadcastingInitializer";
+import {EventSessionVoteResult} from "../../../broadcast/message/EventSessionVoteResult";
 
 /*
 Enhancement:
@@ -76,9 +81,36 @@ const ReviewStep: React.FC<EventStormingStepProps> = ({
                                                       }) => {
     const [cards, setCards] = useState([] as WorkshopCard[])
     const [deduplicationDrawerOpen, setDeduplicationDrawerOpen] = React.useState(true);
+
+    // For navigation
     const [currentStep, setCurrentStep] = useState(0)
-    const [onlineUsers, setOnlineUsers] = useState([] as OnlineUserInfo[])
+
+    // For Feedbacks
     const broadcaster = new Broadcaster(miroProxy)
+    const [onlineUsers, setOnlineUsers] = useState([] as OnlineUserInfo[])
+    const [participantFeedbacks, setParticipantFeedbacks] = useState([] as ParticipantFeedback[])
+    const voteRepository = copilotSession ? new EventSessionVoteRepository(copilotSession.miroBoardId) : null
+    const callback = (feedbacks: ParticipantFeedback[]) => {
+        setParticipantFeedbacks(feedbacks)
+    }
+    const voteResultHandler = voteRepository ? new EventSessionVoteResultHandler(voteRepository, callback) : null
+
+    useEffect(() => {
+        if (!voteResultHandler) return
+
+        messageRegistry.registerHandler(EventSessionVoteResult.MESSAGE_TYPE,
+            voteResultHandler)
+
+        return () => {
+            messageRegistry.unregisterHandler(EventSessionVoteResult.MESSAGE_TYPE,
+                voteResultHandler)
+        }
+    }, []);
+
+    useEffect(() => {
+        voteRepository?.loadVotes().then(setParticipantFeedbacks)
+    }, [])
+
 
     useEffect(() => {
         setCurrentLevel(3)
@@ -117,7 +149,10 @@ const ReviewStep: React.FC<EventStormingStepProps> = ({
             >
                 <CollectingEventFeedbacks onlineUsers={onlineUsers} cards={cards} boardSPI={boardSPI}
                                           copilotSession={copilotSession}
-                                          broadcaster={broadcaster}/>
+                                          broadcaster={broadcaster}
+                                          participantFeedbacks={participantFeedbacks}
+                                          setParticipantFeedbacks={setParticipantFeedbacks}
+                />
 
             </AgendaItem>
             <AgendaItem
@@ -129,7 +164,7 @@ const ReviewStep: React.FC<EventStormingStepProps> = ({
                 setCurrentLevel={setCurrentLevel}
                 setCurrentStep={setCurrentStep}
             >
-                <div/>
+                <IgnoreLowValueCards boardSPI={boardSPI} feedbacks={participantFeedbacks} cards={cards}/>
             </AgendaItem>
             <AgendaItem
                 title="Fix non-past tense cards"

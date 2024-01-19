@@ -2,14 +2,8 @@ import {OnlineUserInfo} from "@mirohq/websdk-types";
 import {WorkshopBoardSPI, WorkshopCard} from "../../../../../application/spi/WorkshopBoardSPI";
 import {Broadcaster} from "../../../../../application/messaging/Broadcaster";
 import {CopilotSession} from "../../../../../application/CopilotSession";
+import {EventFeedback, ItemFeedback, ParticipantFeedback} from "../../../repository/EventSessionVoteRepository";
 import {
-    EventFeedback,
-    EventSessionVoteRepository,
-    ItemFeedback,
-    ParticipantFeedback
-} from "../../../repository/EventSessionVoteRepository";
-import {
-    EntropyCalculationRequest,
     EntropyCalculationResult,
     EntropyCalculationService,
     KnowledgeReaction,
@@ -17,17 +11,13 @@ import {
     ParticipantKnowledgeReaction,
     Reaction
 } from "../../../../../domain/information/alignment/service/EntropyCalculationService";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {VoteItem} from "../../../types/VoteItem";
-import {EventSessionVoteResultHandler} from "../../../broadcast/handler/EventSessionVoteResultHandler";
-import {messageRegistry} from "../../../../../utils/MessagingBroadcastingInitializer";
-import {EventSessionVoteResult} from "../../../broadcast/message/EventSessionVoteResult";
 import {cleanHtmlTag} from "../../../../../application/service/utils/utils";
 import {StartEventSessionVote} from "../../../broadcast/message/StartEventSessionVote";
 import {v4 as uuidv4} from "uuid";
 import {miroProxy} from "../../../../../api/MiroProxy";
 import {Tab, TabList, TabPanel, Tabs} from "react-tabs";
-import {RadarData} from "../../../../../component/RadarChart";
 import {Radar} from "../../../../../component/RadarChartComponent";
 import {prepareDataByParticipant, prepareDataByProperty} from "../../../../../utils/RadarDataFactory";
 import {Familiarity, Impact, Independent, Interest, PastTense, Specific} from "../../../types/EventFeedbackMetricNames";
@@ -38,6 +28,8 @@ type EventVoteProp = {
     boardSPI: WorkshopBoardSPI
     broadcaster: Broadcaster
     copilotSession: CopilotSession
+    participantFeedbacks: ParticipantFeedback[]
+    setParticipantFeedbacks: (feedbacks: ParticipantFeedback[]) => void
 }
 
 function mapReactions(items: ItemFeedback[]): Reaction[] {
@@ -101,31 +93,11 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                                                                       cards,
                                                                       boardSPI,
                                                                       broadcaster,
-                                                                      copilotSession
+                                                                      copilotSession,
+                                                                      participantFeedbacks,
+                                                                      setParticipantFeedbacks
                                                                   }) => {
-    const [participantFeedbacks, setParticipantFeedbacks] = useState([] as ParticipantFeedback[])
-    const voteRepository = copilotSession ? new EventSessionVoteRepository(copilotSession.miroBoardId) : null
     const [entropyCalculationResult, setEntropyCalculationResult] = useState<EntropyCalculationResult | null>(null)
-
-
-    const callback = (feedbacks: ParticipantFeedback[]) => {
-        setParticipantFeedbacks(feedbacks)
-    }
-
-    const voteResultHandler = voteRepository ? new EventSessionVoteResultHandler(voteRepository, callback) : null
-
-    useEffect(() => {
-        if (!voteResultHandler) return
-
-        messageRegistry.registerHandler(EventSessionVoteResult.MESSAGE_TYPE,
-            voteResultHandler)
-
-        return () => {
-            messageRegistry.unregisterHandler(EventSessionVoteResult.MESSAGE_TYPE,
-                voteResultHandler)
-        }
-    }, []);
-
 
     console.log(copilotSession?.miroUserId)
 
@@ -153,7 +125,7 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                 >Start Feedback
                 </button>
                 <button className="btn btn-primary btn-primary-panel px-2 mx-2"
-                        //disabled={participantFeedbacks.length <= 0}
+                    //disabled={participantFeedbacks.length <= 0}
                         onClick={() => {
                             setParticipantFeedbacks(generateTestData())
                         }}
@@ -212,12 +184,17 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                            maxValue={3}
                            levels={4}
                            valueLabelF={value => {
-                               switch(value) {
-                                   case 0: return 'Never heard of it';
-                                   case 1: return 'Heard of it, but don\'t know what it is';
-                                   case 2: return 'Know what it is, but never used it';
-                                   case 3: return 'Used it, and know it well';
-                                   default: return '';
+                               switch (value) {
+                                   case 0:
+                                       return 'Never heard of it';
+                                   case 1:
+                                       return 'Heard of it, but don\'t know what it is';
+                                   case 2:
+                                       return 'Know what it is, but never used it';
+                                   case 3:
+                                       return 'Used it, and know it well';
+                                   default:
+                                       return '';
                                }
                            }}
                     />
@@ -227,12 +204,17 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                            maxValue={3}
                            levels={4}
                            valueLabelF={value => {
-                               switch(value) {
-                                   case 0: return 'Never heard of it';
-                                   case 1: return 'Heard of it, but don\'t know what it is';
-                                   case 2: return 'Know what it is, but never used it';
-                                   case 3: return 'Used it, and know it well';
-                                   default: return '';
+                               switch (value) {
+                                   case 0:
+                                       return 'Never heard of it';
+                                   case 1:
+                                       return 'Heard of it, but don\'t know what it is';
+                                   case 2:
+                                       return 'Know what it is, but never used it';
+                                   case 3:
+                                       return 'Used it, and know it well';
+                                   default:
+                                       return '';
                                }
                            }}
                     />
@@ -241,12 +223,17 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                            levels={4}
                            maxValue={3}
                            valueLabelF={value => {
-                               switch(value) {
-                                   case 0: return 'No impact or value';
-                                   case 1: return 'Low impact or value';
-                                   case 2: return 'Medium impact or value';
-                                   case 3: return 'High impact or value';
-                                   default: return '';
+                               switch (value) {
+                                   case 0:
+                                       return 'No impact or value or irrelevant for/with workshop goal';
+                                   case 1:
+                                       return 'Low impact or value for workshop goal';
+                                   case 2:
+                                       return 'Medium impact or value for workshop goal';
+                                   case 3:
+                                       return 'High impact or value for workshop goal';
+                                   default:
+                                       return '';
                                }
                            }}
                     ></Radar>
@@ -255,12 +242,17 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                            levels={4}
                            maxValue={3}
                            valueLabelF={value => {
-                               switch(value) {
-                                   case 0: return 'No impact or value';
-                                   case 1: return 'Low impact or value';
-                                   case 2: return 'Medium impact or value';
-                                   case 3: return 'High impact or value';
-                                   default: return '';
+                               switch (value) {
+                                   case 0:
+                                       return 'No impact or value or irrelevant for/with workshop goal';
+                                   case 1:
+                                       return 'Low impact or value for workshop goal';
+                                   case 2:
+                                       return 'Medium impact or value for workshop goal';
+                                   case 3:
+                                       return 'High impact or value for workshop goal';
+                                   default:
+                                       return '';
                                }
                            }}
                     ></Radar>
@@ -271,10 +263,13 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                            data={prepareDataByProperty(participantFeedbacks, PastTense)} levels={2}
                            maxValue={1}
                            valueLabelF={value => {
-                               switch(value) {
-                                   case 0: return 'No, it is not past tense';
-                                   case 1: return 'Yes, it is past tense';
-                                   default: return '';
+                               switch (value) {
+                                   case 0:
+                                       return 'No, it is not past tense';
+                                   case 1:
+                                       return 'Yes, it is past tense';
+                                   default:
+                                       return '';
                                }
                            }}
                     ></Radar>
@@ -283,10 +278,13 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                            data={prepareDataByProperty(participantFeedbacks, Specific)} levels={2}
                            maxValue={1}
                            valueLabelF={value => {
-                               switch(value) {
-                                   case 0: return 'No, it is very blurry or vague';
-                                   case 1: return 'Yes, it is specific';
-                                   default: return '';
+                               switch (value) {
+                                   case 0:
+                                       return 'No, it is very blurry or vague';
+                                   case 1:
+                                       return 'Yes, it is specific';
+                                   default:
+                                       return '';
                                }
                            }}
                     ></Radar>
@@ -295,44 +293,47 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                            data={prepareDataByProperty(participantFeedbacks, Independent)} levels={2}
                            maxValue={1}
                            valueLabelF={value => {
-                               switch(value) {
-                                   case 0: return 'No, it contains other events';
-                                   case 1: return 'Yes, it is independent';
-                                   default: return '';
+                               switch (value) {
+                                   case 0:
+                                       return 'No, it contains other events';
+                                   case 1:
+                                       return 'Yes, it is independent';
+                                   default:
+                                       return '';
                                }
                            }}
                     ></Radar>
                 </TabPanel>
                 {/*<TabPanel>*/}
-                    {/*<div className="w-full">*/}
-                    {/*    <div className="sub-title sub-title-panel">Alignment Entropy Analysis</div>*/}
-                    {/*    <table className="w-full">*/}
-                    {/*        <thead>*/}
-                    {/*        <tr>*/}
-                    {/*            <th className="header header-panel">Event Name</th>*/}
-                    {/*            <th className="header header-panel">Total</th>*/}
-                    {/*            <th className="header header-panel">Familiarity</th>*/}
-                    {/*            <th className="header header-panel">Past</th>*/}
-                    {/*            <th className="header header-panel">Impact</th>*/}
-                    {/*            <th className="header header-panel">Specific</th>*/}
-                    {/*            <th className="header header-panel">Independent</th>*/}
-                    {/*        </tr>*/}
-                    {/*        </thead>*/}
-                    {/*        <tbody>*/}
-                    {/*        {entropyCalculationResult?.entropyPerKnowledge.map((item, index) => {*/}
-                    {/*            return (<tr key={item.knowledge} className={`${index % 2 === 0 ? "even_row" : "odd_row"}`}>*/}
-                    {/*                <td className="text-cell text-cell-panel">{item.knowledge}</td>*/}
-                    {/*                <td className="number-cell number-cell-panel">{item.entropy.toFixed(2)}</td>*/}
-                    {/*                <td className="number-cell number-cell-panel">{item.entropyPerKnowledgeItem.find(i => i.item === 'Familiar')?.entropy.toFixed(2)}</td>*/}
-                    {/*                <td className="number-cell number-cell-panel">{item.entropyPerKnowledgeItem.find(i => i.item === 'PastTense')?.entropy.toFixed(2)}</td>*/}
-                    {/*                <td className="number-cell number-cell-panel">{item.entropyPerKnowledgeItem.find(i => i.item === 'Impact')?.entropy.toFixed(2)}</td>*/}
-                    {/*                <td className="number-cell number-cell-panel">{item.entropyPerKnowledgeItem.find(i => i.item === 'Specific')?.entropy.toFixed(2)}</td>*/}
-                    {/*                <td className="number-cell number-cell-panel">{item.entropyPerKnowledgeItem.find(i => i.item === 'Independent')?.entropy.toFixed(2)}</td>*/}
-                    {/*            </tr>)*/}
-                    {/*        })}*/}
-                    {/*        </tbody>*/}
-                    {/*    </table>*/}
-                    {/*</div>*/}
+                {/*<div className="w-full">*/}
+                {/*    <div className="sub-title sub-title-panel">Alignment Entropy Analysis</div>*/}
+                {/*    <table className="w-full">*/}
+                {/*        <thead>*/}
+                {/*        <tr>*/}
+                {/*            <th className="header header-panel">Event Name</th>*/}
+                {/*            <th className="header header-panel">Total</th>*/}
+                {/*            <th className="header header-panel">Familiarity</th>*/}
+                {/*            <th className="header header-panel">Past</th>*/}
+                {/*            <th className="header header-panel">Impact</th>*/}
+                {/*            <th className="header header-panel">Specific</th>*/}
+                {/*            <th className="header header-panel">Independent</th>*/}
+                {/*        </tr>*/}
+                {/*        </thead>*/}
+                {/*        <tbody>*/}
+                {/*        {entropyCalculationResult?.entropyPerKnowledge.map((item, index) => {*/}
+                {/*            return (<tr key={item.knowledge} className={`${index % 2 === 0 ? "even_row" : "odd_row"}`}>*/}
+                {/*                <td className="text-cell text-cell-panel">{item.knowledge}</td>*/}
+                {/*                <td className="number-cell number-cell-panel">{item.entropy.toFixed(2)}</td>*/}
+                {/*                <td className="number-cell number-cell-panel">{item.entropyPerKnowledgeItem.find(i => i.item === 'Familiar')?.entropy.toFixed(2)}</td>*/}
+                {/*                <td className="number-cell number-cell-panel">{item.entropyPerKnowledgeItem.find(i => i.item === 'PastTense')?.entropy.toFixed(2)}</td>*/}
+                {/*                <td className="number-cell number-cell-panel">{item.entropyPerKnowledgeItem.find(i => i.item === 'Impact')?.entropy.toFixed(2)}</td>*/}
+                {/*                <td className="number-cell number-cell-panel">{item.entropyPerKnowledgeItem.find(i => i.item === 'Specific')?.entropy.toFixed(2)}</td>*/}
+                {/*                <td className="number-cell number-cell-panel">{item.entropyPerKnowledgeItem.find(i => i.item === 'Independent')?.entropy.toFixed(2)}</td>*/}
+                {/*            </tr>)*/}
+                {/*        })}*/}
+                {/*        </tbody>*/}
+                {/*    </table>*/}
+                {/*</div>*/}
                 {/*</TabPanel>*/}
             </Tabs>
 

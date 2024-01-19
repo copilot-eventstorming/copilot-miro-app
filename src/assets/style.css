@@ -202,7 +202,8 @@ input:checked + .agenda-item-btn::after {
     @apply text-xl
     px-1 py-2
     text-left text-black
-    font-lato;
+    font-lato
+    font-bold;
 }
 
 .header-modal {
