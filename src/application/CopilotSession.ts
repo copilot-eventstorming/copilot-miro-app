@@ -50,5 +50,4 @@ combineLatest([copilotSession$, gptConfiguration$]).subscribe(([copilotSession, 
     if (copilotSession && copilotSession.gptConfiguration !== gptConfiguration) {
         copilotSession$.next({...copilotSession, gptConfiguration})
     }
-    console.log("gptConfiguration$", gptConfiguration, "copilotSession", {...copilotSession, gptConfiguration})
 })

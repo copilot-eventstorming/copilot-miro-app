@@ -23,8 +23,16 @@ const modalHtmlEntries = fs
         return acc;
     }, {});
 
+const panelHtmlEntries = fs
+    .readdirSync('./panels')
+    .filter((file) => path.extname(file) === '.html')
+    .reduce((acc, file) => {
+        acc[`panels/${path.basename(file, '.html')}`] = path.resolve(__dirname, 'panels', file);
+        return acc;
+    }, {});
+
 // make sure vite picks up all html files in root, needed for vite build
-const allHtmlEntries = {...rootHtmlEntries, ...modalHtmlEntries};
+const allHtmlEntries = {...rootHtmlEntries, ...modalHtmlEntries, ...panelHtmlEntries};
 
 // https://vitejs.dev/config/
 export default defineConfig({

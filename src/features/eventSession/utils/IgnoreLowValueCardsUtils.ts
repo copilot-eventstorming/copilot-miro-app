@@ -1,16 +1,15 @@
 import {EventFeedback, ParticipantFeedback} from "../repository/EventSessionVoteRepository";
 import {Familiarity, Impact, Interest} from "../types/EventFeedbackMetricNames";
 import {EventScore} from "../types/EventScore";
+import {OnlineUserInfo} from "@mirohq/websdk-types";
+import {WorkshopCard} from "../../../application/spi/WorkshopBoardSPI";
 
-export function convertToEventScore(feedbacks: ParticipantFeedback[]): EventScore[] {
+export function convertToEventScore(feedbacks: ParticipantFeedback[], ownerNameF: (eventName: string) => string): EventScore[] {
     return feedbacks.reduce((acc: EventScore[], feedback: ParticipantFeedback) => {
         const eventScore: EventScore[] = feedback.feedback.map((eventFeedback: EventFeedback) => {
-            console.log('convertToEventScore0', eventFeedback.items.find(item => item.item === Interest))
-            console.log('convertToEventScore1', eventFeedback.items.find(item => item.item === Interest)?.feedback)
-            console.log(numerical(eventFeedback.items.find(item => item.item === Interest)?.feedback, 0))
-
             return {
                 eventName: eventFeedback.eventName,
+                eventOwner: ownerNameF(eventFeedback.eventName),
                 importanceScore: numerical(eventFeedback.items.find(item => item.item === Impact)?.feedback, 0),
                 interestScore: numerical(eventFeedback.items.find(item => item.item === Interest)?.feedback, 0),
                 familiarScore: numerical(eventFeedback.items.find(item => item.item === Familiarity)?.feedback, 0),
@@ -27,6 +26,7 @@ export function convertToEventScore(feedbacks: ParticipantFeedback[]): EventScor
             } else {
                 acc.push({
                     eventName: score.eventName,
+                    eventOwner: ownerNameF(score.eventName),
                     importanceScore: score.importanceScore || 0,
                     interestScore: score.interestScore || 0,
                     familiarScore: score.familiarScore || 0,
@@ -48,6 +48,7 @@ export function convertToEventScore(feedbacks: ParticipantFeedback[]): EventScor
     }).map((eventScore: EventScore) => {
         return {
             eventName: eventScore.eventName,
+            eventOwner: eventScore.eventOwner,
             importanceScore: eventScore.importanceScore/feedbacks.length,
             interestScore: eventScore.interestScore/feedbacks.length,
             familiarScore: eventScore.familiarScore/feedbacks.length

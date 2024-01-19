@@ -204,7 +204,7 @@ export const ConceptIntroductionStepPanel: React.FC<TConceptIntroductionPanelPro
                 <label className="font-lato text-sm text-blue-800">Auto Refresh</label>
                 <div className="mx-2 justify-center">
                     <Switch checked={autoRefresh} onChange={setAutoRefresh} height={20} width={40}
-                            onColor="#00ff00"
+                            onColor="#00CC00"
                             offColor="#888888"/>
                 </div>
             </div>

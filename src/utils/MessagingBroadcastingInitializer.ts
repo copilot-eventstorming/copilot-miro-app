@@ -9,11 +9,18 @@ import {
 import {copilotSession$} from "../application/CopilotSession";
 import {StartEventSessionVoteHandler} from "../features/eventSession/broadcast/handler/StartEventSessionVoteHandler";
 import {StartEventSessionVote} from "../features/eventSession/broadcast/message/StartEventSessionVote";
+import {
+    ParticipantFeedbackAdjustmentRequestHandler
+} from "../features/eventSession/broadcast/handler/ParticipantFeedbackAdjustmentRequestHandler";
+import {
+    ParticipantFeedbackAdjustmentRequest
+} from "../features/eventSession/broadcast/message/ParticipantFeedbackAdjustmentRequest";
 
 export const messageRegistry = new MessageRegistry(MessageTopics)
 
 const startEventSessionConceptIntroductionQuizHandler = new StartEventSessionConceptIntroductionQuizHandler();
 const startEventSessionVoteHandler = new StartEventSessionVoteHandler();
+const participantFeedbackAdjustmentRequestHandler = new ParticipantFeedbackAdjustmentRequestHandler();
 
 export function initializeMessaging() {
     copilotSession$.subscribe((copilotSession) => {
@@ -34,6 +41,11 @@ export function initializeMessaging() {
     messageRegistry.registerHandler(
         StartEventSessionVote.MESSAGE_TYPE,
         startEventSessionVoteHandler
+    )
+
+    messageRegistry.registerHandler(
+        ParticipantFeedbackAdjustmentRequest.MESSAGE_TYPE,
+        participantFeedbackAdjustmentRequestHandler
     )
 
 

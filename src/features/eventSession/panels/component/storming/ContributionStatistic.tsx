@@ -239,7 +239,7 @@ export const CreatingEvents: React.FC<CreatingEventsProps> = ({
                 <label className="font-lato text-sm">Auto Refresh</label>
                 <div className="mx-2 centered">
                     <Switch checked={autoRefresh} onChange={setAutoRefresh} height={20} width={40}
-                            onColor="#00ff00"
+                            onColor="#00CC00"
                             offColor="#888888"/>
                 </div>
             </div>

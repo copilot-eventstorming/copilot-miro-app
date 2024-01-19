@@ -164,7 +164,7 @@ const ReviewStep: React.FC<EventStormingStepProps> = ({
                 setCurrentLevel={setCurrentLevel}
                 setCurrentStep={setCurrentStep}
             >
-                <IgnoreLowValueCards boardSPI={boardSPI} feedbacks={participantFeedbacks} cards={cards}/>
+                <IgnoreLowValueCards boardSPI={boardSPI} feedbacks={participantFeedbacks} cards={cards} copilotSession={copilotSession} onlineUsers={onlineUsers}/>
             </AgendaItem>
             <AgendaItem
                 title="Fix non-past tense cards"

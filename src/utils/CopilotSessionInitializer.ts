@@ -9,7 +9,6 @@ export function initializeSession() {
         miro.board.getInfo().then((board) => {
             gptConfigurationRepo.loadGPTConfiguration().then((gptConfiguration) => {
                 gptConfiguration$.next(gptConfiguration || manuallyAskGPTConfiguration)
-                console.log("initializeSession", "gptConfiguration", gptConfiguration, "user", user, "board", board)
                 copilotSession$.next({
                     miroUserId: user.id,
                     miroUsername: user.name,

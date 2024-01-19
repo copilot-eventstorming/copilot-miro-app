@@ -13,7 +13,7 @@ export class MessageRegistry {
     constructor(messageTopics: string[]) {
         this.messageTopics = messageTopics;
         messageTopics.forEach((messageTopic: string) => {
-            this.subscriptions.set(messageTopic, this.onMessage(messageTopic))
+            this.subscriptions.set(messageTopic, this.onMessage(messageTopic).bind(this))
         })
     }
 
@@ -22,6 +22,7 @@ export class MessageRegistry {
     }
 
     registerHandler(type: string, handler: IMessageHandler<any>) {
+        console.log("registering handler", type, handler, this.handlers.get(type)?.length ?? 0)
         if (this.handlers.has(type)) {
             const handlers = this.handlers.get(type);
             this.handlers.get(type)?.push(handler);
@@ -29,6 +30,7 @@ export class MessageRegistry {
         } else {
             this.handlers.set(type, [handler]);
         }
+        console.log("after registering handler", type, handler, this.handlers.get(type)?.length ?? 0)
     }
 
     unregisterHandler(type: string, handler: IMessageHandler<any>) {
