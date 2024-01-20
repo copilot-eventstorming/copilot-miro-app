@@ -71,7 +71,7 @@ export const Radar: React.FC<TRadarProps> = ({
     const distinctValues = new Set(data[0].concat(data[1]).concat(data[2]).map(d => d.value))
     const sortedDistinctValues = [...distinctValues].sort((a, b) => a - b)
     return (
-        <div className="w-full flex flex-col justify-center">
+        <div key={`${id}-container`} className="w-full flex flex-col justify-center">
             <div className="font-lato text-center sub-title">{title}</div>
             <div className="w-full">
                 <table className="w-full">
@@ -165,7 +165,7 @@ export const Radar: React.FC<TRadarProps> = ({
                         valueLabelF && sortedDistinctValues && sortedDistinctValues.map((value, index) => {
                             return (
                                 valueLabelF(value) ? (
-                                    <li key={`${title}-${index}`} className="text-cell text-cell-panel text-sm">
+                                    <li key={`${title}-${value}-${index}`} className="text-cell text-cell-panel text-sm">
                                         {value} - {valueLabelF(value)}
                                     </li>
                                 ) : (

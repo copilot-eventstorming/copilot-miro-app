@@ -12,10 +12,17 @@ import {CopilotSession} from "../../../../../application/CopilotSession";
 import {OnlineUserInfo} from "@mirohq/websdk-types";
 import {Familiarity, Impact, Interest} from "../../../types/EventFeedbackMetricNames";
 import {MetricMetadata, MetricOption} from "../../../types/MetricMetadata";
+import {
+    ParticipantFeedbackAdjustmentResponseHandler
+} from "../../../broadcast/handler/ParticipantFeedbackAdjustmentResponseHandler";
+import {IncrementalFeedback, updateFeedbacks} from "../../../utils/FeedbackMergeUtils";
+import {messageRegistry} from "../../../../../utils/MessagingBroadcastingInitializer";
+import {ParticipantFeedbackAdjustmentResponse} from "../../../broadcast/message/ParticipantFeedbackAdjustmentResponse";
 
 type IgnoreLowValueCardsProps = {
     boardSPI: WorkshopBoardSPI
     feedbacks: ParticipantFeedback[]
+    setFeedbacks: (feedbacks: ParticipantFeedback[]) => void
     cards: WorkshopCard[]
     copilotSession: CopilotSession
     onlineUsers: OnlineUserInfo[]
@@ -58,11 +65,18 @@ function filterParticipantFeedbacks(feedbacks: ParticipantFeedback[], eventName:
 export const IgnoreLowValueCards: React.FC<IgnoreLowValueCardsProps> = ({
                                                                             boardSPI,
                                                                             feedbacks,
+                                                                            setFeedbacks,
                                                                             cards,
                                                                             copilotSession,
                                                                             onlineUsers
                                                                         }) => {
+
     const [eventScores, setEventScores] = useState<EventScore[]>([])
+    const previousEventScores = React.useRef<EventScore[]>(eventScores)
+    useEffect(() => {
+        previousEventScores.current = eventScores;
+    }, [eventScores]);
+
     const eventOwnerByEventName = (eventName: string) => {
         const card = cards.find(card => contentWithoutSpace(card.content) === contentWithoutSpace(eventName))
         if (card) {
@@ -78,7 +92,33 @@ export const IgnoreLowValueCards: React.FC<IgnoreLowValueCardsProps> = ({
     }
     useEffect(() => {
         setEventScores(convertToEventScore(feedbacks, eventOwnerByEventName))
+        console.log("feedbacks", feedbacks)
     }, [feedbacks])
+
+    const [incrementalFeedback, setIncrementalFeedback] = React.useState<IncrementalFeedback | null>(null);
+
+    useEffect(() => {
+        if (incrementalFeedback) {
+            console.log("incrementalFeedback", incrementalFeedback)
+            updateFeedbacks(incrementalFeedback, feedbacks, setFeedbacks);
+        }
+    }, [incrementalFeedback]);
+
+    const adjustmentResponseHandler = new ParticipantFeedbackAdjustmentResponseHandler(setIncrementalFeedback)
+
+    useEffect(() => {
+        messageRegistry.registerHandler(
+            ParticipantFeedbackAdjustmentResponse.MESSAGE_TYPE,
+            adjustmentResponseHandler
+        )
+        return () => {
+            messageRegistry.unregisterHandler(
+                ParticipantFeedbackAdjustmentResponse.MESSAGE_TYPE,
+                adjustmentResponseHandler
+            )
+        }
+    }, []);
+
     const broadcaster = new Broadcaster(miroProxy);
 
     return (<div className="w-full">
@@ -108,13 +148,26 @@ export const IgnoreLowValueCards: React.FC<IgnoreLowValueCardsProps> = ({
                     }>{eventScore.eventName}</td>
                     <td className="text-cell number-cell-panel">{eventScore.eventOwner}</td>
                     <td className="text-cell number-cell-panel">
-                        <li className={eventScore.importanceScore === 0 ? "text-red-500" : eventScore.importanceScore === 1 ? "text-yellow-500" : "text-black"}>
+                        <li className={`
+                                ${eventScore.importanceScore !== previousEventScores.current.find(previousEventScore => previousEventScore.eventName === eventScore.eventName)?.importanceScore ? "cell-change" : ""}
+                                ${eventScore.importanceScore === 0 ? "text-red-500" : eventScore.importanceScore === 1 ? "text-yellow-500" : "text-black"}
+                                `
+                        }>
                             {eventScore.importanceScore.toFixed(2)}
                         </li>
-                        <li className={eventScore.interestScore === 3 ? "text-red-500" : eventScore.interestScore === 2 ? "text-yellow-500" : "text-black"}>
+                        <li className={`
+                                ${eventScore.interestScore !== previousEventScores.current.find(previousEventScore => previousEventScore.eventName === eventScore.eventName)?.interestScore ? "cell-change" : ""}
+                                ${eventScore.interestScore === 3 ? "text-red-500" : eventScore.interestScore === 2 ? "text-yellow-500" : "text-black"}
+                        `}
+                        >
                             {eventScore.interestScore.toFixed(2)}
                         </li>
-                        <li className={eventScore.familiarScore === 0 ? "text-red-500" : eventScore.familiarScore === 1 ? "text-yellow-500" : "text-black"}>
+                        <li className={`
+                                ${eventScore.familiarScore !== previousEventScores.current.find(previousEventScore => previousEventScore.eventName === eventScore.eventName)?.familiarScore ? "cell-change" : ""}
+                                ${eventScore.familiarScore === 0 ? "text-red-500" : eventScore.familiarScore === 1 ? "text-yellow-500" : "text-black"}
+                                `
+                        }
+                        >
                             {eventScore.familiarScore.toFixed(2)}
                         </li>
                     </td>

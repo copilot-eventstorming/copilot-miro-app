@@ -23,53 +23,13 @@ import {MetricMetadata} from "../types/MetricMetadata";
 import {numerical} from "../utils/IgnoreLowValueCardsUtils";
 import {Broadcaster} from "../../../application/messaging/Broadcaster";
 import {v4 as uuidv4} from 'uuid';
+import {IncrementalFeedback, updateFeedbacks} from "../utils/FeedbackMergeUtils";
 
 const boardSPI: WorkshopBoardSPI = new WorkshopBoardService(miroProxy);
 const broadcaster: Broadcaster = new Broadcaster(miroProxy);
 
-export interface IncrementalFeedback {
-    incrementalFeedback: EventFeedback;
-    participantId: string;
-}
 
-function mergeEventFeedBack(targetFeedback: ParticipantFeedback, incrementalFeedback: EventFeedback): ParticipantFeedback {
-    const otherEventFeedbacks = targetFeedback.feedback.filter(feedback => feedback.eventName !== incrementalFeedback.eventName)
-    const originalEventFeedback = targetFeedback.feedback.find(feedback => feedback.eventName === incrementalFeedback.eventName)
-    const incrementMetrics: Set<string> = new Set(incrementalFeedback.items.map(item => item.item))
-    if (originalEventFeedback) {
-        const otherItems = originalEventFeedback.items.filter(item => !incrementMetrics.has(item.item))
-        const mergedItems = [...otherItems, ...incrementalFeedback.items]
-        const mergedEventFeedback: EventFeedback = {
-            eventName: incrementalFeedback.eventName,
-            items: mergedItems
-        }
-        return {
-            ...targetFeedback,
-            feedback: [...otherEventFeedbacks, mergedEventFeedback]
-        }
-    }
-    return {
-        ...targetFeedback,
-        feedback: [...otherEventFeedbacks, incrementalFeedback]
-    };
-}
 
-function updateFeedbacks(incrementalFeedback: IncrementalFeedback, feedbacks: ParticipantFeedback[], setFeedbacks: (value: (((prevState: ParticipantFeedback[]) => ParticipantFeedback[]) | ParticipantFeedback[])) => void) {
-    //merge specific EventFeedback items from specific participant
-    const toMergeParticipantId = incrementalFeedback.participantId
-    const targetFeedback = feedbacks.find(feedback => feedback.participantId === toMergeParticipantId)
-    if (!targetFeedback) {
-        setFeedbacks([...feedbacks, {
-            participantId: toMergeParticipantId,
-            participantName: '',
-            feedback: [incrementalFeedback.incrementalFeedback]
-        }])
-    } else {
-        const mergedFeedback: ParticipantFeedback = mergeEventFeedBack(targetFeedback, incrementalFeedback.incrementalFeedback)
-        const newFeedbacks = [...feedbacks.filter(feedback => feedback.participantId !== toMergeParticipantId), mergedFeedback];
-        setFeedbacks(newFeedbacks)
-    }
-}
 
 const ParticipantFeedbackAdjustmentPanel: React.FC = () => {
     const urlParams = new URLSearchParams(window.location.search);
