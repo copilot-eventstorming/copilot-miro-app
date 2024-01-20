@@ -1,16 +1,17 @@
 import {IMessageHandler} from "../../../../application/messaging/IMessageHandler";
 import {ParticipantFeedbackAdjustmentRequest} from "../message/ParticipantFeedbackAdjustmentRequest";
 import {ParticipantFeedback} from "../../repository/EventSessionVoteRepository";
+import {MetricMetadata} from "../../types/MetricMetadata";
 
 export class ParticipantSwitchFeedbackHandler implements IMessageHandler<ParticipantFeedbackAdjustmentRequest> {
-    private callback: (value: ParticipantFeedback[]) => void;
+    private callback: (value: ParticipantFeedback[], metricMetadata: MetricMetadata[]) => void;
 
-    constructor(feedbacksSetter: (value: (ParticipantFeedback[])) => void) {
+    constructor(feedbacksSetter: (value: ParticipantFeedback[], metricMetadata: MetricMetadata[]) => void) {
         this.callback = feedbacksSetter
     }
     handleMessage(message: ParticipantFeedbackAdjustmentRequest): Promise<void> {
         console.log("ParticipantSwitchFeedbackHandler", message)
-        this.callback(message.feedbacks)
+        this.callback(message.feedbacks, message.metricMeta)
         return Promise.resolve();
     }
 

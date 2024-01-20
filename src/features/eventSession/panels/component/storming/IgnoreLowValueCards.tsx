@@ -11,6 +11,7 @@ import {v4 as uuidv4} from "uuid";
 import {CopilotSession} from "../../../../../application/CopilotSession";
 import {OnlineUserInfo} from "@mirohq/websdk-types";
 import {Familiarity, Impact, Interest} from "../../../types/EventFeedbackMetricNames";
+import {MetricMetadata, MetricOption} from "../../../types/MetricMetadata";
 
 type IgnoreLowValueCardsProps = {
     boardSPI: WorkshopBoardSPI
@@ -20,6 +21,27 @@ type IgnoreLowValueCardsProps = {
     onlineUsers: OnlineUserInfo[]
 }
 
+const ImpactFeedbackMetrics: MetricMetadata[] = [
+    new MetricMetadata('Familiarity', [
+        new MetricOption('Never heard of it', 0),
+        new MetricOption('Heard of it, but don\'t know what it is', 1),
+        new MetricOption('Know what it is, but never used it', 2),
+        new MetricOption('Used it, and know it well', 3),
+    ]),
+    new MetricMetadata('Impact', [
+        new MetricOption('No impact or value or irrelevant for/with workshop goal.', 0),
+        new MetricOption('Low impact or value for workshop goal.', 1),
+        new MetricOption('Medium impact or value for workshop goal.', 2),
+        new MetricOption('High impact or value for workshop goal.', 3),
+    ]),
+    new MetricMetadata('Interest', [
+        new MetricOption('Not interested at all', 0),
+        new MetricOption('Slightly interested', 1),
+        new MetricOption('Moderately interested', 2),
+        new MetricOption('Very interested', 3),
+    ]),
+
+]
 
 function filterParticipantFeedbacks(feedbacks: ParticipantFeedback[], eventName: string, metrics: string[]): ParticipantFeedback[] {
     return feedbacks.map(feedback => ({
@@ -104,7 +126,8 @@ export const IgnoreLowValueCards: React.FC<IgnoreLowValueCardsProps> = ({
                                 copilotSession.miroUserId,
                                 copilotSession.miroUserId,
                                 copilotSession.miroUsername,
-                                filterParticipantFeedbacks(feedbacks, eventScore.eventName, [Impact, Interest, Familiarity])
+                                filterParticipantFeedbacks(feedbacks, eventScore.eventName, [Impact, Interest, Familiarity]),
+                                ImpactFeedbackMetrics
                             ))
                         }}>Call
                         </button>

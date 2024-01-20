@@ -11,6 +11,7 @@ export class ParticipantFeedbackAdjustmentResponseHandler implements IMessageHan
 
 
     handleMessage(message: ParticipantFeedbackAdjustmentResponse): Promise<void> {
+        console.log("ParticipantFeedbackAdjustmentResponseHandler", message)
         this.callback({
             participantId: message.sender,
             incrementalFeedback: message.eventFeedback

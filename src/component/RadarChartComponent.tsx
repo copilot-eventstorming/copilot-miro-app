@@ -165,7 +165,7 @@ export const Radar: React.FC<TRadarProps> = ({
                         valueLabelF && sortedDistinctValues && sortedDistinctValues.map((value, index) => {
                             return (
                                 valueLabelF(value) ? (
-                                    <li key={index} className="text-cell text-cell-panel text-sm">
+                                    <li key={`${title}-${index}`} className="text-cell text-cell-panel text-sm">
                                         {value} - {valueLabelF(value)}
                                     </li>
                                 ) : (

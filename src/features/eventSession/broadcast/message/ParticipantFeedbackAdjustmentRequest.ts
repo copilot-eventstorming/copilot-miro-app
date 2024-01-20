@@ -1,5 +1,6 @@
 import {IMessage} from "../../../../application/messaging/IMessage";
 import {ParticipantFeedback} from "../../repository/EventSessionVoteRepository";
+import {MetricMetadata} from "../../types/MetricMetadata";
 
 export class ParticipantFeedbackAdjustmentRequest implements IMessage {
     static MESSAGE_TYPE: string = 'ParticipantFeedbackAdjustmentRequest';
@@ -10,9 +11,13 @@ export class ParticipantFeedbackAdjustmentRequest implements IMessage {
     senderName: string;
     replyTo: string | null;
     feedbacks: ParticipantFeedback[];
+    metricMeta: MetricMetadata[];
 
     constructor(id: string, recipient: string | null, replyTo: string | null,
-                sender: string, senderName: string, feedbacks: ParticipantFeedback[]) {
+                sender: string, senderName: string,
+                feedbacks: ParticipantFeedback[],
+                metricMeta: MetricMetadata[]
+    ) {
         this.type = ParticipantFeedbackAdjustmentRequest.MESSAGE_TYPE;
         this.id = id;
         this.recipient = recipient;
@@ -20,6 +25,7 @@ export class ParticipantFeedbackAdjustmentRequest implements IMessage {
         this.sender = sender;
         this.senderName = senderName;
         this.feedbacks = feedbacks;
+        this.metricMeta = metricMeta;
     }
 
 }

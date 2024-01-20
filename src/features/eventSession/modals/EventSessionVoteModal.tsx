@@ -39,9 +39,9 @@ const EventSessionVoteModal: React.FC = () => {
     const isEveryEventVoted: () => boolean = () => {
         return voteItems.length > 0
             && voteItems.every((voteItem: VoteItem) =>
-                voteItem.familiar !== null &&
-                (voteItem.familiar === 0
-                    || (voteItem.familiar > 0
+                voteItem.familiarity !== null &&
+                (voteItem.familiarity === 0
+                    || (voteItem.familiarity > 0
                         && voteItem.impact !== undefined && voteItem.impact !== null
                         && voteItem.independent !== undefined && voteItem.independent !== null
                         && voteItem.pastTense !== undefined && voteItem.pastTense !== null
@@ -121,17 +121,17 @@ const EventSessionVoteModal: React.FC = () => {
                                 <td>
                                     <div className="flex flex-row justify-between  space-x-4  mx-2 my-1 py-1">
                                         {[0, 1, 2, 3].map((value, col) => (
-                                            <div key={value} className="flex flex-col">
+                                            <div key={`familiar-${row}-${col}`} className="flex flex-col">
                                                 <input
                                                     type="radio"
                                                     id={`familiar-${row}-${col}`}
                                                     name={`familiar-group-${row}`}
                                                     value={value}
-                                                    checked={voteItem.familiar === value}
+                                                    checked={voteItem.familiarity === value}
                                                     onChange={(e) => {
                                                         const newVoteItems = voteItems.map((item: VoteItem, itemIndex: number) => {
                                                             if (itemIndex === row) {
-                                                                return {...item, familiar: Number(e.target.value)};
+                                                                return {...item, familiarity: Number(e.target.value)};
                                                             }
                                                             return item;
                                                         });
@@ -146,7 +146,7 @@ const EventSessionVoteModal: React.FC = () => {
                                 </td>
                                 <td>
                                     <div className="flex flex-row justify-between space-x-4 centered text-sm mx-5">
-                                        {voteItem.familiar != null && voteItem.familiar > 0 && ['true', 'false'].map((value, col) => (
+                                        {voteItem.familiarity != null && voteItem.familiarity > 0 && ['true', 'false'].map((value, col) => (
                                             <div>
                                                 <div key={value} className="flex flex-col">
                                                     <input
@@ -178,7 +178,7 @@ const EventSessionVoteModal: React.FC = () => {
                                 </td>
                                 <td>
                                     <div className="flex flex-row justify-between  space-x-4  centered text-sm mx-5">
-                                        {voteItem.familiar != null && voteItem.familiar > 0 && ['true', 'false'].map((value, col) => (
+                                        {voteItem.familiarity != null && voteItem.familiarity > 0 && ['true', 'false'].map((value, col) => (
                                             <div key={value} className="flex flex-col">
                                                 <input
                                                     type="radio"
@@ -204,7 +204,7 @@ const EventSessionVoteModal: React.FC = () => {
                                 </td>
                                 <td>
                                     <div className="flex flex-row justify-between  space-x-4  centered text-sm mx-5">
-                                        {voteItem.familiar != null && voteItem.familiar > 0 && ['true', 'false'].map((value, col) => (
+                                        {voteItem.familiarity != null && voteItem.familiarity > 0 && ['true', 'false'].map((value, col) => (
                                             <div key={value} className="flex flex-col">
                                                 <input
                                                     type="radio"
@@ -233,7 +233,7 @@ const EventSessionVoteModal: React.FC = () => {
                                 </td>
                                 <td>
                                     <div
-                                        className="flex flex-row justify-between  space-x-4  centered text-sm mx-5">{voteItem.familiar != null && voteItem.familiar > 0 && [0, 1, 2, 3].map((value, col) => (
+                                        className="flex flex-row justify-between  space-x-4  centered text-sm mx-5">{voteItem.familiarity != null && voteItem.familiarity > 0 && [0, 1, 2, 3].map((value, col) => (
                                         <div key={value} className="flex flex-col">
                                             <input
                                                 type="radio"

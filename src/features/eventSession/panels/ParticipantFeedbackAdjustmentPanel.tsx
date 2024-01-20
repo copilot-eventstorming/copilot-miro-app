@@ -16,12 +16,16 @@ import {WorkshopBoardSPI, WorkshopCard} from "../../../application/spi/WorkshopB
 import {WorkshopBoardService} from "../../../api/WorkshopBoardService";
 import {miroProxy} from "../../../api/MiroProxy";
 import {Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis} from 'recharts';
-import {Familiarity, Impact, Independent, Interest, PastTense, Specific} from "../types/EventFeedbackMetricNames";
 import {CSSTransition} from 'react-transition-group';
 import Switch from "react-switch";
 import {cleanHtmlTag} from "../../../application/service/utils/utils";
+import {MetricMetadata} from "../types/MetricMetadata";
+import {numerical} from "../utils/IgnoreLowValueCardsUtils";
+import {Broadcaster} from "../../../application/messaging/Broadcaster";
+import {v4 as uuidv4} from 'uuid';
 
 const boardSPI: WorkshopBoardSPI = new WorkshopBoardService(miroProxy);
+const broadcaster: Broadcaster = new Broadcaster(miroProxy);
 
 export interface IncrementalFeedback {
     incrementalFeedback: EventFeedback;
@@ -71,6 +75,7 @@ const ParticipantFeedbackAdjustmentPanel: React.FC = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const sender = urlParams.get('sender') ?? "facilitator";
     const senderName = urlParams.get('senderName') ?? "facilitator";
+
     const [followingFacilitator, setFollowingFacilitator] = useState(true);
 
     const [copilotSession, setCopilotSession] = useState(copilotSession$.value as CopilotSession);
@@ -78,16 +83,20 @@ const ParticipantFeedbackAdjustmentPanel: React.FC = () => {
 
     // Assert feedbacks is only for one event
     const [feedbacks, setFeedbacks] = React.useState<ParticipantFeedback[]>(JSON.parse(urlParams.get('feedbacks') ?? "[]"));
+    const [metricsMetadata, setMetricsMetadata] = React.useState<MetricMetadata[]>(JSON.parse(urlParams.get('metricsMetadata') ?? "[]"));
     const [incrementalFeedback, setIncrementalFeedback] = React.useState<IncrementalFeedback | null>(null);
-
-    const requestHandler: ParticipantSwitchFeedbackHandler = new ParticipantSwitchFeedbackHandler(setFeedbacks)
+    const requestCallback: (participantFeedbacks: ParticipantFeedback[], metricMetadata: MetricMetadata[]) => void = (value, metricMetadata) => {
+        setFeedbacks(value)
+        setMetricsMetadata(metricMetadata)
+    }
+    const requestHandler: ParticipantSwitchFeedbackHandler = new ParticipantSwitchFeedbackHandler(requestCallback)
     const responseHandler: IMessageHandler<ParticipantFeedbackAdjustmentResponse> = new ParticipantFeedbackAdjustmentResponseHandler(setIncrementalFeedback)
     const [eventName, setEventName] = useState(feedbacks[0].feedback[0].eventName);
     const [groupedItems, setGroupedItems] = useState<Record<string, Record<string, number>>>({})
 
     const [showAnimation, setShowAnimation] = useState(false);
     const [animationKey, setAnimationKey] = useState(eventName);
-
+    const [myFeedback, setMyFeedback] = useState<ParticipantFeedback | null>(null);
 
     useEffect(() => {
         initialize()
@@ -128,6 +137,7 @@ const ParticipantFeedbackAdjustmentPanel: React.FC = () => {
 
     useEffect(() => {
         if (incrementalFeedback) {
+            console.log("incrementalFeedback", incrementalFeedback)
             if (incrementalFeedback.incrementalFeedback.eventName === feedbacks[0].feedback[0].eventName) {
                 updateFeedbacks(incrementalFeedback, feedbacks, setFeedbacks);
             }
@@ -157,11 +167,16 @@ const ParticipantFeedbackAdjustmentPanel: React.FC = () => {
         setGroupedItems(result)
 
         setEventName(feedbacks[0].feedback[0].eventName)
+
+        const mFeedback = feedbacks.find(feedback => feedback.participantId === copilotSession?.miroUserId)
+        if (mFeedback) {
+            setMyFeedback(mFeedback)
+        }
     }, [feedbacks]);
 
     useEffect(() => {
         // 根据需要的条件来更新 showAnimation 的值
-        setInterval(() => {
+        const intervalId = setInterval(() => {
             setShowAnimation(true);  // 或者 false，具体根据您的逻辑
         }, 200)
         setShowAnimation(false);  // 或者 false，具体根据您的逻辑
@@ -170,13 +185,24 @@ const ParticipantFeedbackAdjustmentPanel: React.FC = () => {
         // 清理函数，确保在组件卸载时取消订阅或做其他清理工作
         return () => {
             // setShowAnimation(false); // 确保在组件卸载时重置状态
+            clearInterval(intervalId);  // 清除定时器
         };
     }, [eventName]);  // 监听 eventName 或其他状态变量的变化
 
     useEffect(() => {
         const eventCardId = cards.find(card => cleanHtmlTag(card.content) === eventName)?.id
         if (eventCardId && followingFacilitator) boardSPI.zoomToCard(eventCardId)
-    },[eventName, cards, followingFacilitator])
+    }, [eventName, cards, followingFacilitator])
+
+
+    useEffect(() => {
+        if (copilotSession && myFeedback) {
+            setFeedbacks(([
+                ...(feedbacks.filter(feedback => feedback.participantId !== copilotSession.miroUserId)),
+                myFeedback
+            ]))
+        }
+    }, [myFeedback, copilotSession]);
 
     return (
         <CSSTransition
@@ -212,17 +238,14 @@ const ParticipantFeedbackAdjustmentPanel: React.FC = () => {
                         <div className="flex flex-col w-full" key={item}>
                             <div className="sub-title sub-title">{item + " Distribution"}</div>
 
-                            <BarChart width={200} height={150} data={data} key={index} title={item}
-                                      className="font-lato">
+                            <BarChart width={200} height={150} data={data} className="font-lato">
                                 <CartesianGrid strokeDasharray="3 3"/>
                                 <XAxis dataKey="name"/>
                                 <YAxis/>
                                 <Tooltip/>
-                                {data.map((entry, index) => (
-                                    <Bar dataKey="count" fill="#82ca9d" key={index}/>
-                                ))}
+                                <Bar dataKey="count" fill="#82ca9d"/>
                             </BarChart>
-                            {labels(item)}
+                            {options(eventName, item, metricsMetadata, myFeedback, setMyFeedback)}
                         </div>
                     );
                 })}
@@ -231,30 +254,78 @@ const ParticipantFeedbackAdjustmentPanel: React.FC = () => {
         </CSSTransition>)
 }
 
-function labels(item: string) {
-    switch (item) {
-        case Familiarity:
-            return (<div className="text-xs px-2 py-2 w-full">
-                <li>0: Never heard of it</li>
-                <li>1: Heard of it, but don't know what it is</li>
-                <li>2: Know what it is, but never used it</li>
-                <li>3: Used it, and know it well</li>
-            </div>)
-        case Impact:
-            return (<div className="text-xs px-2 w-full">
-                <li>0: No impact or value or irrelevant for/with workshop goal.</li>
-                <li>1: Low impact or value for workshop goal.</li>
-                <li>2: Medium impact or value for workshop goal.</li>
-                <li>3: High impact or value for workshop goal.</li>
-            </div>)
-        case Interest:
-        case PastTense:
-        case Specific:
-        case Independent:
-        default:
-            return (<div></div>)
+function options(eventName: string, item: string, metricsMetadata: MetricMetadata[], myFeedback: ParticipantFeedback | null, setMyFeedback: (f: ParticipantFeedback) => void) {
+    const metricMetadata = metricsMetadata.find(metricMetadata => metricMetadata.metricName === item)
 
+    if (metricMetadata) {
+        return (<div className="text-xs px-2 py-2 w-full" key={item}> {
+            metricMetadata.metricOptions.sort((a, b) => a.value - b.value).map(metricOption => {
+                const myChoice = numerical(myFeedback?.feedback[0]
+                    ?.items
+                    ?.find(item => item.item === metricMetadata.metricName)
+                    ?.feedback, 0)
+                return (
+                    // <li>{metricOption.value}: {metricOption.title}</li>
+                    <div key={`${item}-${metricOption.value}-radio`} className="flex flex-row justify-items-center">
+                        <input
+                            type="radio"
+                            id={`${item}-${metricOption.value}`}
+                            name={`${item}-group`}
+                            value={myChoice}
+                            checked={metricOption.value === myChoice}
+                            onChange={(e) => {
+                                broadcaster.broadcast(new ParticipantFeedbackAdjustmentResponse(
+                                    uuidv4(), null,
+                                    copilotSession$.value?.miroUserId ?? '',
+                                    copilotSession$.value?.miroUsername ?? '',
+                                    null,
+                                    new EventFeedback(eventName, [{
+                                        item: metricMetadata.metricName,
+                                        feedback: metricOption.value.toString()
+                                    }])))
+                                // update my Feedback
+                                if (myFeedback) {
+                                    const newFeedback = {
+                                        ...myFeedback,
+                                        feedback: [{
+                                            ...myFeedback.feedback[0],
+                                            items: [
+                                                ...myFeedback.feedback[0].items.filter(item => item.item !== metricMetadata.metricName),
+                                                {
+                                                    item: metricMetadata.metricName,
+                                                    feedback: metricOption.value.toString()
+                                                }]
+                                        }]
+                                    }
+
+                                    setMyFeedback(newFeedback)
+                                } else {
+                                    const newFeedback = {
+                                        participantId: copilotSession$.value?.miroUserId ?? '',
+                                        participantName: copilotSession$.value?.miroUsername ?? '',
+                                        feedback: [{
+                                            eventName: eventName,
+                                            items: [{
+                                                item: metricMetadata.metricName,
+                                                feedback: metricOption.value.toString()
+                                            }]
+                                        }]
+                                    }
+                                    setMyFeedback(newFeedback)
+                                }
+                            }}
+                        />
+                        <label htmlFor={`${item}-${metricOption.value}`}
+                               className="text-sm font-lato"><span className="px-2">{metricOption.value}.</span>
+                            <span>{metricOption.title}</span></label>
+                    </div>
+                )
+
+            })}</div>)
+    } else {
+        return <div>{item}</div>
     }
+
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);

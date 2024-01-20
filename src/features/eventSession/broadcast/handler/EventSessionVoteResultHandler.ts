@@ -20,7 +20,7 @@ export class EventSessionVoteResultHandler implements IMessageHandler<EventSessi
 
     private mapItemFeedback(voteItem: VoteItem): ItemFeedback[] {
         return [
-            new ItemFeedback(Familiarity, voteItem.familiar?.toString() ?? ''),
+            new ItemFeedback(Familiarity, voteItem.familiarity?.toString() ?? ''),
             new ItemFeedback(PastTense, voteItem.pastTense?.toString() ?? ''),
             new ItemFeedback(Specific, voteItem.specific?.toString() ?? ''),
             new ItemFeedback(Independent, voteItem.independent?.toString() ?? ''),

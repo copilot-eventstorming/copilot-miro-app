@@ -1,4 +1,4 @@
-export const Familiarity: string = 'Familiar'
+export const Familiarity: string = 'Familiarity'
 export const PastTense: string = 'PastTense'
 export const Specific: string = 'Specific'
 export const Independent: string = 'Independent'
