@@ -24,6 +24,8 @@ import {numerical} from "../utils/IgnoreLowValueCardsUtils";
 import {Broadcaster} from "../../../application/messaging/Broadcaster";
 import {v4 as uuidv4} from 'uuid';
 import {IncrementalFeedback, updateFeedbacks} from "../utils/FeedbackMergeUtils";
+import {Cell} from 'recharts';
+
 
 const boardSPI: WorkshopBoardSPI = new WorkshopBoardService(miroProxy);
 const broadcaster: Broadcaster = new Broadcaster(miroProxy);
@@ -43,7 +45,7 @@ const ParticipantFeedbackAdjustmentPanel: React.FC = () => {
     const [feedbacks, setFeedbacks] = React.useState<ParticipantFeedback[]>(JSON.parse(urlParams.get('feedbacks') ?? "[]"));
     const [metricsMetadata, setMetricsMetadata] = React.useState<MetricMetadata[]>(JSON.parse(urlParams.get('metricsMetadata') ?? "[]"));
     const [incrementalFeedback, setIncrementalFeedback] = React.useState<IncrementalFeedback | null>(null);
-    const requestCallback: (eventName: string, participantFeedbacks: ParticipantFeedback[], metricMetadata: MetricMetadata[]) => void = (eventName:string, participantFeedbacks, metricMetadata) => {
+    const requestCallback: (eventName: string, participantFeedbacks: ParticipantFeedback[], metricMetadata: MetricMetadata[]) => void = (eventName: string, participantFeedbacks, metricMetadata) => {
         setEventName(eventName)
         setFeedbacks(participantFeedbacks)
         setMetricsMetadata(metricMetadata)
@@ -204,34 +206,35 @@ const ParticipantFeedbackAdjustmentPanel: React.FC = () => {
                                 <XAxis dataKey="name"/>
                                 <YAxis/>
                                 <Tooltip/>
-                                <Bar dataKey="count" fill="#82ca9d"/>
+                                <Bar dataKey="count">
+                                    {
+                                        data.map((entry, index) => {
+                                            let fill;
+                                            switch (entry.name) {
+                                                case '3':
+                                                    fill = '#FF8C00';  // 最深的橙色
+                                                    break;
+                                                case '2':
+                                                    fill = '#FFA500';  // 中等深度的橙色
+                                                    break;
+                                                case '1':
+                                                    fill = '#FFBF00';  // 较浅的橙色
+                                                    break;
+                                                case '0':
+                                                    fill = '#FFDAB9';  // 最浅的橙色
+                                                    break;
+                                                default:
+                                                    fill = '#cccccc';  // 默认颜色
+                                            }
+                                            return <Cell key={`${metadata.metricName}-cell-${index}`} fill={fill}/>;
+                                        })
+                                    }
+                                </Bar>
                             </BarChart>
                             {options(eventName, metadata.metricName, metricsMetadata, myFeedback, setMyFeedback)}
                         </div>
                     );
                 })}
-                {/*{Object.entries(groupedItems).map(([item, values], index) => {*/}
-                {/*    // 将 values 对象转换为 recharts 可以接受的数据格式*/}
-                {/*    const data = Object.entries(values).map(([feedback, count]) => ({*/}
-                {/*        name: feedback,*/}
-                {/*        count: count*/}
-                {/*    }));*/}
-
-                {/*    return (*/}
-                {/*        <div className="flex flex-col w-full" key={item}>*/}
-                {/*            <div className="sub-title sub-title">{item + " Distribution"}</div>*/}
-
-                {/*            <BarChart width={200} height={150} data={data} className="font-lato">*/}
-                {/*                <CartesianGrid strokeDasharray="3 3"/>*/}
-                {/*                <XAxis dataKey="name"/>*/}
-                {/*                <YAxis/>*/}
-                {/*                <Tooltip/>*/}
-                {/*                <Bar dataKey="count" fill="#82ca9d"/>*/}
-                {/*            </BarChart>*/}
-                {/*            {options(eventName, item, metricsMetadata, myFeedback, setMyFeedback)}*/}
-                {/*        </div>*/}
-                {/*    );*/}
-                {/*})}*/}
             </div>
 
         </CSSTransition>)
@@ -267,7 +270,7 @@ function options(eventName: string, item: string, metricsMetadata: MetricMetadat
                                         feedback: metricOption.value.toString()
                                     }])))
                                 // update my Feedback
-                                if (myFeedback) {
+                                if (myFeedback && myFeedback.feedback[0]) {
                                     const newFeedback = {
                                         ...myFeedback,
                                         feedback: [{
