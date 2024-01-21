@@ -186,17 +186,17 @@ const ParticipantFeedbackAdjustmentPanel: React.FC = () => {
                     </div>
                 </div>
                 <div className="title title-panel">{eventName}</div>
-
-                {Object.entries(groupedItems).map(([item, values], index) => {
-                    // 将 values 对象转换为 recharts 可以接受的数据格式
-                    const data = Object.entries(values).map(([feedback, count]) => ({
-                        name: feedback,
-                        count: count
+                {metricsMetadata.map((metadata, index) => {
+                    console.log(metadata)
+                    // Convert values object to a format that recharts can accept
+                    const data = metadata.metricOptions.map(metricOption => ({
+                        name: metricOption.value.toString(),
+                        count: groupedItems[metadata.metricName] ? groupedItems[metadata.metricName][metricOption.value.toString()] : -1
                     }));
 
                     return (
-                        <div className="flex flex-col w-full" key={item}>
-                            <div className="sub-title sub-title">{item + " Distribution"}</div>
+                        <div className="flex flex-col w-full" key={metadata.metricName}>
+                            <div className="sub-title sub-title">{metadata.metricName + " Distribution"}</div>
 
                             <BarChart width={200} height={150} data={data} className="font-lato">
                                 <CartesianGrid strokeDasharray="3 3"/>
@@ -205,10 +205,32 @@ const ParticipantFeedbackAdjustmentPanel: React.FC = () => {
                                 <Tooltip/>
                                 <Bar dataKey="count" fill="#82ca9d"/>
                             </BarChart>
-                            {options(eventName, item, metricsMetadata, myFeedback, setMyFeedback)}
+                            {options(eventName, metadata.metricName, metricsMetadata, myFeedback, setMyFeedback)}
                         </div>
                     );
                 })}
+                {/*{Object.entries(groupedItems).map(([item, values], index) => {*/}
+                {/*    // 将 values 对象转换为 recharts 可以接受的数据格式*/}
+                {/*    const data = Object.entries(values).map(([feedback, count]) => ({*/}
+                {/*        name: feedback,*/}
+                {/*        count: count*/}
+                {/*    }));*/}
+
+                {/*    return (*/}
+                {/*        <div className="flex flex-col w-full" key={item}>*/}
+                {/*            <div className="sub-title sub-title">{item + " Distribution"}</div>*/}
+
+                {/*            <BarChart width={200} height={150} data={data} className="font-lato">*/}
+                {/*                <CartesianGrid strokeDasharray="3 3"/>*/}
+                {/*                <XAxis dataKey="name"/>*/}
+                {/*                <YAxis/>*/}
+                {/*                <Tooltip/>*/}
+                {/*                <Bar dataKey="count" fill="#82ca9d"/>*/}
+                {/*            </BarChart>*/}
+                {/*            {options(eventName, item, metricsMetadata, myFeedback, setMyFeedback)}*/}
+                {/*        </div>*/}
+                {/*    );*/}
+                {/*})}*/}
             </div>
 
         </CSSTransition>)
