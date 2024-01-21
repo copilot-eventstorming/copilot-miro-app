@@ -191,7 +191,7 @@ const ParticipantFeedbackAdjustmentPanel: React.FC = () => {
                     // Convert values object to a format that recharts can accept
                     const data = metadata.metricOptions.map(metricOption => ({
                         name: metricOption.value.toString(),
-                        count: groupedItems[metadata.metricName] ? groupedItems[metadata.metricName][metricOption.value.toString()] : -1
+                        count: groupedItems[metadata.metricName] ? groupedItems[metadata.metricName][metricOption.value.toString()] : null
                     }));
 
                     return (
