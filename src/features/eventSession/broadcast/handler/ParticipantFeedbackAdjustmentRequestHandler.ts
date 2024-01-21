@@ -9,6 +9,7 @@ export class ParticipantFeedbackAdjustmentRequestHandler implements IMessageHand
             url.searchParams.append('senderName', message.senderName);
             url.searchParams.append('feedbacks', JSON.stringify(message.feedbacks));
             url.searchParams.append('metricsMetadata', JSON.stringify(message.metricMeta));
+            url.searchParams.append('eventName', message.eventName);
             await miro.board.ui.openPanel({
                 url: url.toString(),
             });

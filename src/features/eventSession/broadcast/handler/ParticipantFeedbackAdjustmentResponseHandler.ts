@@ -1,6 +1,6 @@
 import {IMessageHandler} from "../../../../application/messaging/IMessageHandler";
 import {ParticipantFeedbackAdjustmentResponse} from "../message/ParticipantFeedbackAdjustmentResponse";
-import {IncrementalFeedback} from "../../panels/ParticipantFeedbackAdjustmentPanel";
+import {IncrementalFeedback} from "../../utils/FeedbackMergeUtils";
 
 export class ParticipantFeedbackAdjustmentResponseHandler implements IMessageHandler<ParticipantFeedbackAdjustmentResponse> {
     private callback: (value: IncrementalFeedback) => void;

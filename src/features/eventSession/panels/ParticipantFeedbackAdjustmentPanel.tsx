@@ -29,8 +29,6 @@ const boardSPI: WorkshopBoardSPI = new WorkshopBoardService(miroProxy);
 const broadcaster: Broadcaster = new Broadcaster(miroProxy);
 
 
-
-
 const ParticipantFeedbackAdjustmentPanel: React.FC = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const sender = urlParams.get('sender') ?? "facilitator";
@@ -45,13 +43,14 @@ const ParticipantFeedbackAdjustmentPanel: React.FC = () => {
     const [feedbacks, setFeedbacks] = React.useState<ParticipantFeedback[]>(JSON.parse(urlParams.get('feedbacks') ?? "[]"));
     const [metricsMetadata, setMetricsMetadata] = React.useState<MetricMetadata[]>(JSON.parse(urlParams.get('metricsMetadata') ?? "[]"));
     const [incrementalFeedback, setIncrementalFeedback] = React.useState<IncrementalFeedback | null>(null);
-    const requestCallback: (participantFeedbacks: ParticipantFeedback[], metricMetadata: MetricMetadata[]) => void = (value, metricMetadata) => {
-        setFeedbacks(value)
+    const requestCallback: (eventName: string, participantFeedbacks: ParticipantFeedback[], metricMetadata: MetricMetadata[]) => void = (eventName:string, participantFeedbacks, metricMetadata) => {
+        setEventName(eventName)
+        setFeedbacks(participantFeedbacks)
         setMetricsMetadata(metricMetadata)
     }
     const requestHandler: ParticipantSwitchFeedbackHandler = new ParticipantSwitchFeedbackHandler(requestCallback)
     const responseHandler: IMessageHandler<ParticipantFeedbackAdjustmentResponse> = new ParticipantFeedbackAdjustmentResponseHandler(setIncrementalFeedback)
-    const [eventName, setEventName] = useState(feedbacks[0].feedback[0].eventName);
+    const [eventName, setEventName] = useState(urlParams.get('eventName') ?? "Event Name Not Specified");
     const [groupedItems, setGroupedItems] = useState<Record<string, Record<string, number>>>({})
 
     const [showAnimation, setShowAnimation] = useState(false);
@@ -126,7 +125,9 @@ const ParticipantFeedbackAdjustmentPanel: React.FC = () => {
         }, {} as Record<string, Record<string, number>>);
         setGroupedItems(result)
 
-        setEventName(feedbacks[0].feedback[0].eventName)
+        if (feedbacks[0].feedback[0]) {
+            setEventName(feedbacks[0].feedback[0].eventName)
+        }
 
         const mFeedback = feedbacks.find(feedback => feedback.participantId === copilotSession?.miroUserId)
         if (mFeedback) {

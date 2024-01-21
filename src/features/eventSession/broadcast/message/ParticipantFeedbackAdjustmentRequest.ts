@@ -12,11 +12,13 @@ export class ParticipantFeedbackAdjustmentRequest implements IMessage {
     replyTo: string | null;
     feedbacks: ParticipantFeedback[];
     metricMeta: MetricMetadata[];
+    eventName:string;
 
     constructor(id: string, recipient: string | null, replyTo: string | null,
                 sender: string, senderName: string,
                 feedbacks: ParticipantFeedback[],
-                metricMeta: MetricMetadata[]
+                metricMeta: MetricMetadata[],
+                eventName:string
     ) {
         this.type = ParticipantFeedbackAdjustmentRequest.MESSAGE_TYPE;
         this.id = id;
@@ -26,6 +28,7 @@ export class ParticipantFeedbackAdjustmentRequest implements IMessage {
         this.senderName = senderName;
         this.feedbacks = feedbacks;
         this.metricMeta = metricMeta;
+        this.eventName = eventName;
     }
 
 }

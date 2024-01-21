@@ -80,6 +80,21 @@ const EventSessionVoteModal: React.FC = () => {
         }
     }, []);
 
+    const handleFillDefaults = () => {
+        const newVoteItems = voteItems.map((item: VoteItem) => {
+            return {
+                ...item,
+                familiarity: 1,
+                interest: 0,
+                impact: 0,
+                pastTense: true,
+                specific: true,
+                independent: true
+            };
+        });
+        setVoteItems(newVoteItems);
+    };
+
     return (
         <div className="w-full">
             <h1 className="title title-modal">Feedback for Domain Event Candidates</h1>
@@ -102,22 +117,25 @@ const EventSessionVoteModal: React.FC = () => {
                 <div/>
             </div>
             <div className="w-full">
+                <button className="btn btn-primary btn-primary-modal px-2" onClick={handleFillDefaults}>Fill Defaults</button>
                 <table className="w-full">
                     <thead>
                     <tr>
                         <th className="header header-modal text-sm text-center">Event Name</th>
                         <th className="header header-modal text-sm  text-center">Familiarity</th>
+                        <th className="header header-modal text-sm  text-center">Interest</th>
+                        <th className="header header-modal text-sm text-center">Impact</th>
                         <th className="header header-modal text-sm  text-center">Past Tense</th>
                         <th className="header header-modal text-sm text-center">Specific</th>
                         <th className="header header-modal text-sm text-center">Independent</th>
-                        <th className="header header-modal text-sm text-center">Valuable</th>
                     </tr>
                     </thead>
                     <tbody>
                     {voteItems.map((voteItem: VoteItem, row: number) => {
                         return (
                             <tr key={row} className={`${row % 2 === 0 ? "even_row" : "odd_row"} w-full `}>
-                                <td className="text-cell text-cell-modal text-sm font-bold"><span className="px-1">{voteItem.eventName}</span></td>
+                                <td className="text-cell text-cell-modal text-sm font-bold"><span
+                                    className="px-1">{voteItem.eventName}</span></td>
                                 <td>
                                     <div className="flex flex-row justify-between  space-x-4  mx-2 my-1 py-1">
                                         {[0, 1, 2, 3].map((value, col) => (
@@ -143,6 +161,58 @@ const EventSessionVoteModal: React.FC = () => {
                                             </div>
                                         ))}
                                     </div>
+                                </td>
+                                <td>
+                                    <div
+                                        className="flex flex-row justify-between  space-x-4  centered text-sm mx-5">{
+                                        [0, 1, 2, 3].map((value, col) => (
+                                            <div key={value} className="flex flex-col">
+                                                <input
+                                                    type="radio"
+                                                    id={`interest-${row}-${col}`}
+                                                    name={`interest-group-${row}`}
+                                                    value={value}
+                                                    checked={voteItem.interest === value}
+                                                    onChange={(e) => {
+                                                        const newVoteItems = voteItems.map((item: VoteItem, itemIndex: number) => {
+                                                            if (itemIndex === row) {
+                                                                return {...item, interest: Number(e.target.value)};
+                                                            }
+                                                            return item;
+                                                        });
+                                                        setVoteItems(newVoteItems);
+                                                    }}
+                                                />
+                                                <label htmlFor={`interest-${row}-${col}`}
+                                                       className="text-sm font-lato">{value}</label>
+                                            </div>
+                                        ))}</div>
+                                </td>
+                                <td>
+                                    <div
+                                        className="flex flex-row justify-between  space-x-4  centered text-sm mx-5">{voteItem.familiarity != null && voteItem.familiarity > 0 &&
+                                        [0, 1, 2, 3].map((value, col) => (
+                                            <div key={value} className="flex flex-col">
+                                                <input
+                                                    type="radio"
+                                                    id={`impact-${row}-${col}`}
+                                                    name={`impact-group-${row}`}
+                                                    value={value}
+                                                    checked={voteItem.impact === value}
+                                                    onChange={(e) => {
+                                                        const newVoteItems = voteItems.map((item: VoteItem, itemIndex: number) => {
+                                                            if (itemIndex === row) {
+                                                                return {...item, impact: Number(e.target.value)};
+                                                            }
+                                                            return item;
+                                                        });
+                                                        setVoteItems(newVoteItems);
+                                                    }}
+                                                />
+                                                <label htmlFor={`impact-${row}-${col}`}
+                                                       className="text-sm font-lato">{value}</label>
+                                            </div>
+                                        ))}</div>
                                 </td>
                                 <td>
                                     <div className="flex flex-row justify-between space-x-4 centered text-sm mx-5">
@@ -230,31 +300,6 @@ const EventSessionVoteModal: React.FC = () => {
                                                     className="text-sm font-lato">{value === 'true' ? 'Y' : 'N'}</label>
                                             </div>
                                         ))}</div>
-                                </td>
-                                <td>
-                                    <div
-                                        className="flex flex-row justify-between  space-x-4  centered text-sm mx-5">{voteItem.familiarity != null && voteItem.familiarity > 0 && [0, 1, 2, 3].map((value, col) => (
-                                        <div key={value} className="flex flex-col">
-                                            <input
-                                                type="radio"
-                                                id={`impact-${row}-${col}`}
-                                                name={`impact-group-${row}`}
-                                                value={value}
-                                                checked={voteItem.impact === value}
-                                                onChange={(e) => {
-                                                    const newVoteItems = voteItems.map((item: VoteItem, itemIndex: number) => {
-                                                        if (itemIndex === row) {
-                                                            return {...item, impact: Number(e.target.value)};
-                                                        }
-                                                        return item;
-                                                    });
-                                                    setVoteItems(newVoteItems);
-                                                }}
-                                            />
-                                            <label htmlFor={`impact-${row}-${col}`}
-                                                   className="text-sm font-lato">{value}</label>
-                                        </div>
-                                    ))}</div>
                                 </td>
                             </tr>
                         )

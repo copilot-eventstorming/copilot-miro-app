@@ -1,4 +1,4 @@
-import {ParticipantFeedback} from "../../../repository/EventSessionVoteRepository";
+import {EventSessionVoteRepository, ParticipantFeedback} from "../../../repository/EventSessionVoteRepository";
 import {WorkshopBoardSPI, WorkshopCard} from "../../../../../application/spi/WorkshopBoardSPI";
 import React, {useEffect, useState} from "react";
 import {contentWithoutSpace} from "../../../../../utils/WorkshopCardUtils";
@@ -21,6 +21,7 @@ import {ParticipantFeedbackAdjustmentResponse} from "../../../broadcast/message/
 
 type IgnoreLowValueCardsProps = {
     boardSPI: WorkshopBoardSPI
+    voteRepository: EventSessionVoteRepository | null
     feedbacks: ParticipantFeedback[]
     setFeedbacks: (feedbacks: ParticipantFeedback[]) => void
     cards: WorkshopCard[]
@@ -64,6 +65,7 @@ function filterParticipantFeedbacks(feedbacks: ParticipantFeedback[], eventName:
 
 export const IgnoreLowValueCards: React.FC<IgnoreLowValueCardsProps> = ({
                                                                             boardSPI,
+                                                                            voteRepository,
                                                                             feedbacks,
                                                                             setFeedbacks,
                                                                             cards,
@@ -92,6 +94,9 @@ export const IgnoreLowValueCards: React.FC<IgnoreLowValueCardsProps> = ({
     }
     useEffect(() => {
         setEventScores(convertToEventScore(feedbacks, eventOwnerByEventName))
+        if (feedbacks && feedbacks.length > 0 && voteRepository){
+            voteRepository.saveVotes(feedbacks)
+        }
         console.log("feedbacks", feedbacks)
     }, [feedbacks])
 
@@ -180,7 +185,8 @@ export const IgnoreLowValueCards: React.FC<IgnoreLowValueCardsProps> = ({
                                 copilotSession.miroUserId,
                                 copilotSession.miroUsername,
                                 filterParticipantFeedbacks(feedbacks, eventScore.eventName, [Impact, Interest, Familiarity]),
-                                ImpactFeedbackMetrics
+                                ImpactFeedbackMetrics,
+                                eventScore.eventName,
                             ))
                         }}>Call
                         </button>

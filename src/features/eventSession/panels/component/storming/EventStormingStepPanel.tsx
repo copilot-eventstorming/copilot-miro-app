@@ -164,7 +164,9 @@ const ReviewStep: React.FC<EventStormingStepProps> = ({
                 setCurrentLevel={setCurrentLevel}
                 setCurrentStep={setCurrentStep}
             >
-                <IgnoreLowValueCards boardSPI={boardSPI} feedbacks={participantFeedbacks}  setFeedbacks={setParticipantFeedbacks}
+                <IgnoreLowValueCards boardSPI={boardSPI}
+                                     voteRepository={voteRepository}
+                                     feedbacks={participantFeedbacks}  setFeedbacks={setParticipantFeedbacks}
                                      cards={cards} copilotSession={copilotSession} onlineUsers={onlineUsers}/>
             </AgendaItem>
             <AgendaItem
