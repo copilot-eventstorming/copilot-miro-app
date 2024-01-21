@@ -106,7 +106,7 @@ const ParticipantFeedbackAdjustmentPanel: React.FC = () => {
 
     useEffect(() => {
         //group by item.item and item.value, count each (item.item,item.value), then create a barchart
-        const allItems = feedbacks.flatMap(feedback => feedback.feedback[0].items);
+        const allItems = feedbacks.flatMap(feedback => feedback.feedback[0]?.items || []);
         const result: Record<string, Record<string, number>> = allItems.reduce((acc, item) => {
             // 如果这个 item.item 还没有在 acc 中，我们就创建一个新的对象
             if (!acc[item.item]) {
@@ -191,7 +191,7 @@ const ParticipantFeedbackAdjustmentPanel: React.FC = () => {
                     // Convert values object to a format that recharts can accept
                     const data = metadata.metricOptions.map(metricOption => ({
                         name: metricOption.value.toString(),
-                        count: groupedItems[metadata.metricName] ? groupedItems[metadata.metricName][metricOption.value.toString()] : null
+                        count: groupedItems[metadata.metricName] ? groupedItems[metadata.metricName][metricOption.value.toString()] : 0
                     }));
 
                     return (
