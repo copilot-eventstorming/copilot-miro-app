@@ -99,9 +99,9 @@ const FloatingWindow: React.FC<FlowingWindowProps> = ({quizAnswer, questions, st
 };
 
 export const ConceptIntroductionStepPanel: React.FC<TConceptIntroductionPanelProps> = ({
-                                                                                       boardSPI,
-                                                                                       copilotSession
-                                                                                   }) => {
+                                                                                           boardSPI,
+                                                                                           copilotSession
+                                                                                       }) => {
     const sampleService = new AddEventStormingSampleService(boardSPI)
     const hotspotService = new FetchHotspotsService(boardSPI)
     const broadcaster = new Broadcaster(miroProxy)
@@ -168,7 +168,7 @@ export const ConceptIntroductionStepPanel: React.FC<TConceptIntroductionPanelPro
         <div className="flex flex-col w-full my-4 px-4 py-2 font-lato text-sm">
             <b>Core Concepts</b>
             <li>Domain Event and Granularity
-                <ul style={{ listStyleType: 'disc',  paddingLeft: '30px'}}>
+                <ul style={{listStyleType: 'disc', paddingLeft: '30px'}}>
                     <li>Past Tense</li>
                     <li>Specific Meaning</li>
                     <li>Independence</li>
@@ -280,7 +280,9 @@ export const ConceptIntroductionStepPanel: React.FC<TConceptIntroductionPanelPro
                         </button>
                     </td>
                     {hoveredScoreIndex == index &&
-                        <FloatingWindow quizAnswer={actualAnswer} questions={questions} style={{}}/>}
+                        <td>
+                            <FloatingWindow quizAnswer={actualAnswer} questions={questions} style={{}}/>
+                        </td>}
                 </tr>
             ))}
             </tbody>
@@ -314,5 +316,6 @@ export const ConceptIntroductionStepPanel: React.FC<TConceptIntroductionPanelPro
             <HotspotList/>
             <div className="divider"/>
             <Quiz/>
-        </div>)
+        </div>
+    )
 }
