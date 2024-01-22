@@ -98,9 +98,6 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                                                                       setParticipantFeedbacks
                                                                   }) => {
     const [entropyCalculationResult, setEntropyCalculationResult] = useState<EntropyCalculationResult | null>(null)
-
-    console.log(copilotSession?.miroUserId)
-
     const entropyCalculationService = new EntropyCalculationService()
 
     return (

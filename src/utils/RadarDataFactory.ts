@@ -18,8 +18,6 @@ export function prepareDataByProperty(testData: ParticipantFeedback[], propertyN
         return acc;
     }, {} as Record<string, number[]>);
 
-    console.log(groupedByEvent)
-
     const minProperty: RadarData[] = Object.entries(groupedByEvent)
         .map(([eventName, properties]) => ({
             axis: eventName,

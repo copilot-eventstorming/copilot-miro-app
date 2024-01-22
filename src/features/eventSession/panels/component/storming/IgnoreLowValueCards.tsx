@@ -97,14 +97,12 @@ export const IgnoreLowValueCards: React.FC<IgnoreLowValueCardsProps> = ({
         if (feedbacks && feedbacks.length > 0 && voteRepository){
             voteRepository.saveVotes(feedbacks)
         }
-        console.log("feedbacks", feedbacks)
     }, [feedbacks])
 
     const [incrementalFeedback, setIncrementalFeedback] = React.useState<IncrementalFeedback | null>(null);
 
     useEffect(() => {
         if (incrementalFeedback) {
-            console.log("incrementalFeedback", incrementalFeedback)
             updateFeedbacks(incrementalFeedback, feedbacks, setFeedbacks);
         }
     }, [incrementalFeedback]);
