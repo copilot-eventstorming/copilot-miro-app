@@ -1,9 +1,9 @@
 import {WorkshopBoardSPI, WorkshopCard} from "../../../../../application/spi/WorkshopBoardSPI";
 import React, {useEffect, useRef, useState} from "react";
 import {
-    GroupByDuplicationDomainEventService,
+    ClusterSimilarDomainEventByGPTService,
     SimilarityGroup
-} from "../../../service/GroupByDuplicationDomainEventService";
+} from "../../../service/ClusterSimilarDomainEventByGPTService";
 import {SimilarEventsGroupLayoutService} from "../../../service/SimilarEventsGroupLayoutService";
 import {SaveActions} from "../../../../../application/repository";
 import {OperationLogChannel} from "../../../../operationLogs/types/OperationLogChannels";
@@ -223,7 +223,7 @@ const ConfigureGPT: React.FC<ConfigureGPTProps> = ({
 type ManuallyCopyPastePromptProps = {
     boardSPI: WorkshopBoardSPI,
     setCards: (cards: WorkshopCard[]) => void,
-    groupingService: GroupByDuplicationDomainEventService,
+    groupingService: ClusterSimilarDomainEventByGPTService,
     cards: WorkshopCard[],
     setSimilarityGroups: (value: SimilarityGroup[]) => void,
     setGroupedCards: (value: WorkshopCard[][]) => void
@@ -263,7 +263,7 @@ const ManuallyCopyPastePrompt: React.FC<ManuallyCopyPastePromptProps> = ({
                                     outline-none ring focus:ring-offset-0 border-gray-300 rounded-sm"
                                          onChange={(e) => {
                                          }}
-                                         value={groupingService.generatePrompt(cards.map(card => cleanHtmlTag(card.content)))}>
+                                         value={groupingService.generatePrompt(cards)}>
                                </textarea>
                 <button className="absolute top-0 right-0 mx-6 my-3" onClick={handleCopy}>
                     <FontAwesomeIcon icon={faCopy} className="text-orange-400"/>
@@ -374,6 +374,7 @@ type SimilarGroupsProps = {
     boardSPI: WorkshopBoardSPI
 }
 const SimilarGroups: React.FC<SimilarGroupsProps> = ({groupedCards, boardSPI}) => {
+    console.log("SimilarGroups", groupedCards.length, groupedCards)
     return <table className="w-full py-2">
         <thead>
         <tr>
@@ -383,14 +384,16 @@ const SimilarGroups: React.FC<SimilarGroupsProps> = ({groupedCards, boardSPI}) =
         </thead>
         <tbody>
         {
-            groupedCards.map((group, index) => (
+            groupedCards
+                .filter(group => group.length > 1)
+                .map((group, index) => (
                 <tr key={index} className={index % 2 === 0 ? 'odd_row' : 'even_row'}>
                     <td className="text-cell text-cell-panel text-center">{group.length}</td>
                     <td>
                         <div>
                             {
                                 <div>{group.map(card => (
-                                    <div key={card.id}
+                                    <div key={`${card.id}-${index}`}
                                          className="clickable-label text-cell text-cell-panel text-left"
                                          onClick={() => boardSPI.zoomToCard(card.id)}
                                     >{cleanHtmlTag(card.content)}</div>
@@ -412,7 +415,7 @@ type TMainButtonsProps = {
     showPrompt: boolean,
     copilotSession: CopilotSession,
     boardSPI: WorkshopBoardSPI,
-    groupingService: GroupByDuplicationDomainEventService,
+    groupingService: ClusterSimilarDomainEventByGPTService,
     setIsLoading: (value: boolean) => void,
     setSimilarityGroups: (value: SimilarityGroup[]) => void,
     setGroupedCards: (value: WorkshopCard[][]) => void
@@ -493,7 +496,7 @@ export const RemoveDuplicates: React.FC<TEventDeduplicationProps> = ({
                                                                          setCards
                                                                      }) => {
 
-    const groupingService = new GroupByDuplicationDomainEventService()
+    const groupingService = new ClusterSimilarDomainEventByGPTService()
     const [isLoading, setIsLoading] = useState(false) // 新增一个状态来跟踪异步操作是否正在进行
     const [groupedCards, setGroupedCards] = useState([] as WorkshopCard[][]) // 新增一个状态来保存分组后的卡片
     const [similarityLayoutGroups, setSimilarityLayoutGroups] = useState([] as SimilarityGroup[]) // 新增一个状态来保存分组后的卡片
