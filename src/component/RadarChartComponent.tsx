@@ -21,7 +21,6 @@ export const Radar: React.FC<TRadarProps> = ({
                                                  showMinimum, showAverage, showMaximum,
                                                  valueLabelF
                                              }) => {
-    console.log("RadarChartComponent", data)
     const [keepData, setKeepData] = useState(data)
     const [showMin, setShowMin] = useState(showMinimum === undefined ? true : showMinimum)
     const [showAvg, setShowAvg] = useState(showAverage === undefined ? true : showAverage)
@@ -169,7 +168,7 @@ export const Radar: React.FC<TRadarProps> = ({
                                         {value} - {valueLabelF(value)}
                                     </li>
                                 ) : (
-                                    <div></div>
+                                    <div key={`${title}-${value}-${index}`}></div>
                                 )
                             )
                         })
