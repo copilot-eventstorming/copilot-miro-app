@@ -22,7 +22,6 @@ export class MessageRegistry {
     }
 
     registerHandler(type: string, handler: IMessageHandler<any>) {
-        console.log("registering handler", type, handler, this.handlers.get(type)?.length ?? 0)
         if (this.handlers.has(type)) {
             const handlers = this.handlers.get(type);
             this.handlers.get(type)?.push(handler);
@@ -30,11 +29,9 @@ export class MessageRegistry {
         } else {
             this.handlers.set(type, [handler]);
         }
-        console.log("after registering handler", type, handler, this.handlers.get(type)?.length ?? 0)
     }
 
     unregisterHandler(type: string, handler: IMessageHandler<any>) {
-        console.log("before unregistering handler", type, handler, this.handlers.get(type)?.length ?? 0)
         if (this.handlers.has(type)) {
             const handlers = this.handlers.get(type);
             const index = handlers?.indexOf(handler);
@@ -42,14 +39,13 @@ export class MessageRegistry {
                 handlers?.splice(index, 1);
             }
         }
-        console.log("after unregistering handler", type, handler, this.handlers.get(type)?.length ?? 0)
     }
 
     bindMessageFramework(
         subscribe: (event: string, messageHandler: ((payload: any) => void)) => void,
         unsubscribe: (event: string, messageHandler: ((payload: any) => void)) => void,
     ) {
-        console.log(this.messageTopics)
+        console.log("MessageTopic should be manually register in MessageTopics.ts.", this.messageTopics)
         this.messageTopics.forEach((messageTopic: string) => {
             try {
                 unsubscribe(messageTopic, this.subscriptions.get(messageTopic)!)
@@ -65,7 +61,6 @@ export class MessageRegistry {
     private onMessage(messageTopic: string) {
         return (payload: any) => {
             const iMessage: IMessage = JSON.parse(payload)
-            console.log("Message Registry is processing: ", iMessage)
             this.handlers.get(messageTopic)?.forEach(handler => {
                 if (this.copilotSession === null || iMessage.recipient === null
                     || iMessage.recipient === this.copilotSession.miroUserId) {
