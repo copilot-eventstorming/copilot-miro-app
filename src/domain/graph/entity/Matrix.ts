@@ -97,8 +97,12 @@ export class Matrix {
         const matrixIndex = this.idMap[id];
         if (matrixIndex) {
             const [i, j] = matrixIndex;
-            const y = Array.from({length: i}, (_, row) => this.rowHeightMap[row]).reduce((sum, height) => sum + height, 0) + 2 * i * this.heightPadding;
-            const x = Array.from({length: j}, (_, column) => this.columnWidthMap[column]).reduce((sum, width) => sum + width, 0) + 2 * j * this.widthPadding;
+            const y = Array.from({length: i}, (_, row) => this.rowHeightMap[row])
+                .filter((rowHeight, index) => rowHeight) // some row might be missing
+                .reduce((sum, height) => sum + height, 0) + 2 * i * this.heightPadding;
+            const x = Array.from({length: j}, (_, column) => this.columnWidthMap[column])
+                .filter((columnWidth, index) => columnWidth) // some column might be missing
+                .reduce((sum, width) => sum + width, 0) + 2 * j * this.widthPadding;
             return [x + this.widthPadding, y + this.heightPadding];
         }
         return null;
