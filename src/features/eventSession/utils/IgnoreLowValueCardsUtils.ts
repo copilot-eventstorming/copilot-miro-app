@@ -1,8 +1,6 @@
 import {EventFeedback, ParticipantFeedback} from "../repository/EventSessionVoteRepository";
 import {Familiarity, Impact, Interest} from "../types/EventFeedbackMetricNames";
 import {EventScore} from "../types/EventScore";
-import {OnlineUserInfo} from "@mirohq/websdk-types";
-import {WorkshopCard} from "../../../application/spi/WorkshopBoardSPI";
 
 export function convertToEventScore(feedbacks: ParticipantFeedback[], ownerNameF: (eventName: string) => string): EventScore[] {
     return feedbacks.reduce((acc: EventScore[], feedback: ParticipantFeedback) => {
