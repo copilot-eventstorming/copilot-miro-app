@@ -91,7 +91,8 @@ const ReviewStep: React.FC<EventStormingStepProps> = ({
     const [participantFeedbacks, setParticipantFeedbacks] = useState([] as ParticipantFeedback[])
     const voteRepository = copilotSession ? new EventSessionVoteRepository(copilotSession.miroBoardId) : null
     const callback = (feedbacks: ParticipantFeedback[]) => {
-        setParticipantFeedbacks(feedbacks)
+        if (feedbacks)
+            setParticipantFeedbacks(feedbacks)
     }
     const voteResultHandler = voteRepository ? new EventSessionVoteResultHandler(voteRepository, callback) : null
 
@@ -122,6 +123,7 @@ const ReviewStep: React.FC<EventStormingStepProps> = ({
     const deduplicationToggleDrawer = () => {
         setDeduplicationDrawerOpen(!deduplicationDrawerOpen);
     };
+
     return (
         <div className="agenda">
             <AgendaItem
@@ -166,7 +168,7 @@ const ReviewStep: React.FC<EventStormingStepProps> = ({
             >
                 <IgnoreLowValueCards boardSPI={boardSPI}
                                      voteRepository={voteRepository}
-                                     feedbacks={participantFeedbacks}  setFeedbacks={setParticipantFeedbacks}
+                                     feedbacks={participantFeedbacks} setFeedbacks={setParticipantFeedbacks}
                                      cards={cards} copilotSession={copilotSession} onlineUsers={onlineUsers}/>
             </AgendaItem>
             <AgendaItem
