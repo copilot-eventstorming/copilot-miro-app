@@ -34,7 +34,7 @@ export class EventSessionVoteRepository {
     }
 
     loadVotes(): Promise<ParticipantFeedback[]> {
-        return findLocally(this.key(this.boardId))
+        return findLocally(this.key(this.boardId)).then(feedbacks => feedbacks || [])
     }
 
 }
