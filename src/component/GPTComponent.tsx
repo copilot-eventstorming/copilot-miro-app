@@ -18,6 +18,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCopy} from "@fortawesome/free-solid-svg-icons";
 
 function MainButtons<R, O>(cards: WorkshopCard[],
+                           actionName: string,
                            showGptConfiguration: boolean,
                            isLoading: boolean,
                            showPrompt: boolean,
@@ -55,7 +56,7 @@ function MainButtons<R, O>(cards: WorkshopCard[],
                                 handleAnalyze()
                                     .then(() => setIsLoading(false))
                             }
-                        }}>Similarity Analysis
+                        }}> {actionName}
                 </button>
             </div>
             {
@@ -183,6 +184,71 @@ const AzureOpenAIConfigurePanel: React.FC<AzureOpenAIConfigurationProps> = ({
         </table>
     </div>;
 }
+interface ManuallyCopyPastePromptProps<R, O> {
+    boardSPI: WorkshopBoardSPI;
+    setCards: (cards: WorkshopCard[]) => void;
+    gptService: BaseGPTService<WorkshopCard[], R, O>;
+    cards: WorkshopCard[];
+    setGptData: (value: O) => void;
+}
+const ManuallyCopyPastePrompt = <R, O>({
+                                           boardSPI,
+                                           setCards,
+                                           gptService,
+                                           cards,
+                                           setGptData
+                                       }: ManuallyCopyPastePromptProps<R, O>) => {
+
+    const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+    const handleCopy = () => {
+        const textarea = textareaRef?.current;
+        if (textarea) {
+            textarea.select();
+            document.execCommand('copy');
+        }
+    };
+    return <div>
+        <div className="w-full centered my-1 flex flex-col"
+             title="Manually Copy/Paste Prompt">
+            <div className="flex flex-row py-1 justify-between items-center relative">
+                <label className="font-lato mx-2 sub-title py-1 centered flex-grow">Prompt:</label>
+                <button className="btn btn-secondary btn-secondary-panel px-2"
+                        onClick={() => {
+                            boardSPI.fetchEventCards().then(setCards)
+                        }}
+                >Reload
+                </button>
+            </div>
+            <div className="w-full flex flex-col relative">
+                               <textarea ref={textareaRef} className="w-auto h-48 px-1 my-1 mx-2 bg-gray-50 font-lato text-xs
+                                    outline-none ring focus:ring-offset-0 border-gray-300 rounded-sm"
+                                         onChange={(e) => {
+                                         }}
+                                         value={gptService.generatePrompt(cards)}>
+                               </textarea>
+                <button className="absolute top-0 right-0 mx-6 my-3" onClick={handleCopy}>
+                    <FontAwesomeIcon icon={faCopy} className="text-orange-400"/>
+                </button>
+            </div>
+        </div>
+        <div className="w-full flex flex-col py-2">
+            <label className="font-lato mx-2 sub-title py-1">GPT Response:</label>
+            <textarea className="w-auto h-48 px-1 my-1 mx-2 bg-gray-50 font-lato text-xs
+                                    outline-none ring focus:ring-offset-0 border-gray-300 rounded-sm"
+                      onChange={(e) => {
+                          let response = e.target.value;
+                          try {
+                              let cardGroups = gptService.parseResponse(cards, response);
+                              setGptData(cardGroups)
+                          } catch (e) {
+                              console.log(e)
+                          }
+                      }}>
+            </textarea>
+        </div>
+    </div>;
+}
 const ConfigureGPT: React.FC<ConfigureGPTProps> = ({
                                                        copilotSession,
                                                        setShowGptConfiguration,
@@ -264,71 +330,18 @@ const ConfigureGPT: React.FC<ConfigureGPTProps> = ({
         </div>
     </>;
 }
-
-function ManuallyCopyPastePrompt<R, O>(boardSPI: WorkshopBoardSPI,
-                                       setCards: (cards: WorkshopCard[]) => void,
-                                       gptService: BaseGPTService<WorkshopCard[], R, O>,
-                                       cards: WorkshopCard[],
-                                       setGptData: (value: O) => void) {
-    const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-
-    const handleCopy = () => {
-        const textarea = textareaRef.current;
-        if (textarea) {
-            textarea.select();
-            document.execCommand('copy');
-        }
-    };
-    return <div>
-        <div className="w-full centered my-1 flex flex-col"
-             title="Manually Copy/Paste Prompt">
-            <div className="flex flex-row py-1 justify-between items-center relative">
-                <label className="font-lato mx-2 sub-title py-1 centered flex-grow">Prompt:</label>
-                <button className="btn btn-secondary btn-secondary-panel px-2"
-                        onClick={() => {
-                            boardSPI.fetchEventCards().then(setCards)
-                        }}
-                >Reload
-                </button>
-            </div>
-            <div className="w-full flex flex-col relative">
-                               <textarea ref={textareaRef} className="w-auto h-48 px-1 my-1 mx-2 bg-gray-50 font-lato text-xs
-                                    outline-none ring focus:ring-offset-0 border-gray-300 rounded-sm"
-                                         onChange={(e) => {
-                                         }}
-                                         value={gptService.generatePrompt(cards)}>
-                               </textarea>
-                <button className="absolute top-0 right-0 mx-6 my-3" onClick={handleCopy}>
-                    <FontAwesomeIcon icon={faCopy} className="text-orange-400"/>
-                </button>
-            </div>
-        </div>
-        <div className="w-full flex flex-col py-2">
-            <label className="font-lato mx-2 sub-title py-1">GPT Response:</label>
-            <textarea className="w-auto h-48 px-1 my-1 mx-2 bg-gray-50 font-lato text-xs
-                                    outline-none ring focus:ring-offset-0 border-gray-300 rounded-sm"
-                      onChange={(e) => {
-                          let response = e.target.value;
-                          try {
-                              let cardGroups = gptService.parseResponse(cards, response);
-                              setGptData(cardGroups)
-                          } catch (e) {
-                              console.log(e)
-                          }
-                      }}>
-                            </textarea>
-        </div>
-    </div>;
+interface GPTAnalysisBaseProps<R, O> {
+    boardSPI: WorkshopBoardSPI,
+    copilotSession: CopilotSession,
+    cards: WorkshopCard[],
+    setGptData: (data: O) => void,
+    setCards: (cards: WorkshopCard[]) => void,
+    gptService: BaseGPTService<WorkshopCard[], R, O>,
+    actionName: string
 }
-
-export function GPTAnalysisBase<R, O>(boardSPI: WorkshopBoardSPI,
-                                      copilotSession: CopilotSession,
-                                      cards: WorkshopCard[],
-                                      setGptData: (data: O) => void,
-                                      setCards: (cards: WorkshopCard[]) => void,
-                                      gptService: BaseGPTService<WorkshopCard[], R, O>,
-                                      actionName: string
-): React.JSX.Element {
+export const GPTAnalysisBase = <R, O>({
+       boardSPI, copilotSession, cards, setGptData, setCards, gptService, actionName
+    }: GPTAnalysisBaseProps<R, O>)=> {
 
     const [isLoading, setIsLoading] = useState(false);
     const [showPrompt, setShowPrompt] = React.useState(false);
@@ -347,16 +360,8 @@ export function GPTAnalysisBase<R, O>(boardSPI: WorkshopBoardSPI,
 
     return (
         <div className="w-full my-2 mb-4">
-            <div className="w-full divider"/>
-            <div className="w-full">
-                <button className="btn btn-primary btn-primary-panel px-2"
-                        disabled={isLoading}
-                        onClick={handleAnalyze}>{actionName}
-                </button>
-                {isLoading && (<div className="spinner"/>)}
-                <div className="w-full divider"/>
-            </div>
-            {MainButtons(cards, showGptConfiguration, isLoading, showPrompt, copilotSession, boardSPI, gptService, setGptData, setIsLoading, setShowGptConfiguration)}
+
+            {MainButtons(cards, actionName, showGptConfiguration, isLoading, showPrompt, copilotSession, boardSPI, gptService, setGptData, setIsLoading, setShowGptConfiguration)}
 
             {isLoading && (<div className="spinner"/>)}
 
@@ -365,12 +370,12 @@ export function GPTAnalysisBase<R, O>(boardSPI: WorkshopBoardSPI,
                               setShowGptConfiguration={setShowGptConfiguration}
                               setShowPrompt={setShowPrompt}/>}
             {showPrompt &&
-                ManuallyCopyPastePrompt(
-                    boardSPI,
-                    setCards,
-                    gptService,
-                    cards,
-                    setGptData)
+                <ManuallyCopyPastePrompt
+                    boardSPI={boardSPI}
+                    setCards={setCards}
+                    gptService={gptService}
+                    cards={cards}
+                    setGptData={setGptData} />
             }
 
         </div>

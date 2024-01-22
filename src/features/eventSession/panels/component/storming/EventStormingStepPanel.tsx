@@ -15,6 +15,7 @@ import {EventSessionVoteRepository, ParticipantFeedback} from "../../../reposito
 import {EventSessionVoteResultHandler} from "../../../broadcast/handler/EventSessionVoteResultHandler";
 import {messageRegistry} from "../../../../../utils/MessagingBroadcastingInitializer";
 import {EventSessionVoteResult} from "../../../broadcast/message/EventSessionVoteResult";
+import {FixNonPastTenseCards} from "./FixNonPastTenseCards";
 
 /*
 Enhancement:
@@ -180,7 +181,8 @@ const ReviewStep: React.FC<EventStormingStepProps> = ({
                 setCurrentLevel={setCurrentLevel}
                 setCurrentStep={setCurrentStep}
             >
-                <div/>
+                <FixNonPastTenseCards boardSPI={boardSPI} cards={cards} setCards={setCards}
+                                      copilotSession={copilotSession}/>
             </AgendaItem>
             <AgendaItem
                 title="Fix unclear semantics cards"

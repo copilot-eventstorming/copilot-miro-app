@@ -83,7 +83,10 @@ export function cleanHtmlTag(title: string | undefined): string {
     }
     return title
 }
-
+export function prettifyContent(card: WorkshopCard, content:string): WorkshopCard {
+    card.content = "<p>" + content + "</p>";
+    return card;
+}
 export function sizeof(object: any): string {
     const str = JSON.stringify(object);
     const size = new Blob([str]).size;
