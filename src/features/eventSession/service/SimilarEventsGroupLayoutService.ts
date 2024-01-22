@@ -1,5 +1,5 @@
 import {WorkshopBoardSPI} from "../../../application/spi/WorkshopBoardSPI";
-import {SimilarityGroup} from "./GroupByDuplicationDomainEventService";
+import {SimilarityGroup} from "./ClusterSimilarDomainEventByGPTService";
 import {PrettifyLayoutService} from "../../../application/service";
 import {contentEquals} from "../../../utils/WorkshopCardUtils";
 import {convertToNodeObject} from "../../../application/service/utils/utils";
