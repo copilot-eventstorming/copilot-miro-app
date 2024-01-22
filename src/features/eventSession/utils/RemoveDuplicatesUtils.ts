@@ -1,14 +1,14 @@
 import {WorkshopBoardSPI, WorkshopCard} from "../../../application/spi/WorkshopBoardSPI";
 import {
-    GroupByDuplicationDomainEventService,
-    SimilarityGroup,
-    TGPTOptions
-} from "../service/GroupByDuplicationDomainEventService";
+    ClusterSimilarDomainEventByGPTService,
+    SimilarityGroup
+} from "../service/ClusterSimilarDomainEventByGPTService";
 import {CopilotSession} from "../../../application/CopilotSession";
+import {TGPTOptions} from "../service/BaseGPTService";
 
 
 export async function analyzeSimilarityByGPT(boardSPI: WorkshopBoardSPI,
-                                             groupingService: GroupByDuplicationDomainEventService,
+                                             groupingService: ClusterSimilarDomainEventByGPTService,
                                              copilotSession: CopilotSession,
                                              setSimilarityGroups: (value: SimilarityGroup[]) => void,
                                              setGroupedCards: (value: WorkshopCard[][]) => void,
@@ -21,7 +21,6 @@ export async function analyzeSimilarityByGPT(boardSPI: WorkshopBoardSPI,
                     setSimilarityGroups(cardGroups)
                     return cardGroups.map(group => group.groupMembers)
                 })
-                .then(grouped => grouped.filter(group => group.length > 1))
                 .then(grouped => {
                     setGroupedCards(grouped)
                     return grouped
