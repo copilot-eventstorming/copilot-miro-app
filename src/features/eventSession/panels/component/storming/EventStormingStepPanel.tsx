@@ -16,6 +16,7 @@ import {EventSessionVoteResultHandler} from "../../../broadcast/handler/EventSes
 import {messageRegistry} from "../../../../../utils/MessagingBroadcastingInitializer";
 import {EventSessionVoteResult} from "../../../broadcast/message/EventSessionVoteResult";
 import {FixNonPastTenseCards} from "./FixNonPastTenseCards";
+import {FixUnclearSemanticsCards} from "./FixUnclearSemanticsCards";
 
 /*
 Enhancement:
@@ -26,19 +27,19 @@ Enhancement:
 - [x] Add Modal to let everyone vote for others' events:
    - I think I know what it means. if yes, then
    - is it a valid event on the 4 characteristics: past tense, value and impact, specific meaning, and independent
-   - [] add interest level
+   - [x] add interest level
 - [x] After Vote, facilitator can do alignment analysis and see the result in the panel.
-   - [] show and record total entropy
+   - [-] show and record total entropy
 - [] Reducing the entropy by removing the event cards
    - [x] by similarity (GPT)
-   - [] by importance/impact/value
+   - [x] by importance/impact/value
    - [] by removing/replacing non-specific events (GPT)
-   - [] by correcting into past tense (GPT)
+   - [x] by correcting into past tense (GPT)
    - [] by removing/replacing non-independent events (GPT)
    - [] by summarizing the events
-- [] After Vote, participants will see the vote statistics about their events from left hand side panel opened.
+- [x] After Vote, participants will see the vote statistics about their events from left hand side panel opened.
    - sort by interest, importance, familiarity
-   -
+   - show fix suggestions
 - [] Add Table/Modal to show the vote statistics
    - List the deduplicated events order by 'familiarity percentage', and 'consensus' with ascending direction
  */
@@ -193,7 +194,8 @@ const ReviewStep: React.FC<EventStormingStepProps> = ({
                 setCurrentLevel={setCurrentLevel}
                 setCurrentStep={setCurrentStep}
             >
-                <div/>
+                <FixUnclearSemanticsCards boardSPI={boardSPI} cards={cards} setCards={setCards}
+                                          copilotSession={copilotSession}/>
             </AgendaItem>
             <AgendaItem
                 title="Split non-independent events"

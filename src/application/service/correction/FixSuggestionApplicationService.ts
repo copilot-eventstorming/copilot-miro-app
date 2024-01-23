@@ -3,21 +3,24 @@ import {WorkshopBoardSPI} from "../../spi/WorkshopBoardSPI";
 import {Broadcaster} from "../../messaging/Broadcaster";
 import {ProblemFixSuggestionApplied} from "../../../component/broadcast/message/ProblemFixSuggestionApplied";
 import {v4 as uuidv4} from 'uuid';
+
 export class FixSuggestionApplicationService {
     boardSPI: WorkshopBoardSPI;
 
-    fixPastTenseService: FixPastTenseService
+    fixPastTenseService: OneCardOneSuggestionFixService
     private broadcaster: Broadcaster;
 
     constructor(boardSPI: WorkshopBoardSPI, broadcaster: Broadcaster) {
         this.boardSPI = boardSPI;
-        this.fixPastTenseService = new FixPastTenseService(boardSPI);
+        this.fixPastTenseService = new OneCardOneSuggestionFixService(boardSPI);
         this.broadcaster = broadcaster;
     }
 
     async performFixSuggestion(ownerId: string, ownerName: string, recipientId: string, fixSuggestion: FixSuggestion) {
         const {id, suggestion, text, typeName} = fixSuggestion;
         switch (typeName) {
+            case FixSuggestionType.SpecificMeaningIssue:
+                //fall through
             case FixSuggestionType.PastTensIssue:
                 if (suggestion.length >= 1) {
                     this.fixPastTenseService.performFixSuggestion(id, suggestion[0])
@@ -32,13 +35,11 @@ export class FixSuggestionApplicationService {
                 break;
             case FixSuggestionType.IndependenceIssue:
                 break;
-            case FixSuggestionType.SpecificMeaningIssue:
-                break;
         }
     }
 }
 
-class FixPastTenseService {
+class OneCardOneSuggestionFixService {
     constructor(private boardSPI: WorkshopBoardSPI) {
     }
 

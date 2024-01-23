@@ -7,6 +7,22 @@ export type TGPTOptions = {
     maxTokens: number,
     temperature: number,
 }
+export interface Item {
+    [key: string]: string;
+}
+
+export interface ResponseData {
+    incorrectQuantity: number;
+    items: Item[];
+}
+
+export interface FixCandidate {
+    eventCardId: string;
+    eventName: string;
+    fixCandidate: string;
+}
+
+
 
 export abstract class BaseGPTService<I, M, O> {
 
