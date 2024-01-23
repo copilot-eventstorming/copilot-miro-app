@@ -6,7 +6,7 @@ import {convertToEventScore} from "../../../utils/IgnoreLowValueCardsUtils";
 import {EventScore} from "../../../types/EventScore";
 import {Broadcaster} from "../../../../../application/messaging/Broadcaster";
 import {miroProxy} from "../../../../../api/MiroProxy";
-import {ParticipantFeedbackAdjustmentRequest} from "../../../broadcast/message/ParticipantFeedbackAdjustmentRequest";
+import {FeedbackAdjustmentRequest} from "../../../../../component/broadcast/message/FeedbackAdjustmentRequest";
 import {v4 as uuidv4} from "uuid";
 import {CopilotSession} from "../../../../../application/CopilotSession";
 import {OnlineUserInfo} from "@mirohq/websdk-types";
@@ -14,10 +14,11 @@ import {Familiarity, Impact, Interest} from "../../../types/EventFeedbackMetricN
 import {MetricMetadata, MetricOption} from "../../../types/MetricMetadata";
 import {
     ParticipantFeedbackAdjustmentResponseHandler
-} from "../../../broadcast/handler/ParticipantFeedbackAdjustmentResponseHandler";
+} from "../../../../../component/broadcast/handler/ParticipantFeedbackAdjustmentResponseHandler";
 import {IncrementalFeedback, updateFeedbacks} from "../../../utils/FeedbackMergeUtils";
 import {messageRegistry} from "../../../../../utils/MessagingBroadcastingInitializer";
-import {ParticipantFeedbackAdjustmentResponse} from "../../../broadcast/message/ParticipantFeedbackAdjustmentResponse";
+import {FeedbackAdjustmentResponse} from "../../../../../component/broadcast/message/FeedbackAdjustmentResponse";
+import {ClosePanelRequest} from "../../../../../component/broadcast/message/ClosePanelRequest";
 
 type IgnoreLowValueCardsProps = {
     boardSPI: WorkshopBoardSPI
@@ -92,9 +93,10 @@ export const IgnoreLowValueCards: React.FC<IgnoreLowValueCardsProps> = ({
             return "Unknown"
         }
     }
+
     useEffect(() => {
         setEventScores(convertToEventScore(feedbacks, eventOwnerByEventName))
-        if (feedbacks && feedbacks.length > 0 && voteRepository){
+        if (feedbacks && feedbacks.length > 0 && voteRepository) {
             voteRepository.saveVotes(feedbacks)
         }
     }, [feedbacks])
@@ -111,13 +113,22 @@ export const IgnoreLowValueCards: React.FC<IgnoreLowValueCardsProps> = ({
 
     useEffect(() => {
         messageRegistry.registerHandler(
-            ParticipantFeedbackAdjustmentResponse.MESSAGE_TYPE,
+            FeedbackAdjustmentResponse.MESSAGE_TYPE,
             adjustmentResponseHandler
         )
         return () => {
             messageRegistry.unregisterHandler(
-                ParticipantFeedbackAdjustmentResponse.MESSAGE_TYPE,
+                FeedbackAdjustmentResponse.MESSAGE_TYPE,
                 adjustmentResponseHandler
+            )
+
+            broadcaster.broadcast(new ClosePanelRequest(
+                    uuidv4(),
+                    null,
+                    copilotSession.miroUserId,
+                    copilotSession.miroUsername,
+                    copilotSession.miroUserId,
+                )
             )
         }
     }, []);
@@ -176,7 +187,7 @@ export const IgnoreLowValueCards: React.FC<IgnoreLowValueCardsProps> = ({
                     </td>
                     <td>
                         <button className="btn btn-secondary btn-secondary-panel mx-2" onClick={() => {
-                            broadcaster.broadcast(new ParticipantFeedbackAdjustmentRequest(
+                            broadcaster.broadcast(new FeedbackAdjustmentRequest(
                                 uuidv4(),
                                 null,
                                 copilotSession.miroUserId,

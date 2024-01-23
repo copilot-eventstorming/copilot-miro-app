@@ -1,8 +1,9 @@
-import {IMessageHandler} from "../../../../application/messaging/IMessageHandler";
-import {ParticipantFeedbackAdjustmentRequest} from "../message/ParticipantFeedbackAdjustmentRequest";
+import {IMessageHandler} from "../../../application/messaging/IMessageHandler";
+import {FeedbackAdjustmentRequest} from "../message/FeedbackAdjustmentRequest";
 
-export class ParticipantFeedbackAdjustmentRequestHandler implements IMessageHandler<ParticipantFeedbackAdjustmentRequest> {
-    async handleMessage(message: ParticipantFeedbackAdjustmentRequest): Promise<void> {
+export class ParticipantFeedbackAdjustmentRequestHandler implements IMessageHandler<FeedbackAdjustmentRequest> {
+    async handleMessage(message: FeedbackAdjustmentRequest): Promise<void> {
+        console.log("ParticipantFeedbackAdjustmentRequestHandler", message)
         if (await miro.board.ui.canOpenPanel()) {
             const url = new URL('panels/ParticipantFeedbackAdjustmentPanel.html', window.location.href);
             url.searchParams.append('sender', message.sender);

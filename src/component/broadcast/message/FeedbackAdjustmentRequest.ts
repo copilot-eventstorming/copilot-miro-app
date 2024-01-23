@@ -1,9 +1,9 @@
-import {IMessage} from "../../../../application/messaging/IMessage";
-import {ParticipantFeedback} from "../../repository/EventSessionVoteRepository";
-import {MetricMetadata} from "../../types/MetricMetadata";
+import {IMessage} from "../../../application/messaging/IMessage";
+import {ParticipantFeedback} from "../../../features/eventSession/repository/EventSessionVoteRepository";
+import {MetricMetadata} from "../../../features/eventSession/types/MetricMetadata";
 
-export class ParticipantFeedbackAdjustmentRequest implements IMessage {
-    static MESSAGE_TYPE: string = 'ParticipantFeedbackAdjustmentRequest';
+export class FeedbackAdjustmentRequest implements IMessage {
+    static MESSAGE_TYPE: string = 'FeedbackAdjustmentRequest';
     id: string;
     type: string;
     recipient: string | null;
@@ -20,7 +20,7 @@ export class ParticipantFeedbackAdjustmentRequest implements IMessage {
                 metricMeta: MetricMetadata[],
                 eventName:string
     ) {
-        this.type = ParticipantFeedbackAdjustmentRequest.MESSAGE_TYPE;
+        this.type = FeedbackAdjustmentRequest.MESSAGE_TYPE;
         this.id = id;
         this.recipient = recipient;
         this.replyTo = replyTo;

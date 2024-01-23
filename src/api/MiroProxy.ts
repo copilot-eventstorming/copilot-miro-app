@@ -10,6 +10,7 @@ import {
     StickyNoteProps
 } from "@mirohq/websdk-types";
 import {IMessage} from "../application/messaging/IMessage";
+import {WorkshopCard} from "../application/spi/WorkshopBoardSPI";
 
 interface ApiCalls {
     [key: string]: number[];
@@ -153,6 +154,17 @@ class MiroProxy {
     async broadcast(message: IMessage) {
         this.updateApiCalls('broadcast');
         await miro.board.events.broadcast(message.type, JSON.stringify(message));
+    }
+
+    findWorkshopCardById(id: string): Promise<WorkshopCard | null> {
+        this.updateApiCalls('findWorkshopCardById');
+        return miro.board.get({"id": id}).then((boardNodes: BoardNode[]) => {
+            if (boardNodes.length > 0) {
+                return boardNodes[0] as WorkshopCard;
+            } else {
+                return null;
+            }
+        });
     }
 }
 

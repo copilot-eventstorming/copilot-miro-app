@@ -1,7 +1,7 @@
 import {WorkshopCard} from "../../../application/spi/WorkshopBoardSPI";
 import {cleanHtmlTag} from "../../../application/service/utils/utils";
 import {contentWithoutSpace} from "../../../utils/WorkshopCardUtils";
-import {BaseGPTService} from "./BaseGPTService";
+import {BaseGPTService} from "../../../application/service/gpt/BaseGPTService";
 
 export type DynamicObject = {
     [key: string]: string[];

@@ -19,9 +19,18 @@ import {
 } from "../application/spi/WorkshopBoardSPI";
 
 class WorkshopBoardService implements WorkshopBoardSPI {
+    updateWorkshopCard(card: WorkshopCard): void {
+        return this.miroProxy.syncBoard(card)
+    }
+
+    findWorkshopCardById(id: string): Promise<WorkshopCard | null> {
+        return this.miroProxy.findWorkshopCardById(id);
+    }
+
     showFailure(failure: string): Promise<void> {
         return miro.board.notifications.showError(failure);
     }
+
     showNotification(message: string): Promise<void> {
         return miro.board.notifications.showInfo(message);
     }
@@ -44,12 +53,15 @@ class WorkshopBoardService implements WorkshopBoardSPI {
     async createStickyNote(stickyNote: StickyNoteProps): Promise<StickyNote> {
         return miroProxy.createStickyNote(stickyNote);
     }
+
     async createShapes(x: ShapeProps): Promise<Shape> {
         return this.miroProxy.createShape(x)
     }
+
     updateHotspot(card: Shape): Promise<void> {
         return this.miroProxy.syncBoard(card);
     }
+
     async fetchWorkshopCards(): Promise<WorkshopCard[]> {
         console.log("accessing miro websdk, fetchWorkshopCards");
         return await this.miroProxy.fetchBoardItems({type: ["sticky_note", 'shape']})

@@ -1,29 +1,29 @@
 import ReactDOM from "react-dom/client";
 import * as React from "react";
 import {useEffect, useState} from "react";
-import {messageRegistry} from "../../../utils/MessagingBroadcastingInitializer";
-import {ParticipantFeedbackAdjustmentRequest} from "../broadcast/message/ParticipantFeedbackAdjustmentRequest";
-import {IMessageHandler} from "../../../application/messaging/IMessageHandler";
-import {ParticipantFeedbackAdjustmentResponse} from "../broadcast/message/ParticipantFeedbackAdjustmentResponse";
+import {messageRegistry} from "../../utils/MessagingBroadcastingInitializer";
+import {FeedbackAdjustmentRequest} from "../broadcast/message/FeedbackAdjustmentRequest";
+import {IMessageHandler} from "../../application/messaging/IMessageHandler";
+import {FeedbackAdjustmentResponse} from "../broadcast/message/FeedbackAdjustmentResponse";
 import {
     ParticipantFeedbackAdjustmentResponseHandler
 } from "../broadcast/handler/ParticipantFeedbackAdjustmentResponseHandler";
 import {ParticipantSwitchFeedbackHandler} from "../broadcast/handler/ParticipantSwitchFeedbackHandler";
-import {EventFeedback, ParticipantFeedback} from "../repository/EventSessionVoteRepository";
-import {CopilotSession, copilotSession$} from "../../../application/CopilotSession";
-import {initialize} from "../../../utils/AppInitializer";
-import {WorkshopBoardSPI, WorkshopCard} from "../../../application/spi/WorkshopBoardSPI";
-import {WorkshopBoardService} from "../../../api/WorkshopBoardService";
-import {miroProxy} from "../../../api/MiroProxy";
+import {EventFeedback, ParticipantFeedback} from "../../features/eventSession/repository/EventSessionVoteRepository";
+import {CopilotSession, copilotSession$} from "../../application/CopilotSession";
+import {initialize} from "../../utils/AppInitializer";
+import {WorkshopBoardSPI, WorkshopCard} from "../../application/spi/WorkshopBoardSPI";
+import {WorkshopBoardService} from "../../api/WorkshopBoardService";
+import {miroProxy} from "../../api/MiroProxy";
 import {Bar, BarChart, CartesianGrid, Cell, Tooltip, XAxis, YAxis} from 'recharts';
 import {CSSTransition} from 'react-transition-group';
 import Switch from "react-switch";
-import {cleanHtmlTag} from "../../../application/service/utils/utils";
-import {MetricMetadata, MetricOption} from "../types/MetricMetadata";
-import {numerical} from "../utils/IgnoreLowValueCardsUtils";
-import {Broadcaster} from "../../../application/messaging/Broadcaster";
+import {cleanHtmlTag} from "../../application/service/utils/utils";
+import {MetricMetadata, MetricOption} from "../../features/eventSession/types/MetricMetadata";
+import {numerical} from "../../features/eventSession/utils/IgnoreLowValueCardsUtils";
+import {Broadcaster} from "../../application/messaging/Broadcaster";
 import {v4 as uuidv4} from 'uuid';
-import {IncrementalFeedback, updateFeedbacks} from "../utils/FeedbackMergeUtils";
+import {IncrementalFeedback, updateFeedbacks} from "../../features/eventSession/utils/FeedbackMergeUtils";
 
 
 const boardSPI: WorkshopBoardSPI = new WorkshopBoardService(miroProxy);
@@ -203,7 +203,7 @@ function makeMyFeedback(eventName: string, metricMetadata: MetricMetadata, metri
 }
 
 function broadcastFeedbackChange(eventName: string, metricMetadata: MetricMetadata, selection: MetricOption) {
-    broadcaster.broadcast(new ParticipantFeedbackAdjustmentResponse(
+    broadcaster.broadcast(new FeedbackAdjustmentResponse(
         uuidv4(), null,
         copilotSession$.value?.miroUserId ?? '',
         copilotSession$.value?.miroUsername ?? '',
@@ -273,21 +273,21 @@ function makeBarChartData(feedbacks: ParticipantFeedback[]) {
     return result;
 }
 
-function setupMessagingComponent(switchFeedbackHandler: ParticipantSwitchFeedbackHandler, feedbackAdjustmentHandler: IMessageHandler<ParticipantFeedbackAdjustmentResponse>) {
+function setupMessagingComponent(switchFeedbackHandler: ParticipantSwitchFeedbackHandler, feedbackAdjustmentHandler: IMessageHandler<FeedbackAdjustmentResponse>) {
     useEffect(() => {
         messageRegistry.registerHandler(
-            ParticipantFeedbackAdjustmentRequest.MESSAGE_TYPE, switchFeedbackHandler
+            FeedbackAdjustmentRequest.MESSAGE_TYPE, switchFeedbackHandler
         )
         messageRegistry.registerHandler(
-            ParticipantFeedbackAdjustmentResponse.MESSAGE_TYPE, feedbackAdjustmentHandler
+            FeedbackAdjustmentResponse.MESSAGE_TYPE, feedbackAdjustmentHandler
         )
         console.log(messageRegistry)
         return () => {
             messageRegistry.unregisterHandler(
-                ParticipantFeedbackAdjustmentRequest.MESSAGE_TYPE, switchFeedbackHandler
+                FeedbackAdjustmentRequest.MESSAGE_TYPE, switchFeedbackHandler
             )
             messageRegistry.unregisterHandler(
-                ParticipantFeedbackAdjustmentResponse.MESSAGE_TYPE, feedbackAdjustmentHandler
+                FeedbackAdjustmentResponse.MESSAGE_TYPE, feedbackAdjustmentHandler
             )
         }
     }, []);
@@ -361,7 +361,7 @@ function useFeedbacks() {
     const [myFeedback, setMyFeedback] = useState<ParticipantFeedback | null>(null);
     // For realtime feedback update
     const [incrementalFeedback, setIncrementalFeedback] = React.useState<IncrementalFeedback | null>(null);
-    const feedbackAdjustmentHandler: IMessageHandler<ParticipantFeedbackAdjustmentResponse> = new ParticipantFeedbackAdjustmentResponseHandler(setIncrementalFeedback)
+    const feedbackAdjustmentHandler: IMessageHandler<FeedbackAdjustmentResponse> = new ParticipantFeedbackAdjustmentResponseHandler(setIncrementalFeedback)
     const [feedbacks, setFeedbacks] = React.useState<ParticipantFeedback[]>(JSON.parse(urlParams.get('feedbacks') ?? "[]"));
     const [metricsMetadata, setMetricsMetadata] = React.useState<MetricMetadata[]>(JSON.parse(urlParams.get('metricsMetadata') ?? "[]"));
     const [eventName, setEventName] = useState(urlParams.get('eventName') ?? "Event Name Not Specified");

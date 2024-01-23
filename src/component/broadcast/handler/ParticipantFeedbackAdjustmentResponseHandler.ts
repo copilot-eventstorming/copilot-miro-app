@@ -1,8 +1,8 @@
-import {IMessageHandler} from "../../../../application/messaging/IMessageHandler";
-import {ParticipantFeedbackAdjustmentResponse} from "../message/ParticipantFeedbackAdjustmentResponse";
-import {IncrementalFeedback} from "../../utils/FeedbackMergeUtils";
+import {IMessageHandler} from "../../../application/messaging/IMessageHandler";
+import {FeedbackAdjustmentResponse} from "../message/FeedbackAdjustmentResponse";
+import {IncrementalFeedback} from "../../../features/eventSession/utils/FeedbackMergeUtils";
 
-export class ParticipantFeedbackAdjustmentResponseHandler implements IMessageHandler<ParticipantFeedbackAdjustmentResponse> {
+export class ParticipantFeedbackAdjustmentResponseHandler implements IMessageHandler<FeedbackAdjustmentResponse> {
     private callback: (value: IncrementalFeedback) => void;
 
     constructor(setIncrementalFeedback: (value: IncrementalFeedback) => void) {
@@ -10,7 +10,7 @@ export class ParticipantFeedbackAdjustmentResponseHandler implements IMessageHan
     }
 
 
-    handleMessage(message: ParticipantFeedbackAdjustmentResponse): Promise<void> {
+    handleMessage(message: FeedbackAdjustmentResponse): Promise<void> {
         console.log("ParticipantFeedbackAdjustmentResponseHandler", message)
         this.callback({
             participantId: message.sender,

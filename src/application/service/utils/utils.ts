@@ -83,8 +83,16 @@ export function cleanHtmlTag(title: string | undefined): string {
     }
     return title
 }
-export function prettifyContent(card: WorkshopCard, content:string): WorkshopCard {
-    card.content = "<p>" + content + "</p>";
+export function prettifyContent(card: WorkshopCard, content: string): WorkshopCard {
+    const words = content.split(/\s+/);
+    const chunks = words.map(word => {
+        if (/[\u4e00-\u9fa5]/.test(word)) { // 如果是中文
+            return word.match(/.{1,4}/g)?.join('</p><p>');
+        } else { // 如果是英文
+            return word.match(/\b\w+\b/g)?.join('</p><p>');
+        }
+    });
+    card.content = "<p>" + chunks?.join(' ') + "</p>";
     return card;
 }
 export function sizeof(object: any): string {

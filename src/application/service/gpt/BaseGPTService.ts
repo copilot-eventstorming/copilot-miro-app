@@ -1,7 +1,7 @@
 import {AzureKeyCredential, OpenAIClient} from '@azure/openai';
 import {Completions} from "@azure/openai/types/openai";
-import {cleanHtmlTag} from "../../../application/service/utils/utils";
-import {AzureOpenAIConfiguration, GPTConfiguration} from "../../../application/CopilotSession";
+import {cleanHtmlTag} from "../utils/utils";
+import {AzureOpenAIConfiguration, GPTConfiguration} from "../../CopilotSession";
 
 export type TGPTOptions = {
     maxTokens: number,

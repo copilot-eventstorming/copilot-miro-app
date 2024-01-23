@@ -4,7 +4,7 @@ import {
     SimilarityGroup
 } from "../service/ClusterSimilarDomainEventByGPTService";
 import {CopilotSession} from "../../../application/CopilotSession";
-import {TGPTOptions} from "../service/BaseGPTService";
+import {TGPTOptions} from "../../../application/service/gpt/BaseGPTService";
 
 
 export async function analyzeSimilarityByGPT(boardSPI: WorkshopBoardSPI,

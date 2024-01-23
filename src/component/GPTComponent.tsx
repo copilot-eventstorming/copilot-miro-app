@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {WorkshopBoardSPI, WorkshopCard} from "../application/spi/WorkshopBoardSPI";
-import {BaseGPTService} from "../features/eventSession/service/BaseGPTService";
+import {BaseGPTService} from "../application/service/gpt/BaseGPTService";
 import {
     AzureOpenAIConfiguration,
     CopilotSession,
@@ -32,12 +32,14 @@ function MainButtons<R, O>(cards: WorkshopCard[],
     const [temperature, setTemperature] = React.useState(0.3);
     const handleAnalyze = async () => {
         setIsLoading(true);
-        const data = await gptService.perform(cards, copilotSession.gptConfiguration, {
-            maxTokens: 1000,
-            temperature: 0.3
+        boardSPI.fetchEventCards().then(async (updatedCards) => {
+            const data = await gptService.perform(updatedCards, copilotSession.gptConfiguration, {
+                maxTokens: 1000,
+                temperature: 0.3
+            });
+            setGptData(data);
+            setIsLoading(false);
         });
-        setGptData(data);
-        setIsLoading(false);
     };
     return (
         <div className="w-full flex flex-col">
@@ -346,17 +348,6 @@ export const GPTAnalysisBase = <R, O>({
     const [isLoading, setIsLoading] = useState(false);
     const [showPrompt, setShowPrompt] = React.useState(false);
     const [showGptConfiguration, setShowGptConfiguration] = React.useState(false);
-
-
-    const handleAnalyze = async () => {
-        setIsLoading(true);
-        const data = await gptService.perform(cards, copilotSession.gptConfiguration, {
-            maxTokens: 1000,
-            temperature: 0.3
-        });
-        setGptData(data);
-        setIsLoading(false);
-    };
 
     return (
         <div className="w-full my-2 mb-4">

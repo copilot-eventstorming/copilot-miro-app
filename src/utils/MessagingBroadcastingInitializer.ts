@@ -11,16 +11,22 @@ import {StartEventSessionVoteHandler} from "../features/eventSession/broadcast/h
 import {StartEventSessionVote} from "../features/eventSession/broadcast/message/StartEventSessionVote";
 import {
     ParticipantFeedbackAdjustmentRequestHandler
-} from "../features/eventSession/broadcast/handler/ParticipantFeedbackAdjustmentRequestHandler";
+} from "../component/broadcast/handler/ParticipantFeedbackAdjustmentRequestHandler";
 import {
-    ParticipantFeedbackAdjustmentRequest
-} from "../features/eventSession/broadcast/message/ParticipantFeedbackAdjustmentRequest";
+    FeedbackAdjustmentRequest
+} from "../component/broadcast/message/FeedbackAdjustmentRequest";
+import {ProblemFixSuggestionsMessage} from "../component/broadcast/message/ProblemFixSuggestionsMessage";
+import {ClosePanelRequest} from "../component/broadcast/message/ClosePanelRequest";
+import {ClosePanelHandler} from "../component/broadcast/handler/ClosePanelHandler";
+import {ProblemFixSuggestionsHandler} from "../component/broadcast/handler/ProblemFixSuggestionsHandler";
 
 export const messageRegistry = new MessageRegistry(MessageTopics)
 
 const startEventSessionConceptIntroductionQuizHandler = new StartEventSessionConceptIntroductionQuizHandler();
 const startEventSessionVoteHandler = new StartEventSessionVoteHandler();
 const participantFeedbackAdjustmentRequestHandler = new ParticipantFeedbackAdjustmentRequestHandler();
+const problemFixSuggestionsMessageHandler = new ProblemFixSuggestionsHandler();
+const closePanelHandler = new ClosePanelHandler()
 
 export function initializeMessaging() {
     copilotSession$.subscribe((copilotSession) => {
@@ -44,11 +50,19 @@ export function initializeMessaging() {
     )
 
     messageRegistry.registerHandler(
-        ParticipantFeedbackAdjustmentRequest.MESSAGE_TYPE,
+        FeedbackAdjustmentRequest.MESSAGE_TYPE,
         participantFeedbackAdjustmentRequestHandler
     )
 
+    messageRegistry.registerHandler(
+        ProblemFixSuggestionsMessage.MESSAGE_TYPE,
+        problemFixSuggestionsMessageHandler
+    )
 
+   messageRegistry.registerHandler(
+       ClosePanelRequest.MESSAGE_TYPE,
+       closePanelHandler
+   )
 }
 
 export function releaseMessaging() {

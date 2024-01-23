@@ -64,6 +64,10 @@ export interface WorkshopBoardSPI {
     showNotification(message: string): Promise<void>;
 
     showFailure(failure: string): Promise<void>;
+
+    findWorkshopCardById(id: string): Promise<WorkshopCard | null>;
+
+    updateWorkshopCard(card: WorkshopCard): void;
 }
 
 

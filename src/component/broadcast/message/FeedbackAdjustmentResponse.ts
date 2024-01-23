@@ -1,8 +1,8 @@
-import {IMessage} from "../../../../application/messaging/IMessage";
-import {EventFeedback} from "../../repository/EventSessionVoteRepository";
+import {IMessage} from "../../../application/messaging/IMessage";
+import {EventFeedback} from "../../../features/eventSession/repository/EventSessionVoteRepository";
 
-export class ParticipantFeedbackAdjustmentResponse implements IMessage {
-    static MESSAGE_TYPE: string = "ParticipantFeedbackAdjustmentResponse";
+export class FeedbackAdjustmentResponse implements IMessage {
+    static MESSAGE_TYPE: string = "FeedbackAdjustmentResponse";
     id: string;
     type: string;
     recipient: string | null;
@@ -12,7 +12,7 @@ export class ParticipantFeedbackAdjustmentResponse implements IMessage {
     eventFeedback: EventFeedback;
 
     public constructor(id: string, recipient: string | null, sender: string, senderName: string, replyTo: string | null, eventFeedback: EventFeedback) {
-        this.type = ParticipantFeedbackAdjustmentResponse.MESSAGE_TYPE;
+        this.type = FeedbackAdjustmentResponse.MESSAGE_TYPE;
         this.id = id;
         this.recipient = recipient;
         this.replyTo = replyTo;
