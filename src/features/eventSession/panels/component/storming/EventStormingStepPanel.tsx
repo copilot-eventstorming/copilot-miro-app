@@ -17,6 +17,7 @@ import {messageRegistry} from "../../../../../utils/MessagingBroadcastingInitial
 import {EventSessionVoteResult} from "../../../broadcast/message/EventSessionVoteResult";
 import {FixNonPastTenseCards} from "./FixNonPastTenseCards";
 import {FixUnclearSemanticsCards} from "./FixUnclearSemanticsCards";
+import {SplitNonIndependentEvents} from "./SplitNonIndependentEvents";
 
 /*
 Enhancement:
@@ -154,6 +155,7 @@ const ReviewStep: React.FC<EventStormingStepProps> = ({
                 <CollectingEventFeedbacks onlineUsers={onlineUsers} cards={cards} boardSPI={boardSPI}
                                           copilotSession={copilotSession}
                                           broadcaster={broadcaster}
+                                          voteRepository={voteRepository}
                                           participantFeedbacks={participantFeedbacks}
                                           setParticipantFeedbacks={setParticipantFeedbacks}
                 />
@@ -206,7 +208,8 @@ const ReviewStep: React.FC<EventStormingStepProps> = ({
                 setCurrentLevel={setCurrentLevel}
                 setCurrentStep={setCurrentStep}
             >
-                <div/>
+                <SplitNonIndependentEvents boardSPI={boardSPI} cards={cards} setCards={setCards}
+                                           copilotSession={copilotSession}/>
             </AgendaItem>
             <AgendaItem
                 title="Merge cards with too fine granularity"

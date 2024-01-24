@@ -19,7 +19,7 @@ import {
 } from "../application/spi/WorkshopBoardSPI";
 
 class WorkshopBoardService implements WorkshopBoardSPI {
-    updateWorkshopCard(card: WorkshopCard): void {
+    updateWorkshopCard(card: WorkshopCard): Promise<void> {
         return this.miroProxy.syncBoard(card)
     }
 

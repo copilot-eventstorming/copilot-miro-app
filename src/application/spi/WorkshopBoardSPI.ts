@@ -67,7 +67,7 @@ export interface WorkshopBoardSPI {
 
     findWorkshopCardById(id: string): Promise<WorkshopCard | null>;
 
-    updateWorkshopCard(card: WorkshopCard): void;
+    updateWorkshopCard(card: WorkshopCard): Promise<void>;
 }
 
 

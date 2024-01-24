@@ -18,7 +18,7 @@ export interface FixCandidate {
     fixCandidate: string;
 }
 
-export class FixEventNotPastTenseByGPTService extends BaseGPTService<WorkshopCard[], ResponseData, FixCandidate[]> {
+export class FixEventNotPastTenseByGPTService extends BaseGPTService<WorkshopCard[], ResponseData, FixCandidate> {
     parseResult(cards: WorkshopCard[], result: ResponseData): FixCandidate[] {
         return result.items.flatMap(item => {
                 return Object.entries(item)
@@ -53,7 +53,10 @@ export class FixEventNotPastTenseByGPTService extends BaseGPTService<WorkshopCar
     }
 }
 
-const PromptPrefix = `Find domain events not using PAST TENSE, and provide possible fix. The response must only contains events not following past tense, and response should ONLY and STRICTLY follow the example JSON format but not content below:
+const PromptPrefix = `Find domain events not using PAST TENSE, and provide past tense fix. 
+The response must only contain events not following past tense and ignore those already in past tense, 
+don't make up event does not exist in request,
+and response should ONLY and STRICTLY follow the example JSON format but not content below:
 {
    "incorrectQuantity" : 5,
    "items" : [
@@ -65,9 +68,11 @@ const PromptPrefix = `Find domain events not using PAST TENSE, and provide possi
         {"客户在抖音上下订单完成": "抖音平台订单已提交",  "confidence" : 0.53}
    ]
 }
-make your response as concise as possible, with no introduction or background at the start, no summary at the end, and outputting only code for answers where code is appropriate.
+Ignore the correct domain events, response only contains incorrect domain events.
+Make your response as concise as possible, with no make up events outside the following real input, with no introduction or background at the start, no summary at the end, and outputting only code for answers where code is appropriate.
 The real Input Event Names are as following:
 `
 
-const PromptPostfix = `Your JSON ONLY response should be:
+const PromptPostfix = `
+Your JSON ONLY response should be:
 `

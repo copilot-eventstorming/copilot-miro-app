@@ -49,7 +49,7 @@ export abstract class BaseGPTService<I, M, O> {
         }
     }
 
-    async perform(input: I, gptConfiguration: GPTConfiguration, gptOptions: TGPTOptions): Promise<O> {
+    async perform(input: I, gptConfiguration: GPTConfiguration, gptOptions: TGPTOptions): Promise<O[]> {
         return this.openaiApiCall(gptConfiguration, input, gptOptions)
             .then(result => {
                 return this.parseResponse(input, result)
@@ -66,7 +66,7 @@ export abstract class BaseGPTService<I, M, O> {
         return this.promptPrefix() + this.promptMiddle(input) + this.promptPostfix();
     }
 
-    parseResponse(input: I, response: string): O {
+    parseResponse(input: I, response: string): O[] {
         try {
             let result: M = JSON.parse(cleanHtmlTag(response));
             return this.parseResult(input, result)
@@ -77,9 +77,9 @@ export abstract class BaseGPTService<I, M, O> {
         }
     }
 
-    abstract parseResult(input: I, result: M): O
+    abstract parseResult(input: I, result: M): O[]
 
-    abstract emptyResult(): O
+    abstract emptyResult(): O[]
 
     abstract promptPrefix(): string
 

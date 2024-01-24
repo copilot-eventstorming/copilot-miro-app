@@ -1,8 +1,8 @@
 import {ParticipantFeedback} from "../features/eventSession/repository/EventSessionVoteRepository";
 import {RadarData} from "../component/RadarChart";
 
-export function prepareDataByProperty(testData: ParticipantFeedback[], propertyName: string): RadarData[][] {
-    const groupedByEvent = testData.flatMap(participantFeedback =>
+export function prepareDataByProperty(feedbacksData: ParticipantFeedback[], propertyName: string): RadarData[][] {
+    const groupedByEvent = feedbacksData.flatMap(participantFeedback =>
         participantFeedback
             .feedback
             .map(eventFeedback => ({

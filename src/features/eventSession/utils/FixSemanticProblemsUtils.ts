@@ -6,27 +6,25 @@ import {FixSuggestion, FixSuggestionType} from "../../../component/types/FixSugg
 import {ProblemFixSuggestionsMessage} from "../../../component/broadcast/message/ProblemFixSuggestionsMessage";
 import {v4 as uuidv4} from "uuid";
 
-export function notifyCardOwners(gptData: FixCandidate[], cards: WorkshopCard[], broadcaster: Broadcaster, copilotSession: CopilotSession, fixSuggestionType: FixSuggestionType) {
-    return () => {
+export async function notifyCardOwners<O>(gptData: O[],
+                                          f: (o:O) => FixSuggestion,
+                                          g: (o:O) => Promise<string>,
+                                          broadcaster: Broadcaster,
+                                          copilotSession: CopilotSession) {
+    const notification = async () => {
         //group by owner id
-        const fixesByOwner = gptData.reduce<Record<string, FixSuggestion[]>>((acc, fixCandidate) => {
+        const fixesByOwner: Record<string, FixSuggestion[]> = {};
+        for (const fixCandidate of gptData) {
             if (fixCandidate) {
-                const cardId = fixCandidate.eventCardId
-                const ownerId: string = cards.find((card) => card.id === cardId)?.createdBy || ""
-                const fixSuggestion = new FixSuggestion(
-                    fixCandidate.eventCardId,
-                    [fixCandidate.eventName],
-                    [fixCandidate.fixCandidate],
-                    fixSuggestionType
-                )
-                if (acc[ownerId]) {
-                    acc[ownerId].push(fixSuggestion)
+                const ownerId: string = await g(fixCandidate);
+                const fixSuggestion = f(fixCandidate);
+                if (fixesByOwner[ownerId]) {
+                    fixesByOwner[ownerId].push(fixSuggestion);
                 } else {
-                    acc[ownerId] = [fixSuggestion]
+                    fixesByOwner[ownerId] = [fixSuggestion];
                 }
             }
-            return acc
-        }, {})
+        }
         Object.entries(fixesByOwner).forEach(([ownerId, fixes]) => {
             broadcaster.broadcast(new ProblemFixSuggestionsMessage(
                 uuidv4(),
@@ -38,4 +36,15 @@ export function notifyCardOwners(gptData: FixCandidate[], cards: WorkshopCard[],
                 fixes));
         });
     };
+    await notification();
+
+}
+
+export const fixCandidateToFixSuggestion: (o: FixCandidate) => FixSuggestion = (o) => {
+    return new FixSuggestion(
+        o.eventCardId,
+        [o.eventName],
+        [o.fixCandidate],
+        FixSuggestionType.SpecificMeaningIssue
+    )
 }

@@ -1,4 +1,4 @@
-import {findLocally, saveLocally, SaveResult} from "../../../utils/localStorage";
+import {findLocally, removeLocally, saveLocally, SaveResult} from "../../../utils/localStorage";
 
 export class ItemFeedback {
     constructor(
@@ -35,6 +35,10 @@ export class EventSessionVoteRepository {
 
     loadVotes(): Promise<ParticipantFeedback[]> {
         return findLocally(this.key(this.boardId)).then(feedbacks => feedbacks || [])
+    }
+
+    removeVotes(): Promise<void> {
+        return removeLocally(this.key(this.boardId));
     }
 
 }

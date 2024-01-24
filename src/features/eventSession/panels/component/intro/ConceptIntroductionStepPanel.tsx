@@ -185,8 +185,16 @@ export const ConceptIntroductionStepPanel: React.FC<TConceptIntroductionPanelPro
         <div className="flex flex-row w-full justify-center">
             <div className="px-2 py-2">
                 <button className="btn btn-primary btn-primary-panel px-2" onClick={async () => {
+                    await sampleService.addPNEventSample()
+                }}>Add Positive/Negative Samples
+                </button>
+            </div>
+        </div>
+        <div className="flex flex-row w-full justify-center">
+            <div className="px-2 py-2">
+                <button className="btn btn-primary btn-primary-panel px-2" onClick={async () => {
                     await sampleService.addSample()
-                }}>Add Sample
+                }}>Add Normalized Sample
                 </button>
             </div>
             <div className="px-2 py-2">

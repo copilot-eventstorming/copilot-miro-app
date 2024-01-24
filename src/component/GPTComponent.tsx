@@ -25,7 +25,7 @@ function MainButtons<R, O>(cards: WorkshopCard[],
                            copilotSession: CopilotSession,
                            boardSPI: WorkshopBoardSPI,
                            gptService: BaseGPTService<WorkshopCard[], R, O>,
-                           setGptData: (data: O) => void,
+                           setGptData: (data: O[]) => void,
                            setIsLoading: (value: boolean) => void,
                            setShowGptConfiguration: (value: boolean) => void) {
     const [maxTokens, setMaxTokens] = React.useState(1000);
@@ -191,7 +191,7 @@ interface ManuallyCopyPastePromptProps<R, O> {
     setCards: (cards: WorkshopCard[]) => void;
     gptService: BaseGPTService<WorkshopCard[], R, O>;
     cards: WorkshopCard[];
-    setGptData: (value: O) => void;
+    setGptData: (value: O[]) => void;
 }
 const ManuallyCopyPastePrompt = <R, O>({
                                            boardSPI,
@@ -336,7 +336,7 @@ interface GPTAnalysisBaseProps<R, O> {
     boardSPI: WorkshopBoardSPI,
     copilotSession: CopilotSession,
     cards: WorkshopCard[],
-    setGptData: (data: O) => void,
+    setGptData: (data: O[]) => void,
     setCards: (cards: WorkshopCard[]) => void,
     gptService: BaseGPTService<WorkshopCard[], R, O>,
     actionName: string

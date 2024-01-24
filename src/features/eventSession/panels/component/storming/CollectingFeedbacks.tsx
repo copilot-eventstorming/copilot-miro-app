@@ -2,7 +2,12 @@ import {OnlineUserInfo} from "@mirohq/websdk-types";
 import {WorkshopBoardSPI, WorkshopCard} from "../../../../../application/spi/WorkshopBoardSPI";
 import {Broadcaster} from "../../../../../application/messaging/Broadcaster";
 import {CopilotSession} from "../../../../../application/CopilotSession";
-import {EventFeedback, ItemFeedback, ParticipantFeedback} from "../../../repository/EventSessionVoteRepository";
+import {
+    EventFeedback,
+    EventSessionVoteRepository,
+    ItemFeedback,
+    ParticipantFeedback
+} from "../../../repository/EventSessionVoteRepository";
 import {
     EntropyCalculationResult,
     EntropyCalculationService,
@@ -28,6 +33,7 @@ type EventVoteProp = {
     boardSPI: WorkshopBoardSPI
     broadcaster: Broadcaster
     copilotSession: CopilotSession
+    voteRepository: EventSessionVoteRepository| null
     participantFeedbacks: ParticipantFeedback[]
     setParticipantFeedbacks: (feedbacks: ParticipantFeedback[]) => void
 }
@@ -94,6 +100,7 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                                                                       boardSPI,
                                                                       broadcaster,
                                                                       copilotSession,
+                                                                      voteRepository,
                                                                       participantFeedbacks,
                                                                       setParticipantFeedbacks
                                                                   }) => {
@@ -121,14 +128,29 @@ export const CollectingEventFeedbacks: React.FC<EventVoteProp> = ({
                         }}
                 >Start Feedback
                 </button>
-                <button className="btn btn-primary btn-primary-panel px-2 mx-2"
-                    //disabled={participantFeedbacks.length <= 0}
-                        onClick={() => {
-                            setParticipantFeedbacks(generateTestData())
-                        }}
-                >
-                    Mock Feedbacks
-                </button>
+                {
+                    participantFeedbacks.length === 0 &&
+
+                    <button className="btn btn-primary btn-primary-panel px-2 mx-2"
+                            onClick={() => {
+                                setParticipantFeedbacks(generateTestData())
+                            }}
+                    >
+                        Mock Feedbacks
+                    </button>
+                }
+                {
+
+                    participantFeedbacks.length > 0 &&
+                    <button className="btn btn-primary btn-primary-panel px-2 mx-2"
+                            onClick={() => {
+                                setParticipantFeedbacks([])
+                                voteRepository?.removeVotes()
+                            }}
+                    >
+                        Clear Feedbacks
+                    </button>
+                }
             </div>
             <div className="w-full">
                 <div className="w-full sub-title sub-title-panel">Feedback Records</div>
