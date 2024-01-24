@@ -25,7 +25,7 @@ const ProblemFixSuggestionsPanel: React.FC<FixProblemPanelProps> = () => {
     const [fixSuggestions, setFixSuggestions] = React.useState<FixSuggestion[]>(JSON.parse(url.searchParams.get("fixSuggestions") || "[]"));
     const [fixSuggestionTypeLabel, setFixSuggestionTypeLabel] = React.useState("Issues");
     const [cards, setCards] = React.useState<WorkshopCard[]>([]);
-    const [copilotSession, setCopilotSession] = React.useState<CopilotSession>(copilotSession$.value);
+    const [copilotSession, setCopilotSession] = React.useState<CopilotSession|null>(copilotSession$.value);
     const fixService = new FixSuggestionApplicationService(boardSPI, broadcaster);
     useEffect(() => {
         initialize()
@@ -57,7 +57,7 @@ const ProblemFixSuggestionsPanel: React.FC<FixProblemPanelProps> = () => {
     return (
         <div className="w-full">
             <div className="title title-panel">{fixSuggestionTypeLabel}</div>
-            {fixSuggestions.length > 0 && (
+            {copilotSession && fixSuggestions.length > 0 && (
                 <table className="w-full">
                     <thead>
                     <tr>
@@ -71,7 +71,7 @@ const ProblemFixSuggestionsPanel: React.FC<FixProblemPanelProps> = () => {
                         <tr key={index} className={index % 2 === 0 ? "even_row" : "odd_row"}>
                             <td className="text-cell text-cell-panel clickable-label">{fixSuggestion.text.map(s =>
                                 (<li key={s} className="list-none" onClick={() => {
-                                    const target: WorkshopCard | null = cards.find(card => card.id === fixSuggestion.id
+                                    const target: WorkshopCard|undefined = cards.find(card => card.id === fixSuggestion.id
                                         && card.createdBy === copilotSession.miroUserId)
                                     if (target) {
                                         boardSPI.zoomToCard(target.id)
@@ -89,7 +89,7 @@ const ProblemFixSuggestionsPanel: React.FC<FixProblemPanelProps> = () => {
                                                 .then(() => {
                                                     setFixSuggestions(fixSuggestions.filter(s => s.id !== fixSuggestion.id))
                                                 })}> Fix
-                                < /button>
+                                </button>
                             </td>
                         </tr>
                     ))}
