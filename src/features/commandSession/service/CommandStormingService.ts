@@ -127,7 +127,20 @@ export class CommandStormingService {
                 }
             }
             
-            // 5. 没有找到源头
+            // 5. 检查是否有直接的 Event → Event 连接（事件直接触发另一个事件）
+            const sourceEvent = this.findRelatedCard(event, events, connectors, 'incoming');
+            if (sourceEvent) {
+                result.push({
+                    eventId: event.id,
+                    eventName: eventName,
+                    sourceType: 'Event',
+                    sourceId: sourceEvent.id,
+                    sourceName: extractCardContent(sourceEvent)
+                });
+                continue;
+            }
+            
+            // 6. 没有找到源头
             result.push({
                 eventId: event.id,
                 eventName: eventName,
