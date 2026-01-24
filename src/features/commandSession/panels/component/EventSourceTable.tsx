@@ -46,6 +46,7 @@ const ALL_SOURCE_TYPES: (EventSourceType | 'unidentified')[] = ['Command', 'Time
  */
 export const EventSourceTable: React.FC<TEventSourceTableProps> = ({boardSPI, data}) => {
     const [filterType, setFilterType] = useState<EventSourceType | 'all' | 'unidentified'>('all');
+    const [filterRole, setFilterRole] = useState<string>('all');
 
     // 计算各类型的统计
     const typeCounts = useMemo(() => {
@@ -67,12 +68,45 @@ export const EventSourceTable: React.FC<TEventSourceTableProps> = ({boardSPI, da
         return counts;
     }, [data]);
 
+    // 收集所有角色名称（仅命令类型）
+    const allRoles = useMemo(() => {
+        const roleSet = new Set<string>();
+        data.forEach(item => {
+            if (item.sourceType === 'Command' && item.roles.length > 0) {
+                item.roles.forEach(r => roleSet.add(r.roleName));
+            }
+        });
+        return Array.from(roleSet).sort();
+    }, [data]);
+
     // 过滤数据
     const filteredData = useMemo(() => {
-        if (filterType === 'all') return data;
-        if (filterType === 'unidentified') return data.filter(item => !item.sourceId);
-        return data.filter(item => item.sourceType === filterType && item.sourceId);
-    }, [data, filterType]);
+        let result = data;
+        
+        // 按源类型过滤
+        if (filterType === 'unidentified') {
+            result = result.filter(item => !item.sourceId);
+        } else if (filterType !== 'all') {
+            result = result.filter(item => item.sourceType === filterType && item.sourceId);
+        }
+        
+        // 按角色过滤（仅当选中命令且选择了特定角色）
+        if (filterType === 'Command' && filterRole !== 'all') {
+            result = result.filter(item => 
+                item.roles.some(r => r.roleName === filterRole)
+            );
+        }
+        
+        return result;
+    }, [data, filterType, filterRole]);
+
+    // 当切换源类型时重置角色过滤
+    const handleTypeChange = (type: EventSourceType | 'all' | 'unidentified') => {
+        setFilterType(type);
+        if (type !== 'Command') {
+            setFilterRole('all');
+        }
+    };
 
     return (
         <div className="mx-2 overflow-y-auto flex-1 flex flex-col">
@@ -83,7 +117,7 @@ export const EventSourceTable: React.FC<TEventSourceTableProps> = ({boardSPI, da
             <div className="flex flex-wrap gap-1 justify-center my-2">
                 <button
                     className={`px-2 py-1 text-xs rounded ${filterType === 'all' ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-700'}`}
-                    onClick={() => setFilterType('all')}
+                    onClick={() => handleTypeChange('all')}
                 >
                     全部 ({data.length})
                 </button>
@@ -91,12 +125,29 @@ export const EventSourceTable: React.FC<TEventSourceTableProps> = ({boardSPI, da
                     <button
                         key={type}
                         className={`px-2 py-1 text-xs rounded ${filterType === type ? getSourceTypeColor(type) + ' ring-2 ring-offset-1' : getSourceTypeColor(type) + ' opacity-60'}`}
-                        onClick={() => setFilterType(type)}
+                        onClick={() => handleTypeChange(type)}
                     >
                         {type === 'unidentified' ? '未识别' : getSourceTypeLabel(type)} ({typeCounts[type]})
                     </button>
                 ))}
             </div>
+
+            {/* 角色过滤（仅命令类型时显示） */}
+            {filterType === 'Command' && allRoles.length > 0 && (
+                <div className="flex items-center gap-2 justify-center mb-2">
+                    <span className="text-xs text-gray-500">按角色过滤:</span>
+                    <select 
+                        className="text-xs border rounded px-2 py-1"
+                        value={filterRole}
+                        onChange={(e) => setFilterRole(e.target.value)}
+                    >
+                        <option value="all">全部角色</option>
+                        {allRoles.map(role => (
+                            <option key={role} value={role}>{role}</option>
+                        ))}
+                    </select>
+                </div>
+            )}
 
             {/* 表格 */}
             <div className="flex-1 overflow-y-auto">
@@ -139,14 +190,19 @@ export const EventSourceTable: React.FC<TEventSourceTableProps> = ({boardSPI, da
                                         ) : (
                                             <span className="text-gray-400">{item.sourceName}</span>
                                         )}
-                                        {/* 角色（仅命令类型显示，右对齐灰色小字） */}
-                                        {item.sourceType === 'Command' && item.roleName && (
-                                            <label 
-                                                className="clickable-label text-right text-gray-500 text-xs italic"
-                                                onClick={() => item.roleId && boardSPI.zoomToCard(item.roleId)}
-                                            >
-                                                👤 {item.roleName}
-                                            </label>
+                                        {/* 多角色显示（仅命令类型） */}
+                                        {item.sourceType === 'Command' && item.roles.length > 0 && (
+                                            <div className="flex flex-wrap gap-1 justify-end mt-1">
+                                                {item.roles.map((role, idx) => (
+                                                    <label 
+                                                        key={idx}
+                                                        className="clickable-label text-xs bg-yellow-100 text-yellow-800 px-1 rounded"
+                                                        onClick={() => boardSPI.zoomToCard(role.roleId)}
+                                                    >
+                                                        👤 {role.roleName}
+                                                    </label>
+                                                ))}
+                                            </div>
                                         )}
                                     </div>
                                 </td>

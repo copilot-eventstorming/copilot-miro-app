@@ -16,6 +16,14 @@ export interface EventWithPolicy {
 }
 
 /**
+ * 角色信息
+ */
+export interface RoleInfo {
+    roleId: string;
+    roleName: string;
+}
+
+/**
  * 事件源关系 - 事件及其触发源
  */
 export interface EventSource {
@@ -24,8 +32,7 @@ export interface EventSource {
     sourceType: EventSourceType;
     sourceId: string;
     sourceName: string;
-    roleId?: string;       // 命令触发方（角色）
-    roleName?: string;
+    roles: RoleInfo[];  // 支持多角色
 }
 
 /**

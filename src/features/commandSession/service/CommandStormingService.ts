@@ -70,6 +70,16 @@ export class CommandStormingService {
             total: cards.length
         });
         
+        // Debug: 检查黄色卡片的 shape
+        const yellowCards = cards.filter(c => c.type === 'sticky_note' && (c as any).style?.fillColor === 'light_yellow');
+        console.log('[CommandStorming] Yellow cards:', yellowCards.map(c => ({
+            id: c.id, 
+            shape: (c as any).shape, 
+            width: c.width, 
+            height: c.height,
+            content: (c as any).content?.substring(0, 30)
+        })));
+        
         const result: EventSource[] = [];
         
         for (const event of events) {
@@ -78,19 +88,15 @@ export class CommandStormingService {
             // 1. 检查是否有 Command 触发（overlap 或 connector）
             const command = this.findRelatedCard(event, commands, connectors, 'incoming');
             if (command) {
-                // 查找 Command 的触发者（Role）- 先用 overlap/connector，再用最近距离
-                let role = this.findRelatedCard(command, roles, connectors, 'incoming');
-                if (!role) {
-                    role = this.findNearestCard(command, roles);
-                }
+                // 查找 Command 的所有关联角色
+                const foundRoles = this.findAllRelatedCards(command, roles, connectors);
                 result.push({
                     eventId: event.id,
                     eventName: eventName,
                     sourceType: 'Command',
                     sourceId: command.id,
                     sourceName: extractCardContent(command),
-                    roleId: role?.id,
-                    roleName: role ? extractCardContent(role) : undefined
+                    roles: foundRoles.map(r => ({ roleId: r.id, roleName: extractCardContent(r) }))
                 });
                 continue;
             }
@@ -106,7 +112,8 @@ export class CommandStormingService {
                     eventName: eventName,
                     sourceType: sourceType,
                     sourceId: timer.id,
-                    sourceName: extractCardContent(timer, true)  // 替换第一个换行
+                    sourceName: extractCardContent(timer, true),  // 替换第一个换行
+                    roles: []
                 });
                 continue;
             }
@@ -119,7 +126,8 @@ export class CommandStormingService {
                     eventName: eventName,
                     sourceType: 'External',
                     sourceId: external.id,
-                    sourceName: extractCardContent(external)
+                    sourceName: extractCardContent(external),
+                    roles: []
                 });
                 continue;
             }
@@ -135,7 +143,8 @@ export class CommandStormingService {
                         eventName: eventName,
                         sourceType: 'Event',
                         sourceId: upstreamEvent.id,
-                        sourceName: extractCardContent(upstreamEvent)
+                        sourceName: extractCardContent(upstreamEvent),
+                        roles: []
                     });
                     continue;
                 }
@@ -149,7 +158,8 @@ export class CommandStormingService {
                     eventName: eventName,
                     sourceType: 'Event',
                     sourceId: sourceEvent.id,
-                    sourceName: extractCardContent(sourceEvent)
+                    sourceName: extractCardContent(sourceEvent),
+                    roles: []
                 });
                 continue;
             }
@@ -157,19 +167,15 @@ export class CommandStormingService {
             // 6. Fallback: 查找最近的 Command 作为触发源
             const nearestCommand = this.findNearestCard(event, commands);
             if (nearestCommand) {
-                // 查找 Command 的触发者（Role）- 先用 overlap/connector，再用最近距离
-                let role = this.findRelatedCard(nearestCommand, roles, connectors, 'incoming');
-                if (!role) {
-                    role = this.findNearestCard(nearestCommand, roles);
-                }
+                // 查找 Command 的所有关联角色
+                const foundRoles = this.findAllRelatedCards(nearestCommand, roles, connectors);
                 result.push({
                     eventId: event.id,
                     eventName: eventName,
                     sourceType: 'Command',
                     sourceId: nearestCommand.id,
                     sourceName: extractCardContent(nearestCommand) + ' (最近)',
-                    roleId: role?.id,
-                    roleName: role ? extractCardContent(role) : undefined
+                    roles: foundRoles.map(r => ({ roleId: r.id, roleName: extractCardContent(r) }))
                 });
                 continue;
             }
@@ -180,7 +186,8 @@ export class CommandStormingService {
                 eventName: eventName,
                 sourceType: 'Command',
                 sourceId: '',
-                sourceName: '(未识别)'
+                sourceName: '(未识别)',
+                roles: []
             });
         }
         
@@ -218,6 +225,33 @@ export class CommandStormingService {
         }
         
         return undefined;
+    }
+
+    /**
+     * 查找与目标卡片关联的所有卡片（通过 overlap 或 connector）
+     * 用于查找一个 Command 对应的所有 Role
+     */
+    private findAllRelatedCards(
+        targetCard: WorkshopCard, 
+        candidates: WorkshopCard[], 
+        connectors: Connector[]
+    ): WorkshopCard[] {
+        const result: WorkshopCard[] = [];
+        
+        for (const candidate of candidates) {
+            // 检查 overlap
+            if (this.isOverlapping(targetCard, candidate)) {
+                result.push(candidate);
+                continue;
+            }
+            // 检查 connector（任意方向）
+            if (this.isConnected(candidate.id, targetCard.id, connectors) ||
+                this.isConnected(targetCard.id, candidate.id, connectors)) {
+                result.push(candidate);
+            }
+        }
+        
+        return result;
     }
 
     /**
