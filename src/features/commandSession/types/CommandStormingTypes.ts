@@ -63,8 +63,9 @@ export type TEventSourceTableProps = {
 
 /**
  * 辅助函数：提取卡片内容文本，去除HTML标签和特殊字符（emoji等）
+ * @param replaceFirstNewline 是否将第一个换行符替换为空格（适用于 PM/Policy 卡片）
  */
-export function extractCardContent(card: WorkshopCard): string {
+export function extractCardContent(card: WorkshopCard, replaceFirstNewline: boolean = false): string {
     if (card.type === 'sticky_note') {
         let content = card.content || '';
         // 移除 HTML 标签
@@ -74,7 +75,15 @@ export function extractCardContent(card: WorkshopCard): string {
         content = content.replace(/&[a-zA-Z]+;/g, '');
         // 移除 emoji 和其他特殊 Unicode 字符
         content = content.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]/gu, '');
-        return content.trim();
+        content = content.trim();
+        
+        // 将第一个换行符替换为空格（适用于 PM/Policy）
+        if (replaceFirstNewline && content.includes('\n')) {
+            const firstNewline = content.indexOf('\n');
+            content = content.substring(0, firstNewline) + ' ' + content.substring(firstNewline + 1);
+        }
+        
+        return content;
     }
     return '';
 }

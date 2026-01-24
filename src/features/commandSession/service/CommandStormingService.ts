@@ -92,7 +92,7 @@ export class CommandStormingService {
                     eventName: eventName,
                     sourceType: sourceType,
                     sourceId: timer.id,
-                    sourceName: extractCardContent(timer)
+                    sourceName: extractCardContent(timer, true)  // 替换第一个换行
                 });
                 continue;
             }
