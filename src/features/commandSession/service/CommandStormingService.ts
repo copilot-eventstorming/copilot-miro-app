@@ -59,6 +59,17 @@ export class CommandStormingService {
         const policies = cards.filter(this.boardSPI.policyPredicate);
         const roles = cards.filter(this.boardSPI.rolePredicate);
         
+        // Debug: 打印各类型卡片数量
+        console.log('[CommandStorming] Card counts:', {
+            events: events.length,
+            commands: commands.length,
+            timers: timers.length,
+            externals: externals.length,
+            policies: policies.length,
+            roles: roles.length,
+            total: cards.length
+        });
+        
         const result: EventSource[] = [];
         
         for (const event of events) {
