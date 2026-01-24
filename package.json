@@ -2,6 +2,9 @@
   "name": "event-storming-copilot-v2",
   "version": "0.1.0",
   "license": "MIT",
+  "engines": {
+    "node": ">=20.x"
+  },
   "scripts": {
     "build:tailwind": "npx tailwindcss build src/assets/style.css -o dist/style.css",
     "start": "vite",
