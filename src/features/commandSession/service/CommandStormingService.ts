@@ -67,8 +67,11 @@ export class CommandStormingService {
             // 1. 检查是否有 Command 触发（overlap 或 connector）
             const command = this.findRelatedCard(event, commands, connectors, 'incoming');
             if (command) {
-                // 查找 Command 的触发者（Role）
-                const role = this.findRelatedCard(command, roles, connectors, 'incoming');
+                // 查找 Command 的触发者（Role）- 先用 overlap/connector，再用最近距离
+                let role = this.findRelatedCard(command, roles, connectors, 'incoming');
+                if (!role) {
+                    role = this.findNearestCard(command, roles);
+                }
                 result.push({
                     eventId: event.id,
                     eventName: eventName,
@@ -143,7 +146,11 @@ export class CommandStormingService {
             // 6. Fallback: 查找最近的 Command 作为触发源
             const nearestCommand = this.findNearestCard(event, commands);
             if (nearestCommand) {
-                const role = this.findRelatedCard(nearestCommand, roles, connectors, 'incoming');
+                // 查找 Command 的触发者（Role）- 先用 overlap/connector，再用最近距离
+                let role = this.findRelatedCard(nearestCommand, roles, connectors, 'incoming');
+                if (!role) {
+                    role = this.findNearestCard(nearestCommand, roles);
+                }
                 result.push({
                     eventId: event.id,
                     eventName: eventName,
@@ -205,6 +212,7 @@ export class CommandStormingService {
     /**
      * 检查两张卡片是否重叠或相邻（Event Storming 布局）
      * Command 通常在 Event 的左边并略有重叠
+     * Role 通常在 Command 的左上角
      */
     private isOverlapping(card1: WorkshopCard, card2: WorkshopCard): boolean {
         if (card1.id === card2.id) return false;
@@ -221,11 +229,11 @@ export class CommandStormingService {
         const card2Bottom = card2.y + card2.height / 2;
         
         // 检查水平方向是否有重叠或足够接近（允许一定间隙）
-        const horizontalGap = 50; // 允许 50px 间隙
+        const horizontalGap = 80; // 允许 80px 间隙
         const horizontalOverlap = card1Right + horizontalGap >= card2Left && card2Right + horizontalGap >= card1Left;
         
         // 检查垂直方向是否有重叠或足够接近
-        const verticalGap = 100; // 允许 100px 间隙 (cards are often slightly offset)
+        const verticalGap = 150; // 允许 150px 间隙 (Role 通常在上方)
         const verticalOverlap = card1Bottom + verticalGap >= card2Top && card2Bottom + verticalGap >= card1Top;
         
         // 两个方向都要有重叠
@@ -234,7 +242,7 @@ export class CommandStormingService {
             const dx = card1.x - card2.x;
             const dy = card1.y - card2.y;
             const centerDistance = Math.sqrt(dx * dx + dy * dy);
-            const maxAllowedDistance = Math.max(card1.width, card2.width) * 1.5;
+            const maxAllowedDistance = Math.max(card1.width, card2.width) * 2.5;  // 放宽到 2.5 倍
             
             return centerDistance < maxAllowedDistance;
         }
