@@ -75,7 +75,7 @@ function createPageBySessionType(sessionType: TSessionType, boardSPI: WorkshopBo
         case EventStormingSession.key:
             return <EventStormingBoardPanel boardSPI={boardSPI}/>
         case CommandStormingSession.key:
-            return <CommandStormingBoardPanel/>
+            return <CommandStormingBoardPanel boardSPI={boardSPI}/>
         case AggregateExplorationSession.key:
             return <AggregateExplorationBoardPanel/>
         case SubdomainExplorationSession.key:
