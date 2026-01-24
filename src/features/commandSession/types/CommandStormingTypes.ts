@@ -62,11 +62,19 @@ export type TEventSourceTableProps = {
 }
 
 /**
- * 辅助函数：提取卡片内容文本
+ * 辅助函数：提取卡片内容文本，去除HTML标签和特殊字符（emoji等）
  */
 export function extractCardContent(card: WorkshopCard): string {
     if (card.type === 'sticky_note') {
-        return card.content?.replace(/<[^>]*>/g, '') || '';
+        let content = card.content || '';
+        // 移除 HTML 标签
+        content = content.replace(/<[^>]*>/g, '');
+        // 移除 HTML 实体（如 &#x1fa77; ）
+        content = content.replace(/&#x[0-9a-fA-F]+;?/g, '');
+        content = content.replace(/&[a-zA-Z]+;/g, '');
+        // 移除 emoji 和其他特殊 Unicode 字符
+        content = content.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F600}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]/gu, '');
+        return content.trim();
     }
     return '';
 }

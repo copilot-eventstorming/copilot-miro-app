@@ -6,7 +6,7 @@ import {TEventPolicyTableProps} from "../../types/CommandStormingTypes";
  */
 export const EventPolicyTable: React.FC<TEventPolicyTableProps> = ({boardSPI, data}) => {
     return (
-        <div className="mx-2 overflow-y-auto max-h-80">
+        <div className="mx-2 overflow-y-auto flex-1">
             <div className="sub-title text-lg w-full text-center">事件与策略列表</div>
             <table style={{width: "100%"}}>
                 <thead>
