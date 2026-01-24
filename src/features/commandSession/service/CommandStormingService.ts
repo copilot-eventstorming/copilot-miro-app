@@ -140,11 +140,27 @@ export class CommandStormingService {
                 continue;
             }
             
-            // 6. 没有找到源头
+            // 6. Fallback: 查找最近的 Command 作为触发源
+            const nearestCommand = this.findNearestCard(event, commands);
+            if (nearestCommand) {
+                const role = this.findRelatedCard(nearestCommand, roles, connectors, 'incoming');
+                result.push({
+                    eventId: event.id,
+                    eventName: eventName,
+                    sourceType: 'Command',
+                    sourceId: nearestCommand.id,
+                    sourceName: extractCardContent(nearestCommand) + ' (最近)',
+                    roleId: role?.id,
+                    roleName: role ? extractCardContent(role) : undefined
+                });
+                continue;
+            }
+            
+            // 7. 真的没有找到源头
             result.push({
                 eventId: event.id,
                 eventName: eventName,
-                sourceType: 'Command',  // 默认假设是命令触发，但来源未知
+                sourceType: 'Command',
                 sourceId: '',
                 sourceName: '(未识别)'
             });
@@ -187,20 +203,43 @@ export class CommandStormingService {
     }
 
     /**
-     * 检查两张卡片是否重叠
-     * 使用中心点欧氏距离判断
+     * 检查两张卡片是否重叠或相邻（Event Storming 布局）
+     * Command 通常在 Event 的左边并略有重叠
      */
     private isOverlapping(card1: WorkshopCard, card2: WorkshopCard): boolean {
         if (card1.id === card2.id) return false;
         
-        const dx = card1.x - card2.x;
-        const dy = card1.y - card2.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+        // 计算卡片边界
+        const card1Left = card1.x - card1.width / 2;
+        const card1Right = card1.x + card1.width / 2;
+        const card1Top = card1.y - card1.height / 2;
+        const card1Bottom = card1.y + card1.height / 2;
         
-        const maxWidth = Math.max(card1.width, card2.width);
-        const threshold = maxWidth * 0.5;
+        const card2Left = card2.x - card2.width / 2;
+        const card2Right = card2.x + card2.width / 2;
+        const card2Top = card2.y - card2.height / 2;
+        const card2Bottom = card2.y + card2.height / 2;
         
-        return distance < threshold;
+        // 检查水平方向是否有重叠或足够接近（允许一定间隙）
+        const horizontalGap = 50; // 允许 50px 间隙
+        const horizontalOverlap = card1Right + horizontalGap >= card2Left && card2Right + horizontalGap >= card1Left;
+        
+        // 检查垂直方向是否有重叠或足够接近
+        const verticalGap = 100; // 允许 100px 间隙 (cards are often slightly offset)
+        const verticalOverlap = card1Bottom + verticalGap >= card2Top && card2Bottom + verticalGap >= card1Top;
+        
+        // 两个方向都要有重叠
+        if (horizontalOverlap && verticalOverlap) {
+            // 额外检查：中心点距离不能太远（防止误判）
+            const dx = card1.x - card2.x;
+            const dy = card1.y - card2.y;
+            const centerDistance = Math.sqrt(dx * dx + dy * dy);
+            const maxAllowedDistance = Math.max(card1.width, card2.width) * 1.5;
+            
+            return centerDistance < maxAllowedDistance;
+        }
+        
+        return false;
     }
 
     /**
@@ -210,5 +249,30 @@ export class CommandStormingService {
         return connectors.some(c => 
             c.start?.item === fromId && c.end?.item === toId
         );
+    }
+
+    /**
+     * 查找与目标卡片最近的卡片
+     */
+    private findNearestCard(targetCard: WorkshopCard, candidates: WorkshopCard[]): WorkshopCard | undefined {
+        if (candidates.length === 0) return undefined;
+        
+        let nearest: WorkshopCard | undefined;
+        let minDistance = Infinity;
+        
+        for (const candidate of candidates) {
+            if (candidate.id === targetCard.id) continue;
+            
+            const dx = targetCard.x - candidate.x;
+            const dy = targetCard.y - candidate.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearest = candidate;
+            }
+        }
+        
+        return nearest;
     }
 }
