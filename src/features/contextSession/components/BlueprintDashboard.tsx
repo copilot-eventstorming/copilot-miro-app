@@ -88,6 +88,24 @@ export const BlueprintDashboard: React.FC = () => {
         </div>
       )}
 
+      {/* Hotspots Warning (High Priority) */}
+      {analysis && analysis.problemSpace?.hotspots && analysis.problemSpace.hotspots.length > 0 && (
+        <div className="bp-warning bp-hotspot-warning">
+          <div className="bp-warning-title" style={{ color: '#e6402a' }}>
+            🔥 {analysis.problemSpace.hotspots.length} Hotspot(s) Detected
+          </div>
+          <ul className="bp-warning-list">
+            {analysis.problemSpace.hotspots.map((h, i) => (
+              <li key={i}>
+                <strong>{h.name}</strong> 
+                {h.relatedAggregate && <span className="bp-tag">Agg: {h.relatedAggregate}</span>}
+                {h.relatedCommand && <span className="bp-tag">Cmd: {h.relatedCommand}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Unresolved Commands Warning */}
       {analysis && analysis.solutionSpace.unresolvedCommands.length > 0 && (
         <div className="bp-warning">

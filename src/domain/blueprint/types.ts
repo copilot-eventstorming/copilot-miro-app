@@ -55,6 +55,13 @@ export interface BusinessRule {
   name: string;
 }
 
+export interface Hotspot {
+  name: string;
+  description: string;
+  relatedAggregate?: string;
+  relatedCommand?: string;
+}
+
 export interface ProblemSpaceBlueprint {
   actors: Actor[];
   objects: BusinessObject[];
@@ -63,6 +70,7 @@ export interface ProblemSpaceBlueprint {
   policies: BusinessPolicy[];
   processes: BusinessProcess[];
   rules: BusinessRule[];
+  hotspots?: Hotspot[];
 }
 
 // --- Solution Space ---
