@@ -1,7 +1,11 @@
 import * as React from "react";
+import { SubdomainDashboard } from './components/SubdomainDashboard';
 
 export const SubdomainExplorationBoardPanel: React.FC = () => {
-    return <div>
-        <div className="title title-panel">It's a SubdomainExploration Board!</div>
-    </div>;
+    return (
+        <div className="agenda">
+            <div className="title title-panel">Subdomain Discovery</div>
+            <SubdomainDashboard />
+        </div>
+    );
 }
