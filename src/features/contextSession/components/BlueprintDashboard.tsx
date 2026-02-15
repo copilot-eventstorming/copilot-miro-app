@@ -4,7 +4,7 @@ import { ProblemSpaceSection } from './ProblemSpaceSection';
 import { SolutionSpaceSection } from './SolutionSpaceSection';
 
 export const BlueprintDashboard: React.FC = () => {
-  const { analysis, loading, error, stats, scanAndAnalyze, clear } = useBlueprint();
+  const { analysis, loading, error, stats, id, scanAndAnalyze, clear, loadBlueprint } = useBlueprint();
   const [expandProblem, setExpandProblem] = useState(true);
   const [expandSolution, setExpandSolution] = useState(true);
 
@@ -24,6 +24,35 @@ export const BlueprintDashboard: React.FC = () => {
             Clear
           </button>
         )}
+      </div>
+      
+      {/* Load / ID Section */}
+      <div className="bp-persistence-bar">
+        {id && (
+          <div className="bp-id-display">
+            <strong>Blueprint ID:</strong> <code>{id}</code>
+          </div>
+        )}
+        <div className="bp-load-action">
+          <input 
+            type="text" 
+            placeholder="Blueprint ID" 
+            id="blueprint-id-input"
+            className="bp-input"
+          />
+          <button 
+            className="btn btn-secondary"
+            onClick={() => {
+              const input = document.getElementById('blueprint-id-input') as HTMLInputElement;
+              if (input && input.value) {
+                loadBlueprint(input.value);
+              }
+            }}
+            disabled={loading}
+          >
+            Load
+          </button>
+        </div>
       </div>
 
       {/* Error */}

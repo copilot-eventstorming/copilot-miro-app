@@ -27,6 +27,7 @@ export function useBlueprint() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<BlueprintStats | null>(null);
+  const [id, setId] = useState<string | null>(null);
 
   useEffect(() => {
     const subs = [
@@ -34,6 +35,7 @@ export function useBlueprint() {
       blueprintStore.loading$.subscribe(setLoading),
       blueprintStore.error$.subscribe(setError),
       blueprintStore.stats$.subscribe(setStats),
+      blueprintStore.id$.subscribe(setId),
     ];
     return () => subs.forEach(s => s.unsubscribe());
   }, []);
@@ -46,5 +48,9 @@ export function useBlueprint() {
     blueprintStore.clear();
   }, []);
 
-  return { analysis, loading, error, stats, scanAndAnalyze, clear };
+  const loadBlueprint = useCallback(async (id: string) => {
+    await blueprintStore.loadBlueprint(id);
+  }, []);
+
+  return { analysis, loading, error, stats, id, scanAndAnalyze, clear, loadBlueprint };
 }
