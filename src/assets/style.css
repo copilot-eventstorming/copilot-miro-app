@@ -439,6 +439,49 @@ input:checked + .agenda-item-btn::after {
 .bp-arrow {
     @apply text-gray-400 font-bold text-xs px-1;
 }
-.bp-step-hotspots {
-    @apply absolute -top-2 -right-2 flex gap-0.5 bg-white rounded-full p-0.5 border border-red-100 shadow-sm;
+/* ===== Context Map (Subdomains) ===== */
+.bp-subdomain-list {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2;
+}
+.bp-subdomain-card {
+    @apply bg-white border border-gray-200 rounded p-2 shadow-sm flex flex-col;
+}
+.bp-sd-header {
+    @apply flex justify-between items-center mb-1 border-b border-gray-100 pb-1;
+}
+.bp-sd-name {
+    @apply font-bold text-sm text-gray-800 font-lato;
+}
+.bp-sd-type {
+    @apply text-xxs font-bold px-1.5 py-0.5 rounded uppercase tracking-wide border;
+}
+.bp-sd-core {
+    @apply bg-green-100 text-green-800 border-green-200;
+}
+.bp-sd-supporting {
+    @apply bg-blue-100 text-blue-800 border-blue-200;
+}
+.bp-sd-generic {
+    @apply bg-gray-100 text-gray-600 border-gray-200;
+}
+.bp-sd-content {
+    @apply text-xs text-gray-600 mt-1 font-lato;
+}
+.bp-sd-aggregates {
+    @apply mb-1;
+}
+.bp-sd-reason {
+    @apply text-xxs text-gray-400 italic mt-1 bg-gray-50 p-1 rounded;
+}
+.bp-connections {
+    @apply mt-3 border-t border-gray-200 pt-2;
+}
+.bp-connection-list {
+    @apply text-xs text-gray-600 list-none pl-0 mt-1 space-y-0.5 font-lato;
+}
+.bp-connection-item {
+    @apply flex items-center gap-1;
+}
+.bp-score {
+    @apply text-xxs text-gray-400;
 }

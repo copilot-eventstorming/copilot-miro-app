@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useBlueprint } from '../hooks/useBlueprint';
 import { ProblemSpaceSection } from './ProblemSpaceSection';
 import { SolutionSpaceSection } from './SolutionSpaceSection';
+import { ContextMapSection } from './ContextMapSection';
 
 export const BlueprintDashboard: React.FC = () => {
   const { analysis, loading, error, stats, id, scanAndAnalyze, clear, loadBlueprint } = useBlueprint();
@@ -136,6 +137,12 @@ export const BlueprintDashboard: React.FC = () => {
             <span>{expandSolution ? '▼' : '▶'} Solution Space</span>
           </div>
           {expandSolution && <SolutionSpaceSection data={analysis.solutionSpace} />}
+
+          {analysis.subdomains && (
+             <div className="bp-section-spacing">
+               <ContextMapSection data={analysis.subdomains} />
+             </div>
+          )}
         </>
       )}
 
