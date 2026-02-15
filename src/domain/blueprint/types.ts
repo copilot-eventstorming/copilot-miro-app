@@ -49,6 +49,7 @@ export interface BusinessPolicy {
 export interface BusinessProcess {
   name: string;
   steps: string[];
+  trigger?: string;
 }
 
 export interface BusinessRule {

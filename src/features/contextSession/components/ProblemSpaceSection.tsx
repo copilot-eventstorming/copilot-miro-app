@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ProblemSpaceBlueprint } from '../../../domain/blueprint/types';
+import { ProcessVisualizer } from './ProcessVisualizer';
 
 interface Props {
   data: ProblemSpaceBlueprint;
@@ -56,10 +57,14 @@ export const ProblemSpaceSection: React.FC<Props> = ({ data }) => {
       }))} />
 
       <SectionHeader title="🔄 Processes" count={data.processes.length} />
-      <ItemList items={data.processes.map(p => ({
-        name: p.name,
-        detail: `${p.steps.length} steps`
-      }))} />
+      <SectionHeader title="🔄 Processes (Cinematic View)" count={data.processes.length} />
+      {data.processes.length === 0 ? <div className="bp-empty">—</div> : (
+        <div className="bp-process-list">
+            {data.processes.map((p, i) => (
+                <ProcessVisualizer key={i} data={p} hotspots={data.hotspots} />
+            ))}
+        </div>
+      )}
     </div>
   );
 };
